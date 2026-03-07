@@ -254,6 +254,12 @@ export default function ServerMonitor() {
           </div>
         </div>
       </div>
+
+      {/* Alerts section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <AlertRulesPanel onTriggered={handleTriggered} />
+        <AlertHistoryPanel refreshTick={alertRefreshTick} />
+      </div>
     </div>
   );
 }
