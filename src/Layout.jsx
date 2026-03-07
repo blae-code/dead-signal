@@ -347,15 +347,19 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           {/* Sidebar bottom */}
-          <div className="border-t" style={{ borderColor: C.border, background: "#050505" }}>
+          <motion.div 
+            className="border-t" 
+            style={{ borderColor: C.border, background: "#050505" }}>
             {/* Mini status row */}
             <div className="px-3 pt-2 pb-1 flex items-center gap-2 border-b" style={{ borderColor: C.border }}>
-              <div style={{
-                width: "5px", height: "5px", borderRadius: "50%",
-                background: online ? "#39ff14" : "#ff2020",
-                animation: online ? "nav-dot-pulse 1.8s infinite" : "none"
-              }} />
-              <span style={{ color: online ? "#39ff1488" : "#ff202088", fontSize: "8px", letterSpacing: "0.15em" }}>
+              <motion.div
+                animate={{ scale: online ? [1, 1.1, 1] : 1 }}
+                transition={{ duration: 2, repeat: Infinity }}
+                style={{
+                  width: "5px", height: "5px", borderRadius: "50%",
+                  background: online ? "#39ff14" : "#ff2020"
+                }} />
+              <span style={{ color: online ? "#39ff14" : "#ff2020", fontSize: "8px", letterSpacing: "0.15em" }}>
                 {online ? "NET: ONLINE" : "NET: OFFLINE"}
               </span>
             </div>
@@ -370,11 +374,11 @@ export default function Layout({ children, currentPageName }) {
               </div>
               <div style={{ height: "1px", background: `linear-gradient(90deg, ${C.textFaint}44, transparent)`, margin: "4px 0" }} />
               <div className="flex items-center gap-1">
-                <Skull size={8} style={{ color: C.textFaint }} />
-                <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.12em" }}>DEAD SIGNAL PROTOCOL</span>
+                <Skull size={8} style={{ color: C.textDim }} />
+                <span style={{ color: C.textDim, fontSize: "8px", letterSpacing: "0.12em" }}>DEAD SIGNAL PROTOCOL</span>
               </div>
             </div>
-          </div>
+          </motion.div>
         </nav>
 
         {/* Mobile overlay */}
