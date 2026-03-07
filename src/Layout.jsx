@@ -42,18 +42,18 @@ const THREAT_LEVELS = [
 { label: "CRITICAL", color: "#ff2020" }];
 
 
-// Neutral chrome palette — no status colours
+// Professional chrome palette — enhanced readability
 const C = {
-  text: "#c8c8c8", // primary text
-  textDim: "#666", // secondary / dim text
-  textFaint: "#333", // very faint labels
+  text: "#d4d4d4", // primary text
+  textDim: "#999", // secondary / dim text
+  textFaint: "#777", // faint labels (brightened from #333)
   border: "#1e1e1e", // default border
   borderMid: "#2a2a2a", // slightly brighter border
-  active: "#e0e0e0", // active nav item text
+  active: "#e8e8e8", // active nav item text
   activeBg: "#141414", // active nav item bg
-  activeLine: "#888", // active left-bar accent
-  accent: "#aaa", // logo / app name
-  scan: "rgba(200,200,200,0.015)"
+  activeLine: "#999", // active left-bar accent
+  accent: "#b8b8b8", // logo / app name (brightened)
+  scan: "rgba(200,200,200,0.02)"
 };
 
 export default function Layout({ children, currentPageName }) {
