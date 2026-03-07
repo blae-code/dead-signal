@@ -179,7 +179,8 @@ export function TableRow({ style, onClick, children }) {
 // ── Empty state ───────────────────────────────────────────────────────────────
 export function EmptyState({ message }) {
   return (
-    <div className="px-3 py-6 text-xs text-center" style={{ color: T.textFaint }}>
+    <div className="px-3 py-6 text-xs text-center border" 
+      style={{ color: T.textFaint, borderColor: T.border, background: T.bg1, fontStyle: "italic" }}>
       // {message}
     </div>
   );
