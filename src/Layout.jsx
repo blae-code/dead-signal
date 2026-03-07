@@ -24,24 +24,34 @@ const THREAT_LEVELS = [
   { label: "CRITICAL", color: "#ff2020" },
 ];
 
+// Neutral chrome palette — no status colours
+const C = {
+  text:        "#c8c8c8",   // primary text
+  textDim:     "#666",      // secondary / dim text
+  textFaint:   "#333",      // very faint labels
+  border:      "#1e1e1e",   // default border
+  borderMid:   "#2a2a2a",   // slightly brighter border
+  active:      "#e0e0e0",   // active nav item text
+  activeBg:    "#141414",   // active nav item bg
+  activeLine:  "#888",      // active left-bar accent
+  accent:      "#aaa",      // logo / app name
+  scan:        "rgba(200,200,200,0.015)",
+};
+
 export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [time, setTime] = useState(new Date());
   const [online, setOnline] = useState(navigator.onLine);
   const [threatLevel] = useState(0); // 0=secure, 1=elevated, 2=critical
-  const [uplinkPulse, setUplinkPulse] = useState(true);
-  const [sidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
-    const pulse = setInterval(() => setUplinkPulse(p => !p), 1800);
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     return () => {
       clearInterval(t);
-      clearInterval(pulse);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
@@ -55,25 +65,21 @@ export default function Layout({ children, currentPageName }) {
     <div className="min-h-screen flex flex-col" style={{ background: "#0a0a0a", fontFamily: "'Share Tech Mono', monospace" }}>
       <style>{`
         @keyframes uplink-pulse {
-          0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(57,255,20,0.8); }
-          50% { opacity: 0.4; box-shadow: 0 0 2px rgba(57,255,20,0.2); }
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.35; }
         }
         @keyframes threat-blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
-        }
-        @keyframes sidebar-glow {
-          0%, 100% { box-shadow: inset 0 0 20px rgba(57,255,20,0.02); }
-          50% { box-shadow: inset 0 0 20px rgba(57,255,20,0.05); }
         }
         @keyframes header-scan {
           0% { background-position: 0% 50%; }
           100% { background-position: 100% 50%; }
         }
         .nav-item-hover:hover {
-          background: #0a1a0a !important;
-          color: #39ff14 !important;
-          border-left-color: #39ff1466 !important;
+          background: #141414 !important;
+          color: ${C.active} !important;
+          border-left-color: ${C.activeLine} !important;
         }
         .nav-item-hover:hover .nav-badge {
           opacity: 1 !important;
@@ -83,31 +89,31 @@ export default function Layout({ children, currentPageName }) {
       {/* Top bar */}
       <header
         className="border-b flex items-center justify-between px-4 py-2 z-50 relative overflow-hidden"
-        style={{ borderColor: "#1e3a1e", background: "#050505" }}
+        style={{ borderColor: C.border, background: "#050505" }}
       >
-        {/* Subtle scan line on header */}
+        {/* Subtle scan line */}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          background: "linear-gradient(90deg, transparent 0%, rgba(57,255,20,0.02) 50%, transparent 100%)",
+          background: `linear-gradient(90deg, transparent 0%, ${C.scan} 50%, transparent 100%)`,
           animation: "header-scan 8s linear infinite",
           backgroundSize: "200% 100%",
         }} />
 
         <div className="flex items-center gap-3 relative">
-          <button className="md:hidden" style={{ color: "#39ff14" }} onClick={() => setMobileOpen(!mobileOpen)}>
+          <button className="md:hidden" style={{ color: C.text }} onClick={() => setMobileOpen(!mobileOpen)}>
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
           <div className="flex items-center gap-3">
-            <Skull size={14} style={{ color: "#39ff14", filter: "drop-shadow(0 0 4px #39ff14)" }} />
-            <span className="font-bold tracking-widest" style={{ color: "#39ff14", fontFamily: "'Orbitron', monospace", fontSize: "11px", textShadow: "0 0 8px rgba(57,255,20,0.6)" }}>
+            <Skull size={14} style={{ color: C.accent }} />
+            <span className="font-bold tracking-widest" style={{ color: C.accent, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
               DEAD SIGNAL
             </span>
-            <span style={{ color: "#1e3a1e" }}>|</span>
-            <span className="hidden sm:block text-xs" style={{ color: "#39ff14", opacity: 0.4, letterSpacing: "0.15em" }}>HUMANITZ OPS CENTER</span>
+            <span style={{ color: C.border }}>|</span>
+            <span className="hidden sm:block text-xs" style={{ color: C.textDim, letterSpacing: "0.15em" }}>HUMANITZ OPS CENTER</span>
           </div>
         </div>
 
-        {/* Center: Threat level */}
+        {/* Center: Threat level — retains status colours intentionally */}
         <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
           <Shield size={11} style={{ color: threat.color }} />
           <span className="text-xs font-bold tracking-widest" style={{
@@ -120,17 +126,18 @@ export default function Layout({ children, currentPageName }) {
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs relative" style={{ color: "#39ff14" }}>
+        <div className="flex items-center gap-4 text-xs relative">
           <div className="hidden sm:flex flex-col items-end" style={{ lineHeight: 1.2 }}>
-            <span style={{ color: "#39ff1466", fontSize: "9px", letterSpacing: "0.1em" }}>LOCAL TIME</span>
-            <span style={{ color: "#ffb000", fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>{timeStr}</span>
+            <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>LOCAL TIME</span>
+            <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>{timeStr}</span>
           </div>
-          <span className="hidden sm:block" style={{ color: "#1e3a1e" }}>|</span>
+          <span className="hidden sm:block" style={{ color: C.border }}>|</span>
           <div className="hidden sm:flex flex-col items-end" style={{ lineHeight: 1.2 }}>
-            <span style={{ color: "#39ff1466", fontSize: "9px", letterSpacing: "0.1em" }}>DATE</span>
-            <span style={{ color: "#39ff1499", fontSize: "10px" }}>{dateStr}</span>
+            <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>DATE</span>
+            <span style={{ color: C.textDim, fontSize: "10px" }}>{dateStr}</span>
           </div>
-          <span className="hidden sm:block" style={{ color: "#1e3a1e" }}>|</span>
+          <span className="hidden sm:block" style={{ color: C.border }}>|</span>
+          {/* Uplink status — retains status colours intentionally */}
           <div className="flex items-center gap-2">
             <div style={{
               width: "6px", height: "6px", borderRadius: "50%",
@@ -152,16 +159,15 @@ export default function Layout({ children, currentPageName }) {
           style={{
             width: "200px",
             background: "#040404",
-            borderRight: "1px solid #1a2e1a",
+            borderRight: `1px solid ${C.border}`,
             minHeight: "calc(100vh - 41px)",
-            animation: "sidebar-glow 6s ease-in-out infinite",
           }}
         >
           {/* Sidebar top label */}
-          <div className="px-3 py-2 border-b" style={{ borderColor: "#1a2e1a" }}>
+          <div className="px-3 py-2 border-b" style={{ borderColor: C.border }}>
             <div className="flex items-center gap-2">
-              <Activity size={9} style={{ color: "#39ff14", opacity: 0.5 }} />
-              <span style={{ color: "#39ff14", opacity: 0.35, fontSize: "9px", letterSpacing: "0.2em" }}>// SYS.NAVIGATION</span>
+              <Activity size={9} style={{ color: C.textDim }} />
+              <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.2em" }}>// SYS.NAVIGATION</span>
             </div>
           </div>
 
@@ -176,27 +182,26 @@ export default function Layout({ children, currentPageName }) {
                   onClick={() => setMobileOpen(false)}
                   className="nav-item-hover flex items-center gap-3 px-3 py-2 text-xs transition-all duration-150 relative"
                   style={{
-                    color: active ? "#39ff14" : "#39ff1455",
-                    background: active ? "#0a1a0a" : "transparent",
-                    borderLeft: active ? "2px solid #39ff14" : "2px solid transparent",
+                    color: active ? C.active : C.textDim,
+                    background: active ? C.activeBg : "transparent",
+                    borderLeft: active ? `2px solid ${C.activeLine}` : "2px solid transparent",
                     letterSpacing: "0.1em",
                     textDecoration: "none",
                   }}
                 >
-                  <Icon size={12} style={{ flexShrink: 0, filter: active ? "drop-shadow(0 0 3px #39ff14)" : "none" }} />
+                  <Icon size={12} style={{ flexShrink: 0 }} />
                   <span style={{ flex: 1 }}>{label}</span>
                   <span className="nav-badge text-xs" style={{
-                    color: "#39ff1433",
+                    color: C.textFaint,
                     fontSize: "8px",
-                    opacity: active ? 0.6 : 0,
+                    opacity: active ? 0.8 : 0,
                     letterSpacing: "0.05em",
                     transition: "opacity 0.15s",
                   }}>{desc}</span>
                   {active && (
                     <div style={{
                       position: "absolute", right: 0, top: "20%", bottom: "20%",
-                      width: "2px", background: "#39ff14",
-                      boxShadow: "0 0 6px #39ff14",
+                      width: "2px", background: C.activeLine,
                     }} />
                   )}
                 </Link>
@@ -204,21 +209,21 @@ export default function Layout({ children, currentPageName }) {
             })}
           </div>
 
-          {/* Sidebar bottom status */}
-          <div className="border-t" style={{ borderColor: "#1a2e1a" }}>
+          {/* Sidebar bottom */}
+          <div className="border-t" style={{ borderColor: C.border }}>
             <div className="px-3 py-2 space-y-1">
               <div className="flex items-center justify-between">
-                <span style={{ color: "#39ff1433", fontSize: "9px", letterSpacing: "0.1em" }}>BUILD</span>
-                <span style={{ color: "#39ff1455", fontSize: "9px" }}>DS-ALPHA</span>
+                <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>BUILD</span>
+                <span style={{ color: C.textDim, fontSize: "9px" }}>DS-ALPHA</span>
               </div>
               <div className="flex items-center justify-between">
-                <span style={{ color: "#39ff1433", fontSize: "9px", letterSpacing: "0.1em" }}>VER</span>
-                <span style={{ color: "#39ff1555", fontSize: "9px" }}>v1.0.0</span>
+                <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>VER</span>
+                <span style={{ color: C.textDim, fontSize: "9px" }}>v1.0.0</span>
               </div>
               <div className="flex items-center gap-1 mt-1">
-                <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, #39ff14, transparent)" }} />
+                <div style={{ flex: 1, height: "1px", background: `linear-gradient(90deg, ${C.textDim}, transparent)` }} />
               </div>
-              <div style={{ color: "#39ff1422", fontSize: "8px", letterSpacing: "0.1em" }}>
+              <div style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>
                 ☠ DEAD SIGNAL PROTOCOL
               </div>
             </div>
