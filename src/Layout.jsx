@@ -250,7 +250,7 @@ export default function Layout({ children, currentPageName }) {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
             className="px-3 py-2 border-b flex items-center justify-between" 
-            style={{ borderColor: C.border, background: "#050505" }}>
+            style={{ borderColor: C.border, background: "linear-gradient(135deg, rgba(20, 15, 10, 0.8) 0%, rgba(25, 18, 12, 0.8) 100%)" }}>
             <div className="flex items-center gap-2">
               <Activity size={9} style={{ color: "#39ff14", animation: "nav-dot-pulse 2s infinite" }} />
               <span style={{ color: C.textDim, fontSize: "9px", letterSpacing: "0.2em", fontFamily: "'Orbitron', monospace" }}>SYS.NAV</span>
