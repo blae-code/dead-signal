@@ -60,6 +60,7 @@ export default function Layout({ children, currentPageName }) {
   const [time, setTime] = useState(new Date());
   const [online, setOnline] = useState(navigator.onLine);
   const [threatLevel] = useState(0); // 0=secure, 1=elevated, 2=critical
+  const [weather, setWeather] = useState(null);
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
@@ -72,6 +73,34 @@ export default function Layout({ children, currentPageName }) {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
+  }, []);
+
+  // Fetch weather based on user timezone (Vancouver area)
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const res = await fetch("https://api.weather.gov/points/49.28,-123.12");
+        const data = await res.json();
+        const forecastUrl = data.properties?.forecast;
+        if (forecastUrl) {
+          const forecastRes = await fetch(forecastUrl);
+          const forecastData = await forecastRes.json();
+          const current = forecastData.properties?.periods?.[0];
+          if (current) {
+            setWeather({
+              temp: current.temperature,
+              shortForecast: current.shortForecast,
+              isDaytime: current.isDaytime
+            });
+          }
+        }
+      } catch (e) {
+        // silently fail
+      }
+    };
+    fetchWeather();
+    const weatherInterval = setInterval(fetchWeather, 600000); // refresh every 10 min
+    return () => clearInterval(weatherInterval);
   }, []);
 
   const timeStr = time.toLocaleTimeString("en-US", { hour12: false });
