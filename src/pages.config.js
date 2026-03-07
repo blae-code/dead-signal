@@ -47,24 +47,24 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AIAgent from './pages/AIAgent';
+import ClanRoster from './pages/ClanRoster';
+import Intel from './pages/Intel';
+import Inventory from './pages/Inventory';
+import Missions from './pages/Missions';
 import ServerMonitor from './pages/ServerMonitor';
 import TacticalMap from './pages/TacticalMap';
-import ClanRoster from './pages/ClanRoster';
-import Missions from './pages/Missions';
-import Inventory from './pages/Inventory';
-import Intel from './pages/Intel';
-import AIAgent from './pages/AIAgent';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AIAgent": AIAgent,
+    "ClanRoster": ClanRoster,
+    "Intel": Intel,
+    "Inventory": Inventory,
+    "Missions": Missions,
     "ServerMonitor": ServerMonitor,
     "TacticalMap": TacticalMap,
-    "ClanRoster": ClanRoster,
-    "Missions": Missions,
-    "Inventory": Inventory,
-    "Intel": Intel,
-    "AIAgent": AIAgent,
 }
 
 export const pagesConfig = {

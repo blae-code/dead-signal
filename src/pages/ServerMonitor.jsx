@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Cpu, RefreshCw, Send, Trash2, AlertTriangle, Users, Clock, Wifi } from "lucide-react";
+import { Cpu, RefreshCw, Send, Trash2, AlertTriangle, Users, Clock, Wifi, Loader } from "lucide-react";
 
 const MOCK_STATUS = {
   online: true,
