@@ -4,18 +4,34 @@ import { createPageUrl } from "@/utils";
 import {
   Radio, Map, Users, Package, Cpu, Crosshair,
   AlertTriangle, Terminal, Menu, X, Wifi, WifiOff, ChevronRight,
-  Shield, Activity, Skull
+  Shield, Activity, Skull, Bot, Zap, Database
 } from "lucide-react";
 
-const navItems = [
-  { label: "COMMAND", page: "Dashboard", icon: Terminal, desc: "HQ" },
-  { label: "SERVER", page: "ServerMonitor", icon: Cpu, desc: "SRV" },
-  { label: "TACTICAL MAP", page: "TacticalMap", icon: Map, desc: "MAP" },
-  { label: "CLAN ROSTER", page: "ClanRoster", icon: Users, desc: "OPS" },
-  { label: "MISSIONS", page: "Missions", icon: Crosshair, desc: "MIS" },
-  { label: "INVENTORY", page: "Inventory", icon: Package, desc: "INV" },
-  { label: "INTEL", page: "Intel", icon: Radio, desc: "INT" },
-  { label: "AI AGENT", page: "AIAgent", icon: AlertTriangle, desc: "AI" },
+// colour, short code, and section grouping per nav item
+const navSections = [
+  {
+    label: "// OPS CENTER",
+    items: [
+      { label: "COMMAND",      page: "Dashboard",     icon: Terminal,  code: "HQ",  color: "#c8c8c8", dot: "#39ff14" },
+      { label: "SERVER",       page: "ServerMonitor", icon: Cpu,       code: "SRV", color: "#00e5ff", dot: "#00e5ff" },
+    ],
+  },
+  {
+    label: "// FIELD OPS",
+    items: [
+      { label: "TACTICAL MAP", page: "TacticalMap",   icon: Map,       code: "MAP", color: "#ffb000", dot: "#ffb000" },
+      { label: "CLAN ROSTER",  page: "ClanRoster",    icon: Users,     code: "OPS", color: "#c8c8c8", dot: "#39ff14" },
+      { label: "MISSIONS",     page: "Missions",      icon: Crosshair, code: "MIS", color: "#ff2020", dot: "#ff2020" },
+    ],
+  },
+  {
+    label: "// LOGISTICS",
+    items: [
+      { label: "INVENTORY",    page: "Inventory",     icon: Package,   code: "INV", color: "#c8c8c8", dot: "#666"    },
+      { label: "INTEL FEED",   page: "Intel",         icon: Radio,     code: "INT", color: "#ffb000", dot: "#ffb000" },
+      { label: "AI AGENT",     page: "AIAgent",       icon: Bot,       code: "AI",  color: "#39ff14", dot: "#39ff14" },
+    ],
+  },
 ];
 
 const THREAT_LEVELS = [
