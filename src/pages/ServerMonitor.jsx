@@ -135,7 +135,7 @@ export default function ServerMonitor() {
   const dismissBanner = (id) => setAlertBanners(prev => prev.filter(b => b.id !== id));
 
   return (
-    <div className="p-4 space-y-4 max-w-7xl mx-auto">
+    <div className="p-4 space-y-4 max-w-7xl mx-auto pb-96">
       {/* In-app alert banners */}
       <AnimatePresence>
         {alertBanners.map(b => (
