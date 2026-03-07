@@ -167,7 +167,7 @@ export default function Layout({ children, currentPageName }) {
       {/* Top bar */}
       <header
         className="border-b flex items-center justify-between px-4 py-2 z-50 relative overflow-hidden"
-        style={{ borderColor: C.border, background: "#050505" }}>
+        style={{ borderColor: C.border, background: "linear-gradient(135deg, rgba(20, 15, 10, 0.95) 0%, rgba(30, 20, 15, 0.95) 100%)" }}>
 
         {/* Subtle scan line */}
         <div style={{
