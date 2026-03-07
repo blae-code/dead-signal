@@ -244,13 +244,18 @@ export default function Layout({ children, currentPageName }) {
           }}>
 
           {/* Sidebar top label */}
-          <div className="px-3 py-2 border-b flex items-center justify-between" style={{ borderColor: C.border, background: "#050505" }}>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="px-3 py-2 border-b flex items-center justify-between" 
+            style={{ borderColor: C.border, background: "#050505" }}>
             <div className="flex items-center gap-2">
               <Activity size={9} style={{ color: "#39ff14", animation: "nav-dot-pulse 2s infinite" }} />
-              <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.2em", fontFamily: "'Orbitron', monospace" }}>SYS.NAV</span>
+              <span style={{ color: C.textDim, fontSize: "9px", letterSpacing: "0.2em", fontFamily: "'Orbitron', monospace" }}>SYS.NAV</span>
             </div>
             <span style={{ color: C.textFaint, fontSize: "8px" }}>{navSections.reduce((a, s) => a + s.items.length, 0)} MODULES</span>
-          </div>
+          </motion.div>
 
           {/* Nav sections */}
           <div className="flex-1 overflow-y-auto py-1">
