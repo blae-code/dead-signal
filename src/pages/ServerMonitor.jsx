@@ -332,17 +332,28 @@ export default function ServerMonitor() {
               LOG ONLINE
             </button>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* RCON History */}
-      <RconHistoryPanel onRerun={(cmd) => setCmd(cmd)} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <RconHistoryPanel onRerun={(cmd) => setCmd(cmd)} />
+      </motion.div>
 
       {/* Alerts section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <motion.div
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         <AlertRulesPanel onTriggered={handleTriggered} />
         <AlertHistoryPanel refreshTick={alertRefreshTick} />
-      </div>
+      </motion.div>
     </div>
   );
 }
