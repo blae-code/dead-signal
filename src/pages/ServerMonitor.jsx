@@ -282,32 +282,45 @@ export default function ServerMonitor() {
         </div>
 
         {/* Event log */}
-        <div className="border" style={{ borderColor: T.border, background: T.bg1 }}>
+        <motion.div className="border" style={{ borderColor: T.border, background: T.bg1 }}>
           <div className="flex items-center gap-2 px-3 py-2 border-b flex-wrap" style={{ borderColor: T.border }}>
             <span className="text-xs font-bold tracking-widest" style={{ color: T.green, fontFamily: "'Orbitron', monospace", fontSize: "10px" }}>EVENT LOG</span>
             <div className="ml-auto flex gap-1">
               {["ALL", "INFO", "WARN", "CRITICAL"].map(f => (
-                <button key={f} onClick={() => setLogFilter(f)}
+                <motion.button
+                  key={f}
+                  onClick={() => setLogFilter(f)}
                   className="text-xs px-2 py-0.5 border"
-                  style={{ borderColor: logFilter === f ? T.green : T.border, color: logFilter === f ? T.green : T.textFaint }}>
+                  whileHover={{ borderColor: logFilter === f ? T.green : T.borderHi, scale: 1.05 }}
+                  style={{ borderColor: logFilter === f ? T.green : T.border, color: logFilter === f ? T.green : T.textFaint }}
+                >
                   {f}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
           <div ref={logRef} className="p-3 overflow-y-auto space-y-1" style={{ height: "235px" }}>
-            {filteredEvents.length === 0
-              ? <div className="text-xs" style={{ color: T.textFaint }}>// NO EVENTS</div>
-              : filteredEvents.map(e => (
-                <div key={e.id} className="text-xs flex gap-2">
-                  <span style={{ color: T.textFaint, flexShrink: 0 }}>
-                    [{new Date(e.created_date).toLocaleTimeString("en-US", { hour12: false })}]
-                  </span>
-                  <span style={{ color: severityColor(e.severity) }}>[{e.severity}]</span>
-                  <span style={{ color: T.textDim }}>{e.message}</span>
-                </div>
-              ))
-            }
+            <AnimatePresence mode="popLayout">
+              {filteredEvents.length === 0
+                ? <motion.div key="no-events" className="text-xs" style={{ color: T.textFaint }}>// NO EVENTS</motion.div>
+                : filteredEvents.map(e => (
+                  <motion.div
+                    key={e.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-xs flex gap-2"
+                  >
+                    <span style={{ color: T.textFaint, flexShrink: 0 }}>
+                      [{new Date(e.created_date).toLocaleTimeString("en-US", { hour12: false })}]
+                    </span>
+                    <span style={{ color: severityColor(e.severity) }}>[{e.severity}]</span>
+                    <span style={{ color: T.textDim }}>{e.message}</span>
+                  </motion.div>
+                ))
+              }
+            </AnimatePresence>
           </div>
           <div className="px-3 py-2 border-t flex gap-2" style={{ borderColor: T.border }}>
             <button onClick={() => logEvent("Broadcast", "Server restarting in 10 min", "WARN")}
