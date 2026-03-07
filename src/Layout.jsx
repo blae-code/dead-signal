@@ -92,12 +92,20 @@ export default function Layout({ children, currentPageName }) {
           0% { background-position: 0% 50%; }
           100% { background-position: 100% 50%; }
         }
-        .nav-item-hover:hover {
-          background: #141414 !important;
-          color: ${C.active} !important;
-          border-left-color: ${C.activeLine} !important;
+        @keyframes nav-dot-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
         }
-        .nav-item-hover:hover .nav-badge {
+        .nav-item-hover:hover {
+          background: #111 !important;
+        }
+        .nav-item-hover:hover .nav-label {
+          color: #e0e0e0 !important;
+        }
+        .nav-item-hover:hover .nav-code {
+          opacity: 1 !important;
+        }
+        .nav-item-hover:hover .nav-icon {
           opacity: 1 !important;
         }
       `}</style>
