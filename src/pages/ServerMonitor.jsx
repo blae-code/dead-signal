@@ -239,6 +239,39 @@ export default function ServerMonitor() {
       {/* Performance charts */}
       <PerformanceCharts status={status} statusLoading={statusLoading} />
 
+      {/* Forecast toggle and section */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex items-center gap-2 mb-3 cursor-pointer" onClick={() => setShowForecast(!showForecast)}>
+          <span
+            className="text-xs font-bold tracking-widest px-2 py-1 border"
+            style={{
+              color: showForecast ? T.cyan : T.textFaint,
+              borderColor: showForecast ? T.cyan : T.border,
+              fontFamily: "'Orbitron', monospace",
+              fontSize: "10px",
+            }}
+          >
+            {showForecast ? "▼" : "▶"} FORECAST
+          </span>
+        </div>
+        <AnimatePresence>
+          {showForecast && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <PerformanceForecast status={status} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
       <motion.div
         className="grid grid-cols-1 lg:grid-cols-2 gap-4"
         initial={{ opacity: 0 }}
