@@ -142,15 +142,15 @@ export default function ServerMonitor() {
       {/* Status cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "STATE", value: statusLoading ? "..." : (status?.state?.toUpperCase() || "UNKNOWN"), icon: Wifi, color: status?.online ? "#39ff14" : "#ff2020" },
-          { label: "UPTIME", value: statusLoading ? "..." : (status?.uptime || "--:--:--"), icon: Clock, color: "#ffb000" },
-          { label: "NET ↓", value: statusLoading ? "..." : `${status?.networkRxKB ?? 0} KB`, icon: RefreshCw, color: "#00e5ff" },
-          { label: "NET ↑", value: statusLoading ? "..." : `${status?.networkTxKB ?? 0} KB`, icon: RefreshCw, color: "#00e5ff" },
+          { label: "STATE",  value: statusLoading ? "..." : (status?.state?.toUpperCase() || "UNKNOWN"), icon: Wifi,      color: status?.online ? T.green : T.red },
+          { label: "UPTIME", value: statusLoading ? "..." : (status?.uptime || "--:--:--"),               icon: Clock,     color: T.amber },
+          { label: "NET ↓",  value: statusLoading ? "..." : `${status?.networkRxKB ?? 0} KB`,             icon: RefreshCw, color: T.cyan },
+          { label: "NET ↑",  value: statusLoading ? "..." : `${status?.networkTxKB ?? 0} KB`,             icon: RefreshCw, color: T.cyan },
         ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="border p-3" style={{ borderColor: "#1e3a1e", background: "#060606" }}>
+          <div key={label} className="border p-3" style={{ borderColor: T.border, background: T.bg1 }}>
             <div className="flex items-center gap-2 mb-1">
-              <Icon size={11} style={{ color }} />
-              <span className="text-xs" style={{ color: "#39ff1455" }}>{label}</span>
+              <Icon size={10} style={{ color: T.textFaint }} />
+              <span className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</span>
             </div>
             <div className="text-sm font-bold truncate" style={{ color }}>{value}</div>
           </div>
