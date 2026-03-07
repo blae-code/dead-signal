@@ -233,9 +233,14 @@ export default function ServerMonitor() {
         ))}
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <motion.div
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         {/* RCON Console */}
-        <div className="border" style={{ borderColor: T.border, background: T.bg1 }}>
+        <motion.div className="border" style={{ borderColor: T.border, background: T.bg1 }}>
           <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: T.border }}>
             <span className="text-xs font-bold tracking-widest" style={{ color: T.cyan, fontFamily: "'Orbitron', monospace", fontSize: "10px" }}>RCON TERMINAL</span>
             <button onClick={() => setConsoleLines([{ text: "> Console cleared.", color: T.textFaint }])} className="ml-auto hover:opacity-70 transition-opacity">
@@ -243,9 +248,19 @@ export default function ServerMonitor() {
             </button>
           </div>
           <div ref={consoleRef} className="p-3 overflow-y-auto text-xs space-y-0.5" style={{ height: "200px" }}>
-            {consoleLines.map((l, i) => (
-              <div key={i} style={{ color: l.color, fontFamily: "'Share Tech Mono', monospace" }}>{l.text}</div>
-            ))}
+            <AnimatePresence mode="popLayout">
+              {consoleLines.map((l, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ color: l.color, fontFamily: "'Share Tech Mono', monospace" }}
+                >
+                  {l.text}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
           <div className="flex border-t" style={{ borderColor: T.border }}>
             <span className="px-3 py-2 text-xs" style={{ color: "#39ff14" }}>&gt;</span>
