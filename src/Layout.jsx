@@ -143,11 +143,18 @@ export default function Layout({ children, currentPageName }) {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
         }
+        @keyframes text-glow {
+          0%, 100% { text-shadow: 0 0 4px rgba(212,212,212,0.4); }
+          50% { text-shadow: 0 0 8px rgba(212,212,212,0.8); }
+        }
+        .nav-item-hover {
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
         .nav-item-hover:hover {
           background: #111 !important;
         }
         .nav-item-hover:hover .nav-label {
-          color: #e0e0e0 !important;
+          color: #e8e8e8 !important;
         }
         .nav-item-hover:hover .nav-code {
           opacity: 1 !important;
