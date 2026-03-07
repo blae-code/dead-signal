@@ -32,13 +32,15 @@ Deno.serve(async (req) => {
             'Accept': 'Application/vnd.pterodactyl.v1+json',
         };
 
-        // Fetch server resources (cpu, ram, uptime, state)
-        const resourcesRes = await fetch(`${PANEL_URL}/api/client/servers/${SERVER_ID}/resources`, { headers });
-        const resourcesData = await safeJson(resourcesRes);
-
-        // Fetch server details (name, description)
-        const detailsRes = await fetch(`${PANEL_URL}/api/client/servers/${SERVER_ID}`, { headers });
-        const detailsData = await safeJson(detailsRes);
+        // Fetch resources and details in parallel
+        const [resourcesRes, detailsRes] = await Promise.all([
+            fetch(`${PANEL_URL}/api/client/servers/${SERVER_ID}/resources`, { headers }),
+            fetch(`${PANEL_URL}/api/client/servers/${SERVER_ID}`, { headers }),
+        ]);
+        const [resourcesData, detailsData] = await Promise.all([
+            safeJson(resourcesRes),
+            safeJson(detailsRes),
+        ]);
 
         const state = resourcesData?.attributes?.current_state;
         const stats = resourcesData?.attributes?.resources || {};
