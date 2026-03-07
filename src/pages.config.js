@@ -49,12 +49,14 @@
  */
 import Dashboard from './pages/Dashboard';
 import ServerMonitor from './pages/ServerMonitor';
+import TacticalMap from './pages/TacticalMap';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Dashboard": Dashboard,
     "ServerMonitor": ServerMonitor,
+    "TacticalMap": TacticalMap,
 }
 
 export const pagesConfig = {
