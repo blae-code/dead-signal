@@ -53,7 +53,7 @@ export function StatGrid({ stats }) {
 // ── Panel (card with optional header) ────────────────────────────────────────
 export function Panel({ title, titleColor = T.text, headerRight, accentBorder, children }) {
   return (
-    <div className="border" style={{ borderColor: accentBorder || T.border, background: T.bg1 }}>
+    <div className="border" style={{ borderColor: accentBorder || T.border, background: T.bg1, boxShadow: `inset 0 1px 0 rgba(184, 134, 11, 0.15), 0 2px 4px rgba(0, 0, 0, 0.5)` }}>
       {title && (
         <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: T.border }}>
           <span className="text-xs font-bold tracking-widest" style={{ color: titleColor, fontFamily: "'Orbitron', monospace", fontSize: "10px" }}>
