@@ -4,8 +4,8 @@ import { ChevronDown, Cloud, CloudRain, Sun, Wind, Droplets, Eye, Gauge } from "
 
 const C = {
   text: "#c8c8c8",
-  textDim: "#888",
-  textFaint: "#666",
+  textDim: "#aaa",
+  textFaint: "#888",
   border: "#1e1e1e",
   borderMid: "#2a2a2a",
 };
