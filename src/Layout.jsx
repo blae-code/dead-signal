@@ -4,54 +4,54 @@ import { createPageUrl } from "@/utils";
 import {
   Radio, Map, Users, Package, Cpu, Crosshair,
   AlertTriangle, Terminal, Menu, X, Wifi, WifiOff, ChevronRight,
-  Shield, Activity, Skull, Bot, Zap, Database
-} from "lucide-react";
+  Shield, Activity, Skull, Bot, Zap, Database } from
+"lucide-react";
 
 // colour, short code, and section grouping per nav item
 const navSections = [
-  {
-    label: "// OPS CENTER",
-    items: [
-      { label: "COMMAND",      page: "Dashboard",     icon: Terminal,  code: "HQ",  color: "#c8c8c8", dot: "#39ff14" },
-      { label: "SERVER",       page: "ServerMonitor", icon: Cpu,       code: "SRV", color: "#00e5ff", dot: "#00e5ff" },
-    ],
-  },
-  {
-    label: "// FIELD OPS",
-    items: [
-      { label: "TACTICAL MAP", page: "TacticalMap",   icon: Map,       code: "MAP", color: "#ffb000", dot: "#ffb000" },
-      { label: "CLAN ROSTER",  page: "ClanRoster",    icon: Users,     code: "OPS", color: "#c8c8c8", dot: "#39ff14" },
-      { label: "MISSIONS",     page: "Missions",      icon: Crosshair, code: "MIS", color: "#ff2020", dot: "#ff2020" },
-    ],
-  },
-  {
-    label: "// LOGISTICS",
-    items: [
-      { label: "INVENTORY",    page: "Inventory",     icon: Package,   code: "INV", color: "#c8c8c8", dot: "#666"    },
-      { label: "INTEL FEED",   page: "Intel",         icon: Radio,     code: "INT", color: "#ffb000", dot: "#ffb000" },
-      { label: "AI AGENT",     page: "AIAgent",       icon: Bot,       code: "AI",  color: "#39ff14", dot: "#39ff14" },
-    ],
-  },
-];
+{
+  label: "// OPS CENTER",
+  items: [
+  { label: "COMMAND", page: "Dashboard", icon: Terminal, code: "HQ", color: "#c8c8c8", dot: "#39ff14" },
+  { label: "SERVER", page: "ServerMonitor", icon: Cpu, code: "SRV", color: "#00e5ff", dot: "#00e5ff" }]
+
+},
+{
+  label: "// FIELD OPS",
+  items: [
+  { label: "TACTICAL MAP", page: "TacticalMap", icon: Map, code: "MAP", color: "#ffb000", dot: "#ffb000" },
+  { label: "CLAN ROSTER", page: "ClanRoster", icon: Users, code: "OPS", color: "#c8c8c8", dot: "#39ff14" },
+  { label: "MISSIONS", page: "Missions", icon: Crosshair, code: "MIS", color: "#ff2020", dot: "#ff2020" }]
+
+},
+{
+  label: "// LOGISTICS",
+  items: [
+  { label: "INVENTORY", page: "Inventory", icon: Package, code: "INV", color: "#c8c8c8", dot: "#666" },
+  { label: "INTEL FEED", page: "Intel", icon: Radio, code: "INT", color: "#ffb000", dot: "#ffb000" },
+  { label: "AI AGENT", page: "AIAgent", icon: Bot, code: "AI", color: "#39ff14", dot: "#39ff14" }]
+
+}];
+
 
 const THREAT_LEVELS = [
-  { label: "SECURE", color: "#39ff14" },
-  { label: "ELEVATED", color: "#ffb000" },
-  { label: "CRITICAL", color: "#ff2020" },
-];
+{ label: "SECURE", color: "#39ff14" },
+{ label: "ELEVATED", color: "#ffb000" },
+{ label: "CRITICAL", color: "#ff2020" }];
+
 
 // Neutral chrome palette — no status colours
 const C = {
-  text:        "#c8c8c8",   // primary text
-  textDim:     "#666",      // secondary / dim text
-  textFaint:   "#333",      // very faint labels
-  border:      "#1e1e1e",   // default border
-  borderMid:   "#2a2a2a",   // slightly brighter border
-  active:      "#e0e0e0",   // active nav item text
-  activeBg:    "#141414",   // active nav item bg
-  activeLine:  "#888",      // active left-bar accent
-  accent:      "#aaa",      // logo / app name
-  scan:        "rgba(200,200,200,0.015)",
+  text: "#c8c8c8", // primary text
+  textDim: "#666", // secondary / dim text
+  textFaint: "#333", // very faint labels
+  border: "#1e1e1e", // default border
+  borderMid: "#2a2a2a", // slightly brighter border
+  active: "#e0e0e0", // active nav item text
+  activeBg: "#141414", // active nav item bg
+  activeLine: "#888", // active left-bar accent
+  accent: "#aaa", // logo / app name
+  scan: "rgba(200,200,200,0.015)"
 };
 
 export default function Layout({ children, currentPageName }) {
@@ -113,14 +113,14 @@ export default function Layout({ children, currentPageName }) {
       {/* Top bar */}
       <header
         className="border-b flex items-center justify-between px-4 py-2 z-50 relative overflow-hidden"
-        style={{ borderColor: C.border, background: "#050505" }}
-      >
+        style={{ borderColor: C.border, background: "#050505" }}>
+
         {/* Subtle scan line */}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
           background: `linear-gradient(90deg, transparent 0%, ${C.scan} 50%, transparent 100%)`,
           animation: "header-scan 8s linear infinite",
-          backgroundSize: "200% 100%",
+          backgroundSize: "200% 100%"
         }} />
 
         <div className="flex items-center gap-3 relative">
@@ -144,7 +144,7 @@ export default function Layout({ children, currentPageName }) {
             color: threat.color,
             fontFamily: "'Orbitron', monospace",
             fontSize: "9px",
-            animation: threatLevel > 0 ? "threat-blink 1s infinite" : "none",
+            animation: threatLevel > 0 ? "threat-blink 1s infinite" : "none"
           }}>
             THREAT: {threat.label}
           </span>
@@ -162,17 +162,17 @@ export default function Layout({ children, currentPageName }) {
           </div>
           <span className="hidden sm:block" style={{ color: C.border }}>|</span>
           {/* Uplink status — retains status colours intentionally */}
-          <div className="flex items-center gap-2">
-            <div style={{
-              width: "6px", height: "6px", borderRadius: "50%",
-              background: online ? "#39ff14" : "#ff2020",
-              animation: online ? "uplink-pulse 1.8s infinite" : "none",
-            }} />
-            {online
-              ? <span className="hidden sm:block text-xs" style={{ color: "#39ff14", letterSpacing: "0.1em" }}>UPLINK ACTIVE</span>
-              : <span className="hidden sm:block text-xs" style={{ color: "#ff2020", letterSpacing: "0.1em" }}>UPLINK LOST</span>
-            }
-          </div>
+          
+
+
+
+
+
+
+
+
+
+
         </div>
       </header>
 
@@ -184,9 +184,9 @@ export default function Layout({ children, currentPageName }) {
             width: "210px",
             background: "#030303",
             borderRight: `1px solid ${C.border}`,
-            minHeight: "calc(100vh - 41px)",
-          }}
-        >
+            minHeight: "calc(100vh - 41px)"
+          }}>
+
           {/* Sidebar top label */}
           <div className="px-3 py-2 border-b flex items-center justify-between" style={{ borderColor: C.border, background: "#050505" }}>
             <div className="flex items-center gap-2">
@@ -198,8 +198,8 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Nav sections */}
           <div className="flex-1 overflow-y-auto py-1">
-            {navSections.map((section) => (
-              <div key={section.label}>
+            {navSections.map((section) =>
+            <div key={section.label}>
                 {/* Section divider */}
                 <div className="flex items-center gap-2 px-3 pt-3 pb-1">
                   <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.2em" }}>{section.label}</span>
@@ -207,82 +207,82 @@ export default function Layout({ children, currentPageName }) {
                 </div>
 
                 {section.items.map(({ label, page, icon: Icon, code, color, dot }) => {
-                  const active = currentPageName === page;
-                  return (
-                    <Link
-                      key={page}
-                      to={createPageUrl(page)}
-                      onClick={() => setMobileOpen(false)}
-                      className="nav-item-hover flex items-center gap-2 px-3 py-2 text-xs transition-all duration-150 relative"
-                      style={{
-                        background: active ? "#0d0d0d" : "transparent",
-                        borderLeft: active ? `2px solid ${color}` : "2px solid transparent",
-                        letterSpacing: "0.08em",
-                        textDecoration: "none",
-                      }}
-                    >
+                const active = currentPageName === page;
+                return (
+                  <Link
+                    key={page}
+                    to={createPageUrl(page)}
+                    onClick={() => setMobileOpen(false)}
+                    className="nav-item-hover flex items-center gap-2 px-3 py-2 text-xs transition-all duration-150 relative"
+                    style={{
+                      background: active ? "#0d0d0d" : "transparent",
+                      borderLeft: active ? `2px solid ${color}` : "2px solid transparent",
+                      letterSpacing: "0.08em",
+                      textDecoration: "none"
+                    }}>
+
                       {/* Status dot */}
                       <div style={{
-                        width: "5px", height: "5px", borderRadius: "50%", flexShrink: 0,
-                        background: active ? dot : C.textFaint,
-                        boxShadow: active ? `0 0 6px ${dot}` : "none",
-                        animation: active ? "nav-dot-pulse 2s infinite" : "none",
-                        transition: "background 0.2s",
-                      }} />
+                      width: "5px", height: "5px", borderRadius: "50%", flexShrink: 0,
+                      background: active ? dot : C.textFaint,
+                      boxShadow: active ? `0 0 6px ${dot}` : "none",
+                      animation: active ? "nav-dot-pulse 2s infinite" : "none",
+                      transition: "background 0.2s"
+                    }} />
 
                       {/* Icon */}
                       <Icon
-                        size={11}
-                        className="nav-icon"
-                        style={{
-                          flexShrink: 0,
-                          color: active ? color : C.textFaint,
-                          opacity: active ? 1 : 0.5,
-                          transition: "color 0.15s, opacity 0.15s",
-                        }}
-                      />
+                      size={11}
+                      className="nav-icon"
+                      style={{
+                        flexShrink: 0,
+                        color: active ? color : C.textFaint,
+                        opacity: active ? 1 : 0.5,
+                        transition: "color 0.15s, opacity 0.15s"
+                      }} />
+
 
                       {/* Label */}
                       <span
-                        className="nav-label"
-                        style={{
-                          flex: 1,
-                          color: active ? color : C.textDim,
-                          fontSize: "10px",
-                          transition: "color 0.15s",
-                        }}
-                      >
+                      className="nav-label"
+                      style={{
+                        flex: 1,
+                        color: active ? color : C.textDim,
+                        fontSize: "10px",
+                        transition: "color 0.15s"
+                      }}>
+
                         {label}
                       </span>
 
                       {/* Code badge */}
                       <span
-                        className="nav-code"
-                        style={{
-                          color: active ? color : C.textFaint,
-                          fontSize: "8px",
-                          opacity: active ? 0.9 : 0,
-                          fontFamily: "'Orbitron', monospace",
-                          transition: "opacity 0.15s",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
+                      className="nav-code"
+                      style={{
+                        color: active ? color : C.textFaint,
+                        fontSize: "8px",
+                        opacity: active ? 0.9 : 0,
+                        fontFamily: "'Orbitron', monospace",
+                        transition: "opacity 0.15s",
+                        letterSpacing: "0.05em"
+                      }}>
+
                         {code}
                       </span>
 
                       {/* Active right bar */}
-                      {active && (
-                        <div style={{
-                          position: "absolute", right: 0, top: "15%", bottom: "15%",
-                          width: "2px",
-                          background: `linear-gradient(180deg, transparent, ${color}, transparent)`,
-                        }} />
-                      )}
-                    </Link>
-                  );
-                })}
+                      {active &&
+                    <div style={{
+                      position: "absolute", right: 0, top: "15%", bottom: "15%",
+                      width: "2px",
+                      background: `linear-gradient(180deg, transparent, ${color}, transparent)`
+                    }} />
+                    }
+                    </Link>);
+
+              })}
               </div>
-            ))}
+            )}
           </div>
 
           {/* Sidebar bottom */}
@@ -292,7 +292,7 @@ export default function Layout({ children, currentPageName }) {
               <div style={{
                 width: "5px", height: "5px", borderRadius: "50%",
                 background: online ? "#39ff14" : "#ff2020",
-                animation: online ? "nav-dot-pulse 1.8s infinite" : "none",
+                animation: online ? "nav-dot-pulse 1.8s infinite" : "none"
               }} />
               <span style={{ color: online ? "#39ff1488" : "#ff202088", fontSize: "8px", letterSpacing: "0.15em" }}>
                 {online ? "NET: ONLINE" : "NET: OFFLINE"}
@@ -317,15 +317,15 @@ export default function Layout({ children, currentPageName }) {
         </nav>
 
         {/* Mobile overlay */}
-        {mobileOpen && (
-          <div className="fixed inset-0 z-30 bg-black bg-opacity-80 md:hidden" onClick={() => setMobileOpen(false)} />
-        )}
+        {mobileOpen &&
+        <div className="fixed inset-0 z-30 bg-black bg-opacity-80 md:hidden" onClick={() => setMobileOpen(false)} />
+        }
 
         {/* Main content */}
         <main className="flex-1 overflow-auto" style={{ background: "#0a0a0a" }}>
           {children}
         </main>
       </div>
-    </div>
-  );
+    </div>);
+
 }
