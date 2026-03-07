@@ -22,19 +22,19 @@ export default function PerformanceCharts({ status, statusLoading }) {
 
   // Real-time updates every second (smooth extension without flickering)
   useEffect(() => {
-    if (!lastStatus || cpuHistory.length === 0) return;
+    if (!lastStatus) return;
 
     const interval = setInterval(() => {
       const now = new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
       
       // Extend chart with last known values (no variance, smooth continuation)
-      setCpuHistory(prev => [...prev.slice(-29), { time: now, cpu: prev[prev.length - 1]?.cpu ?? (lastStatus.cpu ?? 0) }]);
-      setRamHistory(prev => [...prev.slice(-29), { time: now, ram: prev[prev.length - 1]?.ram ?? Math.round((lastStatus.ramUsedMB ?? 0) / 1024 * 10) / 10 }]);
-      setDiskHistory(prev => [...prev.slice(-29), { time: now, disk: prev[prev.length - 1]?.disk ?? Math.round((lastStatus.diskMB ?? 0) / 1024 * 10) / 10 }]);
+      setCpuHistory(prev => prev.length > 0 ? [...prev.slice(-29), { time: now, cpu: prev[prev.length - 1].cpu }] : []);
+      setRamHistory(prev => prev.length > 0 ? [...prev.slice(-29), { time: now, ram: prev[prev.length - 1].ram }] : []);
+      setDiskHistory(prev => prev.length > 0 ? [...prev.slice(-29), { time: now, disk: prev[prev.length - 1].disk }] : []);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lastStatus, cpuHistory.length]);
+  }, [lastStatus]);
 
   const ChartCard = ({ title, data, dataKey, color, unit }) => (
     <motion.div
