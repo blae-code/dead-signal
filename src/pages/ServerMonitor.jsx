@@ -16,6 +16,8 @@ export default function ServerMonitor() {
   const [status, setStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(true);
   const [logFilter, setLogFilter] = useState("ALL");
+  const [alertBanners, setAlertBanners] = useState([]);
+  const [alertRefreshTick, setAlertRefreshTick] = useState(0);
   const logRef = useRef(null);
   const consoleRef = useRef(null);
 
