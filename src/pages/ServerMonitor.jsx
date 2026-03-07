@@ -41,7 +41,6 @@ export default function ServerMonitor() {
   const [alertRefreshTick, setAlertRefreshTick] = useState(0);
   const [showForecast, setShowForecast] = useState(false);
   const logRef = useRef(null);
-  const consoleRef = useRef(null);
 
   const fetchStatus = async () => {
     try {
