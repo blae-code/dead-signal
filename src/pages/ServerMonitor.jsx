@@ -221,7 +221,7 @@ export default function ServerMonitor() {
               {["ALL", "INFO", "WARN", "CRITICAL"].map(f => (
                 <button key={f} onClick={() => setLogFilter(f)}
                   className="text-xs px-2 py-0.5 border"
-                  style={{ borderColor: logFilter === f ? "#39ff14" : "#1e3a1e", color: logFilter === f ? "#39ff14" : "#39ff1444" }}>
+                  style={{ borderColor: logFilter === f ? T.green : T.border, color: logFilter === f ? T.green : T.textFaint }}>
                   {f}
                 </button>
               ))}
