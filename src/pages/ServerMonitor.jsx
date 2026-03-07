@@ -137,12 +137,22 @@ export default function ServerMonitor() {
   return (
     <div className="p-4 space-y-4 max-w-7xl mx-auto">
       {/* In-app alert banners */}
-      {alertBanners.map(b => (
-        <div key={b.id} className="flex items-center justify-between px-3 py-2 border text-xs" style={{ borderColor: "#ff2020", background: "#1a0000", color: "#ff2020" }}>
-          <span><AlertTriangle size={10} className="inline mr-2" />{b.message}</span>
-          <button onClick={() => dismissBanner(b.id)}><X size={10} /></button>
-        </div>
-      ))}
+      <AnimatePresence>
+        {alertBanners.map(b => (
+          <motion.div
+            key={b.id}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="flex items-center justify-between px-3 py-2 border text-xs"
+            style={{ borderColor: "#ff2020", background: "#1a0000", color: "#ff2020" }}
+          >
+            <span><AlertTriangle size={10} className="inline mr-2" />{b.message}</span>
+            <button onClick={() => dismissBanner(b.id)}><X size={10} /></button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
 
       <PageHeader icon={Cpu} title="SERVER MONITOR" color={T.green}>
         {statusLoading
