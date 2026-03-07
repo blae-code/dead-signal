@@ -41,35 +41,46 @@ export default function ServerMonitor() {
   }, [consoleLines]);
 
   const handleCommand = async () => {
-    if (!cmd.trim()) return;
+    if (!cmd.trim() || rconLoading) return;
     const input = cmd.trim().toUpperCase();
-    setConsoleLines(prev => [...prev, { text: `> ${cmd}`, color: "#00e5ff" }]);
+    const raw = cmd.trim();
+    setConsoleLines(prev => [...prev, { text: `> ${raw}`, color: "#00e5ff" }]);
     setCmd("");
 
+    // Local-only commands
     if (input === "HELP") {
       setConsoleLines(prev => [...prev,
-        { text: "Available: STATUS | PLAYERS | CLEAR | RESTART | KICK [name] | BAN [name]", color: "#39ff1488" }
+        { text: "Tip: Commands are sent live to your server via RCON.", color: "#39ff1488" },
+        { text: "Examples: kick PlayerName | say Hello! | status | players", color: "#39ff1488" },
+        { text: "Type CLEAR to wipe the console.", color: "#39ff1488" },
       ]);
-    } else if (input === "STATUS") {
-      setConsoleLines(prev => [...prev,
-        { text: `Server: ${status.online ? "ONLINE" : "OFFLINE"} | Players: ${status.players}/${status.maxPlayers} | Ping: ${status.ping}ms`, color: "#39ff14" }
-      ]);
-    } else if (input === "PLAYERS") {
-      setConsoleLines(prev => [...prev,
-        { text: `Active players: ${status.players} / ${status.maxPlayers}`, color: "#39ff14" }
-      ]);
-    } else if (input === "CLEAR") {
+      return;
+    }
+    if (input === "CLEAR") {
       setConsoleLines([{ text: "> Console cleared.", color: "#39ff1488" }]);
-    } else if (input.startsWith("KICK")) {
-      const name = cmd.split(" ").slice(1).join(" ");
-      setConsoleLines(prev => [...prev, { text: `KICK command sent for: ${name || "(no name)"}`, color: "#ffb000" }]);
-      await base44.entities.ServerEvent.create({ event_type: "Admin Action", message: `KICK: ${name}`, severity: "WARN" }).catch(() => {});
-    } else if (input.startsWith("BAN")) {
-      const name = cmd.split(" ").slice(1).join(" ");
-      setConsoleLines(prev => [...prev, { text: `BAN command sent for: ${name || "(no name)"}`, color: "#ff2020" }]);
-      await base44.entities.ServerEvent.create({ event_type: "Admin Action", message: `BAN: ${name}`, severity: "CRITICAL" }).catch(() => {});
-    } else {
-      setConsoleLines(prev => [...prev, { text: `Unknown command: ${cmd}. Type HELP.`, color: "#ff2020" }]);
+      return;
+    }
+
+    // All other commands go live to the server
+    setRconLoading(true);
+    setConsoleLines(prev => [...prev, { text: `Sending to server...`, color: "#39ff1444" }]);
+    try {
+      const res = await base44.functions.invoke('sendRconCommand', { command: raw });
+      if (res.data?.success) {
+        setConsoleLines(prev => [...prev, { text: `✓ ${res.data.output}`, color: "#39ff14" }]);
+        // Log admin actions to ServerEvent feed
+        await base44.entities.ServerEvent.create({
+          event_type: "Admin Action",
+          message: `RCON: ${raw}`,
+          severity: "WARN"
+        }).catch(() => {});
+      } else {
+        setConsoleLines(prev => [...prev, { text: `✗ ${res.data?.error || "Unknown error"}`, color: "#ff2020" }]);
+      }
+    } catch (err) {
+      setConsoleLines(prev => [...prev, { text: `✗ ${err.message}`, color: "#ff2020" }]);
+    } finally {
+      setRconLoading(false);
     }
   };
 
