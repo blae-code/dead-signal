@@ -60,10 +60,16 @@ export default function ServerMonitor() {
       if (ev.type === "create") setEvents(prev => [ev.data, ...prev.slice(0, 49)]);
     });
 
+    base44.entities.RconHistory.list("-created_date", 50).then(setRconHistory).catch(() => {});
+    const unsubHistory = base44.entities.RconHistory.subscribe((ev) => {
+      if (ev.type === "create") setRconHistory(prev => [ev.data, ...prev.slice(0, 49)]);
+    });
+
     fetchStatus();
     const pollInterval = setInterval(fetchStatus, 30000); // refresh every 30s
     return () => {
       unsub();
+      unsubHistory();
       clearInterval(pollInterval);
     };
   }, []);
