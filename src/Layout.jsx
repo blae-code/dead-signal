@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { motion } from "framer-motion";
 import {
   Radio, Map, Users, Package, Cpu, Crosshair,
   AlertTriangle, Terminal, Menu, X, Wifi, WifiOff, ChevronRight,
-  Shield, Activity, Skull, Bot, Zap, Database } from
+  Shield, Activity, Skull, Bot, Zap, Database, Cloud, CloudRain, Sun } from
 "lucide-react";
 
 // colour, short code, and section grouping per nav item
