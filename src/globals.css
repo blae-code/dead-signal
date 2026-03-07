@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --terminal-green: #39ff14;
+  --terminal-amber: #ffb000;
+  --terminal-red: #ff2020;
+  --terminal-cyan: #00e5ff;
+  --terminal-dim: #1a1a1a;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-card: #0f0f0f;
+  --border-color: #2a2a2a;
+  --border-accent: #39ff14;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--terminal-green);
+  font-family: 'Share Tech Mono', monospace;
+  overflow-x: hidden;
+}
+
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.05) 2px,
+    rgba(0, 0, 0, 0.05) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Terminal flicker animation */
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.85; }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+.terminal-flicker { animation: flicker 4s infinite; }
+.cursor-blink::after { content: '█'; animation: blink 1s infinite; }
+.glitch { animation: glitch 0.3s infinite; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #39ff14; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #ffb000; }
+
+/* Terminal card */
+.terminal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  position: relative;
+}
+
+.terminal-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--terminal-green);
+  opacity: 0.6;
+}
+
+.terminal-header {
+  font-family: 'Orbitron', monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Input overrides */
+input, textarea, select {
+  background: #0a0a0a !important;
+  border-color: #2a2a2a !important;
+  color: #39ff14 !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  border-radius: 2px !important;
+}
+
+input:focus, textarea:focus {
+  border-color: #39ff14 !important;
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.3) !important;
+  outline: none !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #2a4a1a !important;
+}
+
+/* Button overrides */
+button {
+  font-family: 'Share Tech Mono', monospace !important;
+}
+
+/* Status colors */
+.status-active { color: #39ff14; }
+.status-warn { color: #ffb000; }
+.status-danger { color: #ff2020; }
+.status-info { color: #00e5ff; }
+.status-dim { color: #555; }
+
+/* Glow effects */
+.glow-green { text-shadow: 0 0 10px rgba(57, 255, 20, 0.8); }
+.glow-amber { text-shadow: 0 0 10px rgba(255, 176, 0, 0.8); }
+.glow-red { text-shadow: 0 0 10px rgba(255, 32, 32, 0.8); }
+.glow-cyan { text-shadow: 0 0 10px rgba(0, 229, 255, 0.8); }
+
+.border-glow-green { box-shadow: 0 0 8px rgba(57, 255, 20, 0.4); border-color: #39ff14; }
+.border-glow-amber { box-shadow: 0 0 8px rgba(255, 176, 0, 0.4); border-color: #ffb000; }
+.border-glow-red { box-shadow: 0 0 8px rgba(255, 32, 32, 0.4); border-color: #ff2020; }
+
+/* ASCII border decoration */
+.ascii-box {
+  border: 1px solid #39ff14;
+  padding: 1rem;
+  position: relative;
+}
+
+.progress-bar-terminal {
+  height: 4px;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  overflow: hidden;
+}
+
+.progress-bar-terminal-fill {
+  height: 100%;
+  background: #39ff14;
+  transition: width 0.5s ease;
+}
