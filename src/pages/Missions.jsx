@@ -1,40 +1,37 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Crosshair, Plus, X, Save, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { T, PageHeader, StatGrid, Panel, FormPanel, Field, FilterPill, ActionBtn, TableRow, EmptyState, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
 
-const STATUSES = ["Pending", "Active", "Complete", "Failed", "Aborted"];
+const STATUSES  = ["Pending", "Active", "Complete", "Failed", "Aborted"];
 const PRIORITIES = ["Critical", "High", "Medium", "Low"];
-const STATUS_COLORS = { Pending: "#ffb000", Active: "#39ff14", Complete: "#00e5ff", Failed: "#ff2020", Aborted: "#555" };
-const PRIORITY_COLORS = { Critical: "#ff2020", High: "#ff8000", Medium: "#ffb000", Low: "#39ff14" };
+const STATUS_COLORS   = { Pending: T.amber, Active: T.green, Complete: T.cyan, Failed: T.red, Aborted: T.textDim };
+const PRIORITY_COLORS = { Critical: T.red, High: T.orange, Medium: T.amber, Low: T.green };
 
-const emptyMission = { title: "", briefing: "", status: "Pending", priority: "Medium", objective_coords: "", reward: "", deadline: "", debrief_notes: "" };
+const empty = { title: "", briefing: "", status: "Pending", priority: "Medium", objective_coords: "", reward: "", deadline: "", debrief_notes: "" };
 
 export default function Missions() {
   const [missions, setMissions] = useState([]);
-  const [members, setMembers] = useState([]);
   const [expanded, setExpanded] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(emptyMission);
+  const [form, setForm] = useState(empty);
   const [filterStatus, setFilterStatus] = useState("ALL");
 
   useEffect(() => {
     base44.entities.Mission.list("-created_date").then(setMissions).catch(() => {});
-    base44.entities.ClanMember.list().then(setMembers).catch(() => {});
   }, []);
 
   const handleSave = async () => {
     if (!form.title.trim()) return;
     if (editing) {
-      const updated = await base44.entities.Mission.update(editing, form);
-      setMissions(m => m.map(x => x.id === editing ? updated : x));
+      const u = await base44.entities.Mission.update(editing, form);
+      setMissions(m => m.map(x => x.id === editing ? u : x));
     } else {
-      const created = await base44.entities.Mission.create(form);
-      setMissions(m => [created, ...m]);
+      const c = await base44.entities.Mission.create(form);
+      setMissions(m => [c, ...m]);
     }
-    setForm(emptyMission);
-    setEditing(null);
-    setShowForm(false);
+    setForm(empty); setEditing(null); setShowForm(false);
   };
 
   const handleDelete = async (id) => {
@@ -44,139 +41,122 @@ export default function Missions() {
   };
 
   const handleStatusChange = async (id, status) => {
-    const updated = await base44.entities.Mission.update(id, { status });
-    setMissions(m => m.map(x => x.id === id ? updated : x));
+    const u = await base44.entities.Mission.update(id, { status });
+    setMissions(m => m.map(x => x.id === id ? u : x));
   };
 
   const filtered = filterStatus === "ALL" ? missions : missions.filter(m => m.status === filterStatus);
 
   return (
     <div className="p-4 space-y-4 max-w-5xl mx-auto">
-      <div className="flex items-center gap-3 flex-wrap">
-        <Crosshair size={16} style={{ color: "#ff2020" }} />
-        <span className="text-sm font-bold tracking-widest" style={{ color: "#ff2020", fontFamily: "'Orbitron', monospace" }}>MISSION BOARD</span>
-        <div className="ml-auto flex items-center gap-2 flex-wrap">
-          <select className="text-xs px-2 py-1 border bg-black" style={{ borderColor: "#1e3a1e", color: "#39ff14" }}
-            value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-            <option value="ALL">ALL</option>
-            {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <button onClick={() => { setShowForm(!showForm); setEditing(null); setForm(emptyMission); }}
-            className="text-xs px-3 py-1 border flex items-center gap-1"
-            style={{ borderColor: "#ff2020", color: "#ff2020" }}>
-            <Plus size={11} /> NEW MISSION
-          </button>
-        </div>
-      </div>
+      <PageHeader icon={Crosshair} title="MISSION BOARD" color={T.red}>
+        <select className="text-xs px-2 py-1.5 border outline-none" style={{ ...selectStyle, minWidth: "110px" }}
+          value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+          <option value="ALL">ALL STATUS</option>
+          {STATUSES.map(s => <option key={s}>{s}</option>)}
+        </select>
+        <ActionBtn color={T.red} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
+          <Plus size={10} /> NEW MISSION
+        </ActionBtn>
+      </PageHeader>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
         {STATUSES.map(s => (
-          <div key={s} className="border p-2 text-center" style={{ borderColor: "#1e3a1e", background: "#060606" }}>
-            <div className="text-lg font-bold" style={{ color: STATUS_COLORS[s], fontFamily: "'Orbitron', monospace" }}>
+          <div key={s} className="border p-2.5 text-center" style={{ borderColor: T.border, background: T.bg1 }}>
+            <div className="text-base font-bold" style={{ color: STATUS_COLORS[s], fontFamily: "'Orbitron', monospace" }}>
               {missions.filter(m => m.status === s).length}
             </div>
-            <div className="text-xs" style={{ color: "#39ff1044" }}>{s.toUpperCase()}</div>
+            <div className="text-xs tracking-widest mt-0.5" style={{ color: T.textFaint, fontSize: "9px" }}>{s.toUpperCase()}</div>
           </div>
         ))}
       </div>
 
-      {/* Mission form */}
       {showForm && (
-        <div className="border p-4 space-y-3" style={{ borderColor: "#ff2020", background: "#060606" }}>
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold" style={{ color: "#ff2020" }}>// {editing ? "EDIT MISSION" : "NEW MISSION BRIEFING"}</span>
-            <button onClick={() => { setShowForm(false); setEditing(null); }}><X size={12} style={{ color: "#ff202044" }} /></button>
-          </div>
+        <FormPanel title={editing ? "EDIT MISSION" : "NEW MISSION BRIEFING"} titleColor={T.red} onClose={() => { setShowForm(false); setEditing(null); }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <div className="text-xs mb-1" style={{ color: "#39ff1066" }}>MISSION TITLE *</div>
-              <input className="w-full text-xs px-2 py-1 border bg-black" style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
+            <Field label="MISSION TITLE *">
+              <input className="w-full text-xs px-2 py-1.5 border bg-transparent outline-none" style={inputStyle}
                 value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Operation..." />
-            </div>
-            <div>
-              <div className="text-xs mb-1" style={{ color: "#39ff1066" }}>PRIORITY</div>
-              <select className="w-full text-xs px-2 py-1 border bg-black" style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
+            </Field>
+            <Field label="PRIORITY">
+              <select className="w-full text-xs px-2 py-1.5 border outline-none" style={selectStyle}
                 value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}>
-                {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
+                {PRIORITIES.map(p => <option key={p}>{p}</option>)}
               </select>
-            </div>
-            <div>
-              <div className="text-xs mb-1" style={{ color: "#39ff1066" }}>STATUS</div>
-              <select className="w-full text-xs px-2 py-1 border bg-black" style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
+            </Field>
+            <Field label="STATUS">
+              <select className="w-full text-xs px-2 py-1.5 border outline-none" style={selectStyle}
                 value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
-                {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                {STATUSES.map(s => <option key={s}>{s}</option>)}
               </select>
-            </div>
-            <div>
-              <div className="text-xs mb-1" style={{ color: "#39ff1066" }}>OBJECTIVE COORDS</div>
-              <input className="w-full text-xs px-2 py-1 border bg-black" style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
+            </Field>
+            <Field label="OBJECTIVE COORDS">
+              <input className="w-full text-xs px-2 py-1.5 border bg-transparent outline-none" style={inputStyle}
                 value={form.objective_coords} onChange={e => setForm(f => ({ ...f, objective_coords: e.target.value }))} placeholder="Grid E4..." />
-            </div>
-            <div>
-              <div className="text-xs mb-1" style={{ color: "#39ff1066" }}>REWARD / OBJECTIVE</div>
-              <input className="w-full text-xs px-2 py-1 border bg-black" style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
+            </Field>
+            <Field label="REWARD / OBJECTIVE">
+              <input className="w-full text-xs px-2 py-1.5 border bg-transparent outline-none" style={inputStyle}
                 value={form.reward} onChange={e => setForm(f => ({ ...f, reward: e.target.value }))} placeholder="Loot / XP..." />
-            </div>
-            <div>
-              <div className="text-xs mb-1" style={{ color: "#39ff1066" }}>DEADLINE</div>
-              <input type="datetime-local" className="w-full text-xs px-2 py-1 border bg-black" style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
+            </Field>
+            <Field label="DEADLINE">
+              <input type="datetime-local" className="w-full text-xs px-2 py-1.5 border bg-transparent outline-none" style={inputStyle}
                 value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} />
+            </Field>
+            <div className="md:col-span-2">
+              <Field label="BRIEFING *">
+                <textarea className="w-full text-xs px-2 py-1.5 border bg-transparent outline-none resize-none" rows={3} style={inputStyle}
+                  value={form.briefing} onChange={e => setForm(f => ({ ...f, briefing: e.target.value }))}
+                  placeholder="Mission objectives and intel..." />
+              </Field>
             </div>
           </div>
-          <div>
-            <div className="text-xs mb-1" style={{ color: "#39ff1066" }}>BRIEFING *</div>
-            <textarea className="w-full text-xs px-2 py-1 border bg-black resize-none" rows={3}
-              style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
-              value={form.briefing} onChange={e => setForm(f => ({ ...f, briefing: e.target.value }))}
-              placeholder="Mission objectives and intel..." />
-          </div>
-          <button onClick={handleSave} className="text-xs px-4 py-1 border flex items-center gap-1"
-            style={{ borderColor: "#ff2020", color: "#ff2020" }}>
-            <Save size={11} /> {editing ? "UPDATE" : "POST MISSION"}
-          </button>
-        </div>
+          <ActionBtn color={T.red} onClick={handleSave}>
+            <Save size={10} /> {editing ? "UPDATE" : "POST MISSION"}
+          </ActionBtn>
+        </FormPanel>
       )}
 
-      {/* Mission list */}
       <div className="space-y-2">
         {filtered.length === 0
-          ? <div className="p-4 text-xs" style={{ color: "#39ff1033" }}>// NO MISSIONS ON RECORD</div>
+          ? <div className="border px-3 py-6 text-xs text-center" style={{ borderColor: T.border, color: T.textFaint }}>// NO MISSIONS ON RECORD</div>
           : filtered.map(m => (
-            <div key={m.id} className="border" style={{ borderColor: expanded === m.id ? STATUS_COLORS[m.status] : "#1e3a1e", background: "#060606" }}>
-              {/* Header */}
-              <div className="flex items-center gap-3 px-3 py-2 cursor-pointer" onClick={() => setExpanded(expanded === m.id ? null : m.id)}>
-                <span className="text-xs px-1 border" style={{ borderColor: PRIORITY_COLORS[m.priority], color: PRIORITY_COLORS[m.priority] }}>
+            <div key={m.id} className="border" style={{ borderColor: expanded === m.id ? (STATUS_COLORS[m.status] + "88") : T.border, background: T.bg1 }}>
+              <div className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none" onClick={() => setExpanded(expanded === m.id ? null : m.id)}>
+                <span className="text-xs px-1.5 py-0.5 border" style={{ borderColor: PRIORITY_COLORS[m.priority] + "88", color: PRIORITY_COLORS[m.priority], fontSize: "9px", letterSpacing: "0.1em" }}>
                   {m.priority?.toUpperCase()}
                 </span>
-                <span className="text-xs font-bold flex-1" style={{ color: "#39ff14" }}>{m.title}</span>
-                <span className="text-xs" style={{ color: STATUS_COLORS[m.status] }}>● {m.status}</span>
-                {expanded === m.id ? <ChevronUp size={12} style={{ color: "#39ff1055" }} /> : <ChevronDown size={12} style={{ color: "#39ff1055" }} />}
+                <span className="text-xs font-bold flex-1 truncate" style={{ color: T.text }}>{m.title}</span>
+                <span className="text-xs flex items-center gap-1 flex-shrink-0" style={{ color: STATUS_COLORS[m.status] }}>
+                  <span style={{ fontSize: "7px" }}>●</span>{m.status}
+                </span>
+                {expanded === m.id
+                  ? <ChevronUp size={11} style={{ color: T.textFaint, flexShrink: 0 }} />
+                  : <ChevronDown size={11} style={{ color: T.textFaint, flexShrink: 0 }} />
+                }
               </div>
-              {/* Expanded */}
+
               {expanded === m.id && (
-                <div className="px-3 pb-3 space-y-3 border-t" style={{ borderColor: "#1e3a1e" }}>
-                  <div className="text-xs mt-2" style={{ color: "#39ff1088" }}>{m.briefing}</div>
+                <div className="px-3 pb-3 space-y-3 border-t" style={{ borderColor: T.border }}>
+                  <p className="text-xs mt-2 leading-relaxed" style={{ color: T.textDim }}>{m.briefing}</p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                    {m.objective_coords && <div><span style={{ color: "#39ff1033" }}>COORDS: </span><span style={{ color: "#00e5ff" }}>{m.objective_coords}</span></div>}
-                    {m.reward && <div><span style={{ color: "#39ff1033" }}>REWARD: </span><span style={{ color: "#ffb000" }}>{m.reward}</span></div>}
-                    {m.deadline && <div><span style={{ color: "#39ff1033" }}>DEADLINE: </span><span style={{ color: "#ff2020" }}>{new Date(m.deadline).toLocaleDateString()}</span></div>}
+                    {m.objective_coords && <div><span style={{ color: T.textFaint }}>COORDS: </span><span style={{ color: T.cyan }}>{m.objective_coords}</span></div>}
+                    {m.reward          && <div><span style={{ color: T.textFaint }}>REWARD: </span><span style={{ color: T.amber }}>{m.reward}</span></div>}
+                    {m.deadline        && <div><span style={{ color: T.textFaint }}>DEADLINE: </span><span style={{ color: T.red }}>{new Date(m.deadline).toLocaleDateString()}</span></div>}
                   </div>
-                  {/* Status controls */}
-                  <div className="flex flex-wrap gap-1 pt-1 border-t" style={{ borderColor: "#1e3a1e" }}>
+                  <div className="flex flex-wrap gap-1 pt-2 border-t" style={{ borderColor: T.border }}>
                     {STATUSES.map(s => (
                       <button key={s} onClick={() => handleStatusChange(m.id, s)}
-                        className="text-xs px-2 py-0.5 border"
-                        style={{ borderColor: m.status === s ? STATUS_COLORS[s] : "#1e3a1e", color: m.status === s ? STATUS_COLORS[s] : "#39ff1033" }}>
+                        className="text-xs px-2 py-0.5 border transition-colors"
+                        style={{ borderColor: m.status === s ? STATUS_COLORS[s] : T.border, color: m.status === s ? STATUS_COLORS[s] : T.textFaint }}>
                         {s}
                       </button>
                     ))}
                     <button onClick={() => { setForm({ ...m }); setEditing(m.id); setShowForm(true); setExpanded(null); }}
-                      className="text-xs px-2 py-0.5 border ml-auto" style={{ borderColor: "#1e3a1e", color: "#39ff1055" }}>
+                      className="text-xs px-2 py-0.5 border ml-auto" style={{ borderColor: T.border, color: T.textDim }}>
                       EDIT
                     </button>
-                    <button onClick={() => handleDelete(m.id)}
-                      className="text-xs px-2 py-0.5 border" style={{ borderColor: "#ff202044", color: "#ff202066" }}>
+                    <button onClick={() => handleDelete(m.id)} className="text-xs px-2 py-0.5 border"
+                      style={{ borderColor: T.red + "44", color: T.red + "88" }}>
                       DELETE
                     </button>
                   </div>
