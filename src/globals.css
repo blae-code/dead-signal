@@ -9,12 +9,16 @@
   --terminal-amber: #ffb000;
   --terminal-red: #ff2020;
   --terminal-cyan: #00e5ff;
-  --terminal-dim: #1a1a1a;
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-card: #0f0f0f;
-  --border-color: #2a2a2a;
-  --border-accent: #39ff14;
+  --rust-dark: #1a1410;
+  --rust-brown: #2d1f0f;
+  --rust-medium: #4a3020;
+  --rust-light: #7a5a3a;
+  --rust-accent: #b8860b;
+  --rust-surface: #201a14;
+  --rust-border: #3a2a1a;
+  --corrosion-color: #5a4a3a;
+  --metal-gray: #5a5a5a;
+  --scrap-text: #b8a890;
 }
 
 * {
@@ -22,37 +26,33 @@
 }
 
 body {
-  background-color: var(--bg-primary);
-  color: var(--terminal-green);
+  background: linear-gradient(135deg, var(--rust-dark) 0%, var(--rust-brown) 100%);
+  color: var(--scrap-text);
   font-family: 'Share Tech Mono', monospace;
   overflow-x: hidden;
 }
 
-/* Scanline overlay */
+/* Rust texture overlay */
 body::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 3px,
-    rgba(0, 0, 0, 0.08) 3px,
-    rgba(0, 0, 0, 0.08) 4px
-  );
+  background: 
+    repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
+    repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(139,69,19,0.05) 2px, rgba(139,69,19,0.05) 4px);
   pointer-events: none;
   z-index: 9998;
 }
 
-/* Vignette overlay */
+/* Heavy vignette—apocalyptic darkness */
 body::after {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.65) 100%);
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.8) 100%);
   pointer-events: none;
   z-index: 9997;
-  animation: vignette-pulse 8s ease-in-out infinite;
+  animation: vignette-pulse 12s ease-in-out infinite;
 }
 
 /* Terminal flicker animation */
