@@ -51,6 +51,7 @@ import Dashboard from './pages/Dashboard';
 import ServerMonitor from './pages/ServerMonitor';
 import TacticalMap from './pages/TacticalMap';
 import ClanRoster from './pages/ClanRoster';
+import Missions from './pages/Missions';
 import __Layout from './Layout.jsx';
 
 
@@ -59,6 +60,7 @@ export const PAGES = {
     "ServerMonitor": ServerMonitor,
     "TacticalMap": TacticalMap,
     "ClanRoster": ClanRoster,
+    "Missions": Missions,
 }
 
 export const pagesConfig = {
