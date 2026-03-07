@@ -3,17 +3,17 @@
  * Keeps the design system consistent without inline style chaos.
  */
 
-// ── Palette ──────────────────────────────────────────────────────────────────
+// ── Rust-apocalypse palette ───────────────────────────────────────────────────
 export const T = {
-  bg0:      "#050505",   // deepest bg
-  bg1:      "#080808",   // card bg
-  bg2:      "#0d0d0d",   // raised element bg
-  border:   "#1a1a1a",   // default border
-  borderHi: "#2a2a2a",   // highlighted border
-  text:     "#c8c8c8",   // primary text
-  textDim:  "#666",      // secondary text
-  textFaint:"#333",      // faint / label text
-  // status – only use for actual status indications
+  bg0:      "linear-gradient(135deg, rgba(20, 15, 10, 0.95) 0%, rgba(25, 18, 12, 0.95) 100%)",
+  bg1:      "linear-gradient(135deg, rgba(30, 20, 15, 0.9) 0%, rgba(35, 25, 15, 0.9) 100%)",
+  bg2:      "linear-gradient(135deg, rgba(40, 30, 20, 0.9) 0%, rgba(45, 32, 18, 0.9) 100%)",
+  border:   "#3a2a1a",   // dark rust border
+  borderHi: "#4a3a2a",   // medium rust border
+  text:     "#b8a890",   // primary text—faded tan
+  textDim:  "#8a7a6a",   // secondary—muted brown
+  textFaint:"#5a4a3a",   // faint—deep rust
+  // status – strictly reserved
   green:    "#39ff14",
   amber:    "#ffb000",
   red:      "#ff2020",
