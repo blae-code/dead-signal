@@ -7,6 +7,8 @@ import AlertHistoryPanel from "../components/server/AlertHistoryPanel";
 import RconHistoryPanel from "../components/server/RconHistoryPanel";
 import PerformanceCharts from "../components/server/PerformanceCharts";
 import PerformanceForecast from "../components/server/PerformanceForecast";
+import BottomConsoleDrawer from "../components/server/BottomConsoleDrawer";
+import LiveUptime from "../components/server/LiveUptime";
 import { T, PageHeader, ActionBtn } from "@/components/ui/TerminalCard";
 
 // Animated value display component
