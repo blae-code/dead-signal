@@ -38,35 +38,66 @@ export default function PerformanceCharts({ status, statusLoading }) {
 
   const ChartCard = ({ title, data, dataKey, color, unit }) => (
     <motion.div
-      className="border p-3"
-      style={{ borderColor: T.border, background: T.bg1 }}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      className="border p-4 relative overflow-hidden"
+      style={{ 
+        borderColor: T.border, 
+        background: T.bg1,
+        boxShadow: `inset 0 0 1px ${color}22`
+      }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
-      whileHover={{ borderColor: color + "66" }}
+      whileHover={{ 
+        borderColor: color + "88",
+        boxShadow: `inset 0 0 1px ${color}44, 0 0 8px ${color}22`,
+        transition: { duration: 0.2 }
+      }}
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{title}</span>
+      {/* Subtle top accent line */}
+      <div style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "1px",
+        background: color,
+        opacity: 0.3
+      }} />
+
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs tracking-widest font-bold" style={{ color: T.textFaint, fontSize: "10px", fontFamily: "'Orbitron', monospace" }}>{title}</span>
         {data.length > 0 && (
-          <span className="text-xs" style={{ color }}>{data[data.length - 1][dataKey]}{unit}</span>
+          <motion.span 
+            className="text-sm font-bold"
+            key={data[data.length - 1][dataKey]}
+            initial={{ opacity: 0.5, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            style={{ color, fontFamily: "'Orbitron', monospace" }}
+          >
+            {data[data.length - 1][dataKey]}{unit}
+          </motion.span>
         )}
       </div>
-      <ResponsiveContainer width="100%" height={120}>
-        <LineChart data={data} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+      <ResponsiveContainer width="100%" height={140}>
+        <LineChart data={data} margin={{ top: 8, right: 5, left: -20, bottom: 5 }}>
           <CartesianGrid
             strokeDasharray="3 3"
             stroke={T.border}
             vertical={false}
+            opacity={0.3}
           />
           <XAxis
             dataKey="time"
             tick={{ fontSize: 9, fill: T.textFaint }}
             stroke={T.border}
+            opacity={0.5}
             interval={Math.floor(data.length / 3) || 0}
           />
           <YAxis
             tick={{ fontSize: 9, fill: T.textFaint }}
             stroke={T.border}
+            opacity={0.5}
             width={35}
           />
           <Tooltip
@@ -74,19 +105,21 @@ export default function PerformanceCharts({ status, statusLoading }) {
               background: T.bg0,
               border: `1px solid ${color}`,
               borderRadius: 2,
-              padding: 6,
+              padding: 8,
+              fontSize: 11,
             }}
             labelStyle={{ color: T.textFaint, fontSize: 10 }}
             formatter={(val) => [val, dataKey.toUpperCase()]}
-            cursor={{ stroke: color + "44" }}
+            cursor={{ stroke: color + "44", strokeWidth: 2 }}
           />
           <Line
             type="monotone"
             dataKey={dataKey}
             stroke={color}
             dot={false}
-            strokeWidth={2}
+            strokeWidth={2.5}
             isAnimationActive={false}
+            filter={`drop-shadow(0 0 4px ${color}44)`}
           />
         </LineChart>
       </ResponsiveContainer>
