@@ -229,14 +229,14 @@ export default function ServerMonitor() {
           </div>
           <div ref={logRef} className="p-3 overflow-y-auto space-y-1" style={{ height: "235px" }}>
             {filteredEvents.length === 0
-              ? <div className="text-xs" style={{ color: "#39ff1433" }}>// NO EVENTS</div>
+              ? <div className="text-xs" style={{ color: T.textFaint }}>// NO EVENTS</div>
               : filteredEvents.map(e => (
                 <div key={e.id} className="text-xs flex gap-2">
-                  <span style={{ color: "#39ff1433", flexShrink: 0 }}>
+                  <span style={{ color: T.textFaint, flexShrink: 0 }}>
                     [{new Date(e.created_date).toLocaleTimeString("en-US", { hour12: false })}]
                   </span>
                   <span style={{ color: severityColor(e.severity) }}>[{e.severity}]</span>
-                  <span style={{ color: "#39ff1488" }}>{e.message}</span>
+                  <span style={{ color: T.textDim }}>{e.message}</span>
                 </div>
               ))
             }
