@@ -84,7 +84,8 @@ body::after {
 
 .terminal-flicker { animation: flicker 4s infinite; }
 .cursor-blink::after { content: '█'; animation: blink 1s infinite; }
-.glitch { animation: glitch 0.3s infinite; }
+.rust-pulse { animation: rust-pulse 3s ease-in-out infinite; }
+.corrosion { animation: corrosion 6s ease-in-out infinite; }
 
 /* Scrollbar—rusted metal */
 ::-webkit-scrollbar { width: 6px; }
