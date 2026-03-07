@@ -9,12 +9,12 @@ import {
 "lucide-react";
 import WorldStatus from "@/components/WorldStatus";
 
-// colour, short code, and section grouping per nav item
+// Rust-apocalypse nav structure
 const navSections = [
 {
   label: "// OPS CENTER",
   items: [
-  { label: "COMMAND", page: "Dashboard", icon: Terminal, code: "HQ", color: "#c8c8c8", dot: "#39ff14" },
+  { label: "COMMAND", page: "Dashboard", icon: Terminal, code: "HQ", color: "#ffb000", dot: "#39ff14" },
   { label: "SERVER", page: "ServerMonitor", icon: Cpu, code: "SRV", color: "#00e5ff", dot: "#00e5ff" }]
 
 },
@@ -22,14 +22,14 @@ const navSections = [
   label: "// FIELD OPS",
   items: [
   { label: "TACTICAL MAP", page: "TacticalMap", icon: Map, code: "MAP", color: "#ffb000", dot: "#ffb000" },
-  { label: "CLAN ROSTER", page: "ClanRoster", icon: Users, code: "OPS", color: "#c8c8c8", dot: "#39ff14" },
+  { label: "CLAN ROSTER", page: "ClanRoster", icon: Users, code: "OPS", color: "#b8a890", dot: "#39ff14" },
   { label: "MISSIONS", page: "Missions", icon: Crosshair, code: "MIS", color: "#ff2020", dot: "#ff2020" }]
 
 },
 {
   label: "// LOGISTICS",
   items: [
-  { label: "INVENTORY", page: "Inventory", icon: Package, code: "INV", color: "#c8c8c8", dot: "#666" },
+  { label: "INVENTORY", page: "Inventory", icon: Package, code: "INV", color: "#b8a890", dot: "#8a7a6a" },
   { label: "INTEL FEED", page: "Intel", icon: Radio, code: "INT", color: "#ffb000", dot: "#ffb000" },
   { label: "AI AGENT", page: "AIAgent", icon: Bot, code: "AI", color: "#39ff14", dot: "#39ff14" }]
 
@@ -42,18 +42,18 @@ const THREAT_LEVELS = [
 { label: "CRITICAL", color: "#ff2020" }];
 
 
-// Professional chrome palette — enhanced readability
+// Rust-core palette—brown/orange/gray base with status colors reserved
 const C = {
-  text: "#d4d4d4", // primary text
-  textDim: "#999", // secondary / dim text
-  textFaint: "#777", // faint labels (brightened from #333)
-  border: "#1e1e1e", // default border
-  borderMid: "#2a2a2a", // slightly brighter border
-  active: "#e8e8e8", // active nav item text
-  activeBg: "#141414", // active nav item bg
-  activeLine: "#999", // active left-bar accent
-  accent: "#b8b8b8", // logo / app name (brightened)
-  scan: "rgba(200,200,200,0.02)"
+  text: "#b8a890", // primary text—faded beige
+  textDim: "#8a7a6a", // secondary—muted brown
+  textFaint: "#5a4a3a", // faint labels—deep rust
+  border: "#3a2a1a", // default border—dark rust
+  borderMid: "#4a3a2a", // slightly brighter border
+  active: "#d4b8a0", // active nav item—light tan
+  activeBg: "#2a1810", // active nav item bg—very dark
+  activeLine: "#7a5a3a", // active left-bar accent—medium rust
+  accent: "#b8860b", // logo / app name—goldenrod
+  scan: "rgba(184, 134, 11, 0.01)"
 };
 
 export default function Layout({ children, currentPageName }) {
