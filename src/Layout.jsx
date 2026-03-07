@@ -339,13 +339,16 @@ export default function Layout({ children, currentPageName }) {
 
                       {/* Active right bar */}
                       {active &&
-                    <div style={{
-                      position: "absolute", right: 0, top: "15%", bottom: "15%",
-                      width: "2px",
-                      background: `linear-gradient(180deg, transparent, ${color}, transparent)`
-                    }} />
-                    }
-                    </Link>);
+                        <motion.div
+                          layoutId="activeBar"
+                          style={{
+                            position: "absolute", right: 0, top: "15%", bottom: "15%",
+                            width: "2px",
+                            background: `linear-gradient(180deg, transparent, ${color}, transparent)`
+                          }} />
+                      }
+                    </Link>
+                   </motion.div>);
 
               })}
               </div>
