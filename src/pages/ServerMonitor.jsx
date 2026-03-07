@@ -195,27 +195,43 @@ export default function ServerMonitor() {
       </motion.div>
 
       {/* CPU/RAM/Disk stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <motion.div
+        className="grid grid-cols-3 gap-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, staggerChildren: 0.1 }}
+      >
         {[
           { label: "CPU LOAD", val: status?.cpu ?? 0, display: `${status?.cpu ?? 0}%`, isPercent: true },
           { label: "RAM USED", val: 0, display: `${status?.ramUsedMB ?? 0} MB`, isPercent: false },
           { label: "DISK USED", val: 0, display: `${status?.diskMB ?? 0} MB`, isPercent: false },
         ].map(({ label, val, display, isPercent }) => (
-          <div key={label} className="border p-3" style={{ borderColor: T.border, background: T.bg1 }}>
+          <motion.div
+            key={label}
+            className="border p-3"
+            style={{ borderColor: T.border, background: T.bg1 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ borderColor: barColor(val) + "66", transition: { duration: 0.2 } }}
+          >
             <div className="flex justify-between mb-2">
               <span className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</span>
-              <span className="text-xs font-bold" style={{ color: isPercent ? barColor(val) : T.green }}>
-                {statusLoading ? "..." : display}
-              </span>
+              <AnimatedValue value={display} color={isPercent ? barColor(val) : T.green} />
             </div>
             {isPercent && (
-              <div className="progress-bar-terminal">
-                <div className="progress-bar-terminal-fill" style={{ width: statusLoading ? "0%" : `${val}%`, background: barColor(val) }} />
-              </div>
+              <motion.div className="progress-bar-terminal">
+                <motion.div
+                  className="progress-bar-terminal-fill"
+                  initial={{ width: 0 }}
+                  animate={{ width: statusLoading ? "0%" : `${val}%` }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  style={{ background: barColor(val) }}
+                />
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* RCON Console */}
