@@ -53,6 +53,7 @@ import TacticalMap from './pages/TacticalMap';
 import ClanRoster from './pages/ClanRoster';
 import Missions from './pages/Missions';
 import Inventory from './pages/Inventory';
+import Intel from './pages/Intel';
 import __Layout from './Layout.jsx';
 
 
@@ -63,6 +64,7 @@ export const PAGES = {
     "ClanRoster": ClanRoster,
     "Missions": Missions,
     "Inventory": Inventory,
+    "Intel": Intel,
 }
 
 export const pagesConfig = {
