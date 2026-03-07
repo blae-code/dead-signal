@@ -67,9 +67,7 @@ export default function ServerMonitor() {
     };
   }, []);
 
-  useEffect(() => {
-    if (consoleRef.current) consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
-  }, [consoleLines]);
+
 
   const handleCommand = async () => {
     if (!cmd.trim() || rconLoading) return;
