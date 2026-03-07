@@ -22,6 +22,7 @@ export default function ServerMonitor() {
     { text: "> Type HELP for available commands.", color: "#39ff1488" },
   ]);
   const [cmd, setCmd] = useState("");
+  const [rconLoading, setRconLoading] = useState(false);
   const [status] = useState(MOCK_STATUS);
   const [logFilter, setLogFilter] = useState("ALL");
   const logRef = useRef(null);
