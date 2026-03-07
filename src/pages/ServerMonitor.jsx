@@ -127,19 +127,17 @@ export default function ServerMonitor() {
         </div>
       ))}
 
-      <div className="flex items-center gap-3 mb-2">
-        <Cpu size={16} style={{ color: "#39ff14" }} />
-        <span className="text-sm font-bold tracking-widest" style={{ color: "#39ff14", fontFamily: "'Orbitron', monospace" }}>SERVER MONITOR</span>
+      <PageHeader icon={Cpu} title="SERVER MONITOR" color={T.green}>
         {statusLoading
-          ? <span className="text-xs px-2 py-0.5 border" style={{ color: "#39ff1455", borderColor: "#39ff1433" }}>● FETCHING...</span>
-          : <span className="text-xs px-2 py-0.5 border" style={{ color: status?.online ? "#39ff14" : "#ff2020", borderColor: status?.online ? "#39ff14" : "#ff2020" }}>
+          ? <span className="text-xs px-2 py-0.5 border" style={{ color: T.textFaint, borderColor: T.border }}>● FETCHING...</span>
+          : <span className="text-xs px-2 py-0.5 border" style={{ color: status?.online ? T.green : T.red, borderColor: status?.online ? T.green + "66" : T.red + "66" }}>
               {status?.online ? "● ONLINE" : "● OFFLINE"}
             </span>
         }
-        <button onClick={fetchStatus} className="ml-auto" title="Refresh">
-          <RefreshCw size={12} style={{ color: "#39ff1455" }} />
+        <button onClick={fetchStatus} className="p-1 hover:opacity-70 transition-opacity" title="Refresh">
+          <RefreshCw size={11} style={{ color: T.textDim }} />
         </button>
-      </div>
+      </PageHeader>
 
       {/* Status cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
