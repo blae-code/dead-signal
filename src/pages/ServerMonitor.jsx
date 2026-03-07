@@ -185,10 +185,8 @@ export default function ServerMonitor() {
         transition={{ duration: 0.5 }}
       >
         {[
-           { label: "STATE",  value: statusLoading ? "..." : (status?.state?.toUpperCase() || "UNKNOWN"), icon: Wifi,      color: status?.online ? T.green : T.red, isUptime: false },
-           { label: "UPTIME", value: statusLoading ? "..." : (status?.uptime || "--:--:--"),               icon: Clock,     color: T.amber, isUptime: true },
-           { label: "NET ↓",  value: statusLoading ? "..." : `${status?.networkRxKB ?? 0} KB`,             icon: RefreshCw, color: T.cyan, isUptime: false },
-           { label: "NET ↑",  value: statusLoading ? "..." : `${status?.networkTxKB ?? 0} KB`,             icon: RefreshCw, color: T.cyan, isUptime: false },
+           { label: "STATE",  value: statusLoading ? "..." : (status?.state?.toUpperCase() || "UNKNOWN"), icon: Wifi,  color: status?.online ? T.green : T.red, isUptime: false },
+           { label: "UPTIME", value: statusLoading ? "..." : (status?.uptime || "--:--:--"),               icon: Clock, color: T.amber, isUptime: true },
          ].map(({ label, value, icon: Icon, color, isUptime }) => (
            <motion.div
              key={label}
