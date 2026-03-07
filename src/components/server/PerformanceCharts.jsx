@@ -128,10 +128,10 @@ export default function PerformanceCharts({ status, statusLoading }) {
 
   return (
     <motion.div
-      className="grid grid-cols-1 lg:grid-cols-3 gap-3"
+      className="grid grid-cols-1 lg:grid-cols-3 gap-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5, delay: 0.15 }}
+      transition={{ duration: 0.5, delay: 0.1, staggerChildren: 0.08 }}
     >
       <ChartCard
         title="CPU HISTORY (30s)"
