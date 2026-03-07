@@ -98,17 +98,19 @@ export function Field({ label, children }) {
 
 // ── Shared input styles (use as inline style spreads) ─────────────────────────
 export const inputStyle = {
-  background: T.bg0,
+  background: "linear-gradient(135deg, rgba(30, 20, 15, 0.95) 0%, rgba(35, 25, 15, 0.95) 100%)",
   borderColor: T.borderHi,
   color: T.text,
   fontSize: "12px",
+  boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.4)",
 };
 
 export const selectStyle = {
-  background: T.bg0,
+  background: "linear-gradient(135deg, rgba(30, 20, 15, 0.95) 0%, rgba(35, 25, 15, 0.95) 100%)",
   borderColor: T.borderHi,
   color: T.text,
   fontSize: "12px",
+  boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.4)",
 };
 
 // ── Pill / Tag button ─────────────────────────────────────────────────────────
