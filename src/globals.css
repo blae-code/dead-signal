@@ -104,46 +104,60 @@ body::after {
 ::-webkit-scrollbar-thumb { background: #39ff14; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #ffb000; }
 
-/* Terminal card */
+/* Rust-core card styling */
 .terminal-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 2px;
+  background: linear-gradient(135deg, var(--rust-surface) 0%, var(--rust-brown) 100%);
+  border: 1px solid var(--rust-border);
+  border-radius: 0px;
   position: relative;
+  box-shadow: inset 0 1px 0 rgba(139, 69, 19, 0.3), 0 4px 8px rgba(0, 0, 0, 0.6);
 }
 
 .terminal-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 1px;
-  background: var(--terminal-green);
-  opacity: 0.6;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(184, 134, 11, 0.4), rgba(122, 90, 58, 0.2));
+  opacity: 1;
+}
+
+.terminal-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.02) 50%, transparent 100%),
+    repeating-linear-gradient(180deg, transparent, transparent 20px, rgba(0,0,0,0.05) 20px, rgba(0,0,0,0.05) 21px);
+  pointer-events: none;
+  border-radius: 0px;
 }
 
 .terminal-header {
   font-family: 'Orbitron', monospace;
   letter-spacing: 0.2em;
   text-transform: uppercase;
+  color: var(--rust-accent);
 }
 
-/* Input overrides */
+/* Input overrides—weathered metal */
 input, textarea, select {
-  background: #0a0a0a !important;
-  border-color: #2a2a2a !important;
-  color: #39ff14 !important;
+  background: linear-gradient(135deg, rgba(30, 20, 15, 0.9) 0%, rgba(40, 25, 15, 0.9) 100%) !important;
+  border: 1px solid var(--rust-border) !important;
+  color: var(--scrap-text) !important;
   font-family: 'Share Tech Mono', monospace !important;
-  border-radius: 2px !important;
+  border-radius: 0px !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4) !important;
 }
 
 input:focus, textarea:focus {
-  border-color: #39ff14 !important;
-  box-shadow: 0 0 8px rgba(57, 255, 20, 0.3) !important;
+  border-color: var(--rust-accent) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 8px rgba(184, 134, 11, 0.25) !important;
   outline: none !important;
 }
 
 input::placeholder, textarea::placeholder {
-  color: #2a4a1a !important;
+  color: rgba(184, 168, 144, 0.3) !important;
 }
 
 /* Button overrides */
@@ -151,12 +165,12 @@ button {
   font-family: 'Share Tech Mono', monospace !important;
 }
 
-/* Status colors */
+/* Status colors (strictly reserved) */
 .status-active { color: #39ff14; }
 .status-warn { color: #ffb000; }
 .status-danger { color: #ff2020; }
 .status-info { color: #00e5ff; }
-.status-dim { color: #555; }
+.status-dim { color: var(--metal-gray); }
 
 /* Glow effects */
 .glow-green { text-shadow: 0 0 10px rgba(57, 255, 20, 0.8); }
@@ -168,22 +182,25 @@ button {
 .border-glow-amber { box-shadow: 0 0 8px rgba(255, 176, 0, 0.4); border-color: #ffb000; }
 .border-glow-red { box-shadow: 0 0 8px rgba(255, 32, 32, 0.4); border-color: #ff2020; }
 
-/* ASCII border decoration */
+/* Rusted container */
 .ascii-box {
-  border: 1px solid #39ff14;
+  border: 1px solid var(--rust-border);
   padding: 1rem;
   position: relative;
+  background: linear-gradient(135deg, rgba(30, 20, 15, 0.5) 0%, rgba(40, 25, 15, 0.5) 100%);
 }
 
 .progress-bar-terminal {
   height: 4px;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background: var(--rust-dark);
+  border: 1px solid var(--rust-border);
   overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .progress-bar-terminal-fill {
   height: 100%;
   background: #39ff14;
   transition: width 0.5s ease;
+  box-shadow: 0 0 4px rgba(57, 255, 20, 0.4);
 }
