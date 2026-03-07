@@ -37,16 +37,49 @@ function NetworkWidget({ status }) {
   const txMB = (status?.networkTxKB ?? 0) / 1024;
 
   return (
-    <div className="border p-4" style={{ borderColor: T.border, background: T.bg1 }}>
-      <div className="text-xs font-bold tracking-widest mb-3" style={{ color: T.textFaint, fontSize: "10px" }}>NETWORK</div>
-      <div className="grid grid-cols-2 gap-3 text-center text-xs">
+    <div className="border p-4 relative overflow-hidden" style={{ 
+      borderColor: T.border, 
+      background: T.bg1,
+      boxShadow: `inset 0 0 1px ${T.cyan}22`
+    }}>
+      {/* Subtle top accent line */}
+      <div style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "1px",
+        background: T.cyan,
+        opacity: 0.3
+      }} />
+
+      <div className="text-xs font-bold tracking-widest mb-3" style={{ color: T.textFaint, fontSize: "10px", fontFamily: "'Orbitron', monospace" }}>NETWORK</div>
+      <div className="grid grid-cols-2 gap-3 text-center">
         <div>
-          <div style={{ color: T.cyan }}>↓ {rxMB.toFixed(2)} MB/s</div>
-          <div style={{ color: T.textFaint, fontSize: "9px" }}>RX</div>
+          <motion.div 
+            key={`rx-${rxMB}`}
+            initial={{ opacity: 0.5, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="text-sm font-bold"
+            style={{ color: T.cyan, fontFamily: "'Orbitron', monospace" }}
+          >
+            ↓ {rxMB.toFixed(2)} MB/s
+          </motion.div>
+          <div style={{ color: T.textFaint, fontSize: "9px", marginTop: "4px" }}>RX</div>
         </div>
         <div>
-          <div style={{ color: T.amber }}>↑ {txMB.toFixed(2)} MB/s</div>
-          <div style={{ color: T.textFaint, fontSize: "9px" }}>TX</div>
+          <motion.div 
+            key={`tx-${txMB}`}
+            initial={{ opacity: 0.5, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="text-sm font-bold"
+            style={{ color: T.amber, fontFamily: "'Orbitron', monospace" }}
+          >
+            ↑ {txMB.toFixed(2)} MB/s
+          </motion.div>
+          <div style={{ color: T.textFaint, fontSize: "9px", marginTop: "4px" }}>TX</div>
         </div>
       </div>
     </div>
