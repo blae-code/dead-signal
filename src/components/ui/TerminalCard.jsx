@@ -40,7 +40,8 @@ export function StatGrid({ stats }) {
   return (
     <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}>
       {stats.map(({ label, value, color = T.text }) => (
-        <div key={label} className="border p-3 text-center" style={{ borderColor: T.border, background: T.bg1 }}>
+        <div key={label} className="border p-3 text-center" 
+          style={{ borderColor: T.border, background: T.bg1, boxShadow: `inset 0 1px 0 rgba(184, 134, 11, 0.2)` }}>
           <div className="text-xs mb-1 tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</div>
           <div className="font-bold text-base" style={{ color, fontFamily: "'Orbitron', monospace" }}>{value}</div>
         </div>
