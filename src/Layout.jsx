@@ -298,15 +298,15 @@ export default function Layout({ children, currentPageName }) {
                         }} />
 
                       {/* Icon */}
-                      <Icon
-                      size={11}
-                      className="nav-icon"
-                      style={{
-                        flexShrink: 0,
-                        color: active ? color : C.textFaint,
-                        opacity: active ? 1 : 0.5,
-                        transition: "color 0.15s, opacity 0.15s"
-                      }} />
+                      <IconComponent
+                        size={11}
+                        className="nav-icon"
+                        style={{
+                          flexShrink: 0,
+                          color: active ? color : C.textFaint,
+                          opacity: active ? 1 : 0.5,
+                          transition: "color 0.15s, opacity 0.15s"
+                        }} />
 
 
                       {/* Label */}
