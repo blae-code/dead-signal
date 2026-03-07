@@ -1,10 +1,27 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Cpu, RefreshCw, Send, Trash2, AlertTriangle, Clock, Wifi, Loader, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import AlertRulesPanel from "../components/server/AlertRulesPanel";
 import AlertHistoryPanel from "../components/server/AlertHistoryPanel";
 import RconHistoryPanel from "../components/server/RconHistoryPanel";
 import { T, PageHeader, ActionBtn } from "@/components/ui/TerminalCard";
+
+// Animated value display component
+function AnimatedValue({ value, color = T.green, format = (v) => v }) {
+  return (
+    <motion.div
+      key={value}
+      initial={{ opacity: 0.5, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      style={{ color, fontFamily: "'Orbitron', monospace" }}
+      className="text-sm font-bold"
+    >
+      {format(value)}
+    </motion.div>
+  );
+}
 
 export default function ServerMonitor() {
   const [events, setEvents] = useState([]);
