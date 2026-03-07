@@ -24,7 +24,8 @@ export const T = {
 // ── Page header ──────────────────────────────────────────────────────────────
 export function PageHeader({ icon: Icon, title, color = T.text, children }) {
   return (
-    <div className="flex items-center gap-3 flex-wrap pb-3 mb-1 border-b" style={{ borderColor: T.border }}>
+    <div className="flex items-center gap-3 flex-wrap pb-3 mb-1 border-b" 
+      style={{ borderColor: T.border, paddingBottom: "1rem", borderBottomWidth: "2px", borderBottomColor: color + "44" }}>
       <Icon size={14} style={{ color }} />
       <span className="text-xs font-bold tracking-widest" style={{ color, fontFamily: "'Orbitron', monospace", letterSpacing: "0.25em" }}>
         {title}
