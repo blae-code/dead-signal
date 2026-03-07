@@ -183,7 +183,15 @@ export default function Layout({ children, currentPageName }) {
         <div className="flex items-center gap-4 text-xs relative">
           <div className="hidden sm:flex flex-col items-end" style={{ lineHeight: 1.2 }}>
             <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>LOCAL TIME</span>
-            <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>{timeStr}</span>
+            <motion.span 
+              key={timeStr}
+              initial={{ opacity: 0.5 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}
+            >
+              {timeStr}
+            </motion.span>
           </div>
           <span className="hidden sm:block" style={{ color: C.border }}>|</span>
           <div className="hidden sm:flex flex-col items-end" style={{ lineHeight: 1.2 }}>
@@ -191,11 +199,30 @@ export default function Layout({ children, currentPageName }) {
             <span style={{ color: C.textDim, fontSize: "10px" }}>{dateStr}</span>
           </div>
           <span className="hidden sm:block" style={{ color: C.border }}>|</span>
-          {/* Uplink status — retains status colours intentionally */}
-          
-
-
-
+          {/* Weather — retains status colours intentionally */}
+          {weather && (
+            <div className="hidden md:flex flex-col items-end" style={{ lineHeight: 1.2 }}>
+              <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>WEATHER</span>
+              <motion.div 
+                key={weather.temp}
+                initial={{ opacity: 0.5, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center gap-1"
+              >
+                {weather.shortForecast.includes("Rain") ? (
+                  <CloudRain size={11} style={{ color: "#00e5ff" }} />
+                ) : weather.shortForecast.includes("Cloud") ? (
+                  <Cloud size={11} style={{ color: "#666" }} />
+                ) : (
+                  <Sun size={11} style={{ color: "#ffb000" }} />
+                )}
+                <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
+                  {weather.temp}°F
+                </span>
+              </motion.div>
+            </div>
+          )}
 
 
 
