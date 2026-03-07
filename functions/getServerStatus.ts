@@ -3,6 +3,16 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 const PANEL_URL = "https://panel.bisecthosting.com";
 const SERVER_ID = "299b51cf";
 
+// Helper to safely parse JSON from a fetch response, with better error context
+async function safeJson(res) {
+    const text = await res.text();
+    try {
+        return JSON.parse(text);
+    } catch {
+        throw new Error(`Panel returned non-JSON (status ${res.status}): ${text.substring(0, 200)}`);
+    }
+}
+
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
