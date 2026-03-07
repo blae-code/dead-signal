@@ -58,7 +58,7 @@ body::after {
 /* Terminal flicker animation */
 @keyframes flicker {
   0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
-  20%, 24%, 55% { opacity: 0.85; }
+  20%, 24%, 55% { opacity: 0.92; }
 }
 
 @keyframes blink {
@@ -66,32 +66,20 @@ body::after {
   51%, 100% { opacity: 0; }
 }
 
-@keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100vh); }
+@keyframes corrosion {
+  0% { opacity: 0.7; }
+  50% { opacity: 0.85; }
+  100% { opacity: 0.7; }
 }
 
-@keyframes glitch {
-  0% { transform: translate(0); }
-  20% { transform: translate(-2px, 2px); }
-  40% { transform: translate(-2px, -2px); }
-  60% { transform: translate(2px, 2px); }
-  80% { transform: translate(2px, -2px); }
-  100% { transform: translate(0); }
-}
-
-@keyframes noise {
-  0%, 100% { background-position: 0 0; }
-  10% { background-position: -5% -10%; }
-  30% { background-position: 3% 10%; }
-  50% { background-position: 12% 5%; }
-  70% { background-position: -8% 8%; }
-  90% { background-position: 5% -5%; }
+@keyframes rust-pulse {
+  0%, 100% { text-shadow: 0 0 8px rgba(122, 90, 58, 0.3); }
+  50% { text-shadow: 0 0 12px rgba(122, 90, 58, 0.5); }
 }
 
 @keyframes vignette-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.4; }
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 0.65; }
 }
 
 .terminal-flicker { animation: flicker 4s infinite; }
