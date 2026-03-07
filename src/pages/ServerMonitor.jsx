@@ -2,28 +2,17 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Cpu, RefreshCw, Send, Trash2, AlertTriangle, Users, Clock, Wifi, Loader } from "lucide-react";
 
-const MOCK_STATUS = {
-  online: true,
-  players: 3,
-  maxPlayers: 16,
-  uptime: "14:32:07",
-  map: "HumanitZ_World",
-  version: "1.0.4",
-  ping: 42,
-  cpu: 34,
-  ram: 61,
-};
-
 export default function ServerMonitor() {
   const [events, setEvents] = useState([]);
   const [consoleLines, setConsoleLines] = useState([
     { text: "> DEAD SIGNAL TERMINAL v1.0", color: "#ffb000" },
-    { text: "> Connected to HumanitZ server...", color: "#39ff14" },
+    { text: "> Connecting to HumanitZ server...", color: "#39ff14" },
     { text: "> Type HELP for available commands.", color: "#39ff1488" },
   ]);
   const [cmd, setCmd] = useState("");
   const [rconLoading, setRconLoading] = useState(false);
-  const [status] = useState(MOCK_STATUS);
+  const [status, setStatus] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(true);
   const [logFilter, setLogFilter] = useState("ALL");
   const logRef = useRef(null);
   const consoleRef = useRef(null);
