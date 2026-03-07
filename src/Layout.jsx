@@ -400,7 +400,7 @@ export default function Layout({ children, currentPageName }) {
         }
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto" style={{ background: "#0a0a0a" }}>
+        <main className="flex-1 overflow-auto" style={{ background: "linear-gradient(135deg, #1a1410 0%, #2d1f0f 100%)" }}>
           {children}
         </main>
       </div>
