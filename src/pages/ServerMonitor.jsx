@@ -255,6 +255,9 @@ export default function ServerMonitor() {
         </div>
       </div>
 
+      {/* RCON History */}
+      <RconHistoryPanel onRerun={(cmd) => setCmd(cmd)} />
+
       {/* Alerts section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <AlertRulesPanel onTriggered={handleTriggered} />
