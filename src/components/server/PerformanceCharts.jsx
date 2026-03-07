@@ -20,34 +20,21 @@ export default function PerformanceCharts({ status, statusLoading }) {
     setDiskHistory(prev => [...prev.slice(-29), { time: now, disk: Math.round((status.diskMB ?? 0) / 1024 * 10) / 10 }]);
   }, [status]);
 
-  // Real-time updates every second (linear interpolation between known data points)
+  // Real-time updates every second (smooth extension without flickering)
   useEffect(() => {
-    if (!lastStatus) return;
+    if (!lastStatus || cpuHistory.length === 0) return;
 
     const interval = setInterval(() => {
       const now = new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
       
-      // Add slight random variance for realistic animation
-      const cpuVariance = (Math.random() - 0.5) * 2;
-      const ramVariance = (Math.random() - 0.5) * 0.02;
-      const diskVariance = (Math.random() - 0.5) * 0.01;
-
-      setCpuHistory(prev => {
-        const newVal = Math.max(0, Math.min(100, (lastStatus.cpu ?? 0) + cpuVariance));
-        return [...prev.slice(-29), { time: now, cpu: Math.round(newVal * 10) / 10 }];
-      });
-      setRamHistory(prev => {
-        const newVal = Math.max(0, (Math.round((lastStatus.ramUsedMB ?? 0) / 1024 * 10) / 10) + ramVariance);
-        return [...prev.slice(-29), { time: now, ram: Math.round(newVal * 10) / 10 }];
-      });
-      setDiskHistory(prev => {
-        const newVal = Math.max(0, (Math.round((lastStatus.diskMB ?? 0) / 1024 * 10) / 10) + diskVariance);
-        return [...prev.slice(-29), { time: now, disk: Math.round(newVal * 10) / 10 }];
-      });
+      // Extend chart with last known values (no variance, smooth continuation)
+      setCpuHistory(prev => [...prev.slice(-29), { time: now, cpu: prev[prev.length - 1]?.cpu ?? (lastStatus.cpu ?? 0) }]);
+      setRamHistory(prev => [...prev.slice(-29), { time: now, ram: prev[prev.length - 1]?.ram ?? Math.round((lastStatus.ramUsedMB ?? 0) / 1024 * 10) / 10 }]);
+      setDiskHistory(prev => [...prev.slice(-29), { time: now, disk: prev[prev.length - 1]?.disk ?? Math.round((lastStatus.diskMB ?? 0) / 1024 * 10) / 10 }]);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lastStatus]);
+  }, [lastStatus, cpuHistory.length]);
 
   const ChartCard = ({ title, data, dataKey, color, unit }) => (
     <motion.div
