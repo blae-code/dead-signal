@@ -207,6 +207,9 @@ export default function ServerMonitor() {
          ))}
       </motion.div>
 
+      {/* Server Insights: Players, FPS, Latency, Processes, Connections */}
+      <ServerInsightsWidget status={status} statusLoading={statusLoading} />
+
       {/* CPU/RAM/Disk stats */}
       {/* Advanced Metrics Widgets */}
       <ServerMetricsWidget status={status} statusLoading={statusLoading} />
