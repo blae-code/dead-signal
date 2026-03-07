@@ -54,6 +54,7 @@ import ClanRoster from './pages/ClanRoster';
 import Missions from './pages/Missions';
 import Inventory from './pages/Inventory';
 import Intel from './pages/Intel';
+import AIAgent from './pages/AIAgent';
 import __Layout from './Layout.jsx';
 
 
@@ -65,6 +66,7 @@ export const PAGES = {
     "Missions": Missions,
     "Inventory": Inventory,
     "Intel": Intel,
+    "AIAgent": AIAgent,
 }
 
 export const pagesConfig = {
