@@ -279,7 +279,7 @@ export default function ServerMonitor() {
               }
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Event log */}
         <motion.div className="border" style={{ borderColor: T.border, background: T.bg1 }}>
