@@ -17,12 +17,29 @@ export default function ServerMonitor() {
   const logRef = useRef(null);
   const consoleRef = useRef(null);
 
+  const fetchStatus = async () => {
+    try {
+      const res = await base44.functions.invoke('getServerStatus', {});
+      if (res.data && !res.data.error) setStatus(res.data);
+    } catch (e) {
+      // silently fail, keep last known status
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
   useEffect(() => {
     base44.entities.ServerEvent.list("-created_date", 50).then(setEvents).catch(() => {});
     const unsub = base44.entities.ServerEvent.subscribe((ev) => {
       if (ev.type === "create") setEvents(prev => [ev.data, ...prev.slice(0, 49)]);
     });
-    return unsub;
+
+    fetchStatus();
+    const pollInterval = setInterval(fetchStatus, 30000); // refresh every 30s
+    return () => {
+      unsub();
+      clearInterval(pollInterval);
+    };
   }, []);
 
   useEffect(() => {
