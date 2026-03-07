@@ -103,6 +103,22 @@ export default function Layout({ children, currentPageName }) {
     return () => clearInterval(weatherInterval);
   }, []);
 
+  // In-game time: cycles every 120 minutes (real time = 1 day in game)
+  const getInGameTime = () => {
+    const now = new Date();
+    const totalMinutes = now.getHours() * 60 + now.getMinutes();
+    const gameMinutesInDay = totalMinutes * 12; // 1 real minute = 12 game minutes
+    const gameHour = Math.floor((gameMinutesInDay / 60) % 24);
+    const gameMin = Math.floor(gameMinutesInDay % 60);
+    return {
+      hour: String(gameHour).padStart(2, '0'),
+      min: String(gameMin).padStart(2, '0'),
+      isDaytime: gameHour >= 6 && gameHour < 18,
+    };
+  };
+
+  const inGameTime = getInGameTime();
+
   const timeStr = time.toLocaleTimeString("en-US", { hour12: false });
   const dateStr = time.toLocaleDateString("en-US", { year: "2-digit", month: "2-digit", day: "2-digit" });
   const threat = THREAT_LEVELS[threatLevel];
