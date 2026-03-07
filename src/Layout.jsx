@@ -267,29 +267,35 @@ export default function Layout({ children, currentPageName }) {
                   <div style={{ flex: 1, height: "1px", background: C.border }} />
                 </div>
 
-                {section.items.map(({ label, page, icon: Icon, code, color, dot }) => {
+                {section.items.map(({ label, page, icon: IconComponent, code, color, dot }) => {
                 const active = currentPageName === page;
                 return (
-                  <Link
+                  <motion.div
                     key={page}
+                    whileHover={{ x: 2 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                  <Link
                     to={createPageUrl(page)}
                     onClick={() => setMobileOpen(false)}
-                    className="nav-item-hover flex items-center gap-2 px-3 py-2 text-xs transition-all duration-150 relative"
+                    className="nav-item-hover flex items-center gap-2 px-3 py-2 text-xs relative"
                     style={{
                       background: active ? "#0d0d0d" : "transparent",
                       borderLeft: active ? `2px solid ${color}` : "2px solid transparent",
                       letterSpacing: "0.08em",
-                      textDecoration: "none"
+                      textDecoration: "none",
+                      display: "flex"
                     }}>
 
                       {/* Status dot */}
-                      <div style={{
-                      width: "5px", height: "5px", borderRadius: "50%", flexShrink: 0,
-                      background: active ? dot : C.textFaint,
-                      boxShadow: active ? `0 0 6px ${dot}` : "none",
-                      animation: active ? "nav-dot-pulse 2s infinite" : "none",
-                      transition: "background 0.2s"
-                    }} />
+                      <motion.div
+                        animate={{ scale: active ? [1, 1.2, 1] : 1 }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        style={{
+                          width: "5px", height: "5px", borderRadius: "50%", flexShrink: 0,
+                          background: active ? dot : C.textFaint,
+                          boxShadow: active ? `0 0 6px ${dot}` : "none"
+                        }} />
 
                       {/* Icon */}
                       <Icon
