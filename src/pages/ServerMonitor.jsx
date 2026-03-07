@@ -106,39 +106,50 @@ export default function ServerMonitor() {
       <div className="flex items-center gap-3 mb-2">
         <Cpu size={16} style={{ color: "#39ff14" }} />
         <span className="text-sm font-bold tracking-widest" style={{ color: "#39ff14", fontFamily: "'Orbitron', monospace" }}>SERVER MONITOR</span>
-        <span className="text-xs px-2 py-0.5 border" style={{ color: status.online ? "#39ff14" : "#ff2020", borderColor: status.online ? "#39ff14" : "#ff2020" }}>
-          {status.online ? "● ONLINE" : "● OFFLINE"}
-        </span>
+        {statusLoading
+          ? <span className="text-xs px-2 py-0.5 border" style={{ color: "#39ff1455", borderColor: "#39ff1433" }}>● FETCHING...</span>
+          : <span className="text-xs px-2 py-0.5 border" style={{ color: status?.online ? "#39ff14" : "#ff2020", borderColor: status?.online ? "#39ff14" : "#ff2020" }}>
+              {status?.online ? "● ONLINE" : "● OFFLINE"}
+            </span>
+        }
+        <button onClick={fetchStatus} className="ml-auto" title="Refresh">
+          <RefreshCw size={12} style={{ color: "#39ff1455" }} />
+        </button>
       </div>
 
       {/* Status cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "PLAYERS", value: `${status.players}/${status.maxPlayers}`, icon: Users, color: "#00e5ff" },
-          { label: "PING", value: `${status.ping}ms`, icon: Wifi, color: status.ping > 100 ? "#ff2020" : "#39ff14" },
-          { label: "UPTIME", value: status.uptime, icon: Clock, color: "#ffb000" },
-          { label: "MAP", value: status.map, icon: Cpu, color: "#39ff14" },
+          { label: "STATE", value: statusLoading ? "..." : (status?.state?.toUpperCase() || "UNKNOWN"), icon: Wifi, color: status?.online ? "#39ff14" : "#ff2020" },
+          { label: "CPU", value: statusLoading ? "..." : `${status?.cpu ?? "--"}%`, icon: Cpu, color: barColor(status?.cpu ?? 0) },
+          { label: "UPTIME", value: statusLoading ? "..." : (status?.uptime || "--:--:--"), icon: Clock, color: "#ffb000" },
+          { label: "SERVER", value: statusLoading ? "..." : (status?.name || "Unknown"), icon: Users, color: "#39ff14" },
         ].map(({ label, value, icon: Icon, color }) => (
           <div key={label} className="border p-3" style={{ borderColor: "#1e3a1e", background: "#060606" }}>
             <div className="flex items-center gap-2 mb-1">
               <Icon size={11} style={{ color }} />
               <span className="text-xs" style={{ color: "#39ff1455" }}>{label}</span>
             </div>
-            <div className="text-sm font-bold" style={{ color }}>{value}</div>
+            <div className="text-sm font-bold truncate" style={{ color }}>{value}</div>
           </div>
         ))}
       </div>
 
       {/* CPU/RAM bars */}
       <div className="grid grid-cols-2 gap-3">
-        {[{ label: "CPU LOAD", val: status.cpu }, { label: "RAM USAGE", val: status.ram }].map(({ label, val }) => (
+        {[
+          { label: "CPU LOAD", val: status?.cpu ?? 0, suffix: "%" },
+          { label: "RAM USAGE", val: status?.ram ?? 0, suffix: `% (${status?.ramUsedMB ?? 0}/${status?.ramLimitMB ?? 0} MB)` }
+        ].map(({ label, val, suffix }) => (
           <div key={label} className="border p-3" style={{ borderColor: "#1e3a1e", background: "#060606" }}>
             <div className="flex justify-between mb-2">
               <span className="text-xs" style={{ color: "#39ff1466" }}>{label}</span>
-              <span className="text-xs font-bold" style={{ color: barColor(val) }}>{val}%</span>
+              <span className="text-xs font-bold" style={{ color: barColor(val) }}>
+                {statusLoading ? "..." : `${val}${suffix}`}
+              </span>
             </div>
             <div className="progress-bar-terminal">
-              <div className="progress-bar-terminal-fill" style={{ width: `${val}%`, background: barColor(val) }} />
+              <div className="progress-bar-terminal-fill" style={{ width: statusLoading ? "0%" : `${val}%`, background: barColor(val) }} />
             </div>
           </div>
         ))}
