@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Cloud, CloudRain, Sun, Wind, Droplets, Eye, Gauge } from "lucide-react";
 
 const C = {
-  text: "#c8c8c8",
-  textDim: "#aaa",
-  textFaint: "#888",
+  text: "#d4d4d4",
+  textDim: "#999",
+  textFaint: "#777",
   border: "#1e1e1e",
   borderMid: "#2a2a2a",
 };
