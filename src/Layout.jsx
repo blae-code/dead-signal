@@ -197,7 +197,7 @@ export default function Layout({ children, currentPageName }) {
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs relative">
+        <div className="flex items-center gap-3 text-xs relative flex-1">
           <div className="hidden sm:flex flex-col items-end" style={{ lineHeight: 1.2 }}>
             <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>LOCAL TIME</span>
             <motion.span 
@@ -215,56 +215,13 @@ export default function Layout({ children, currentPageName }) {
             <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>DATE</span>
             <span style={{ color: C.textDim, fontSize: "10px" }}>{dateStr}</span>
           </div>
-          <span className="hidden sm:block" style={{ color: C.border }}>|</span>
-          <span className="hidden lg:block" style={{ color: C.border }}>|</span>
-          {/* In-game time and weather */}
-          <div className="hidden lg:flex flex-col items-end" style={{ lineHeight: 1.2 }}>
-            <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>GAME TIME</span>
-            <motion.div 
-              key={`${inGameTime.hour}-${inGameTime.min}`}
-              initial={{ opacity: 0.5, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="flex items-center gap-1"
-            >
-              {inGameTime.isDaytime ? (
-                <Sun size={11} style={{ color: "#ffb000" }} />
-              ) : (
-                <Cloud size={11} style={{ color: "#00e5ff" }} />
-              )}
-              <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
-                {inGameTime.hour}:{inGameTime.min}
-              </span>
-            </motion.div>
+        </div>
+
+        {/* World Status panel (expandable) */}
+        <div className="hidden xl:flex flex-1 justify-center">
+          <div style={{ width: "400px" }}>
+            <WorldStatus inGameTime={inGameTime} weather={weather} />
           </div>
-          <span className="hidden lg:block" style={{ color: C.border }}>|</span>
-          {/* Real-world weather */}
-          {weather && (
-            <div className="hidden md:flex flex-col items-end" style={{ lineHeight: 1.2 }}>
-              <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>WEATHER</span>
-              <motion.div 
-                key={weather.temp}
-                initial={{ opacity: 0.5, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="flex items-center gap-1"
-              >
-                {weather.shortForecast.includes("Rain") ? (
-                  <CloudRain size={11} style={{ color: "#00e5ff" }} />
-                ) : weather.shortForecast.includes("Cloud") ? (
-                  <Cloud size={11} style={{ color: "#666" }} />
-                ) : (
-                  <Sun size={11} style={{ color: "#ffb000" }} />
-                )}
-                <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
-                  {weather.temp}°F
-                </span>
-              </motion.div>
-            </div>
-          )}
-
-
-
         </div>
       </header>
 
