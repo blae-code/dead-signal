@@ -362,7 +362,7 @@ export default function Layout({ children, currentPageName }) {
           {/* Sidebar bottom */}
           <motion.div 
             className="border-t" 
-            style={{ borderColor: C.border, background: "#050505" }}>
+            style={{ borderColor: C.border, background: "linear-gradient(135deg, rgba(20, 15, 10, 0.8) 0%, rgba(25, 18, 12, 0.8) 100%)" }}>
             {/* Mini status row */}
             <div className="px-3 pt-2 pb-1 flex items-center gap-2 border-b" style={{ borderColor: C.border }}>
               <motion.div
