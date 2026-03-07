@@ -69,6 +69,20 @@ body::before {
   100% { transform: translate(0); }
 }
 
+@keyframes noise {
+  0%, 100% { background-position: 0 0; }
+  10% { background-position: -5% -10%; }
+  30% { background-position: 3% 10%; }
+  50% { background-position: 12% 5%; }
+  70% { background-position: -8% 8%; }
+  90% { background-position: 5% -5%; }
+}
+
+@keyframes vignette-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.4; }
+}
+
 .terminal-flicker { animation: flicker 4s infinite; }
 .cursor-blink::after { content: '█'; animation: blink 1s infinite; }
 .glitch { animation: glitch 0.3s infinite; }
