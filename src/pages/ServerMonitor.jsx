@@ -164,10 +164,10 @@ export default function ServerMonitor() {
           { label: "RAM USED", val: 0, display: `${status?.ramUsedMB ?? 0} MB`, isPercent: false },
           { label: "DISK USED", val: 0, display: `${status?.diskMB ?? 0} MB`, isPercent: false },
         ].map(({ label, val, display, isPercent }) => (
-          <div key={label} className="border p-3" style={{ borderColor: "#1e3a1e", background: "#060606" }}>
+          <div key={label} className="border p-3" style={{ borderColor: T.border, background: T.bg1 }}>
             <div className="flex justify-between mb-2">
-              <span className="text-xs" style={{ color: "#39ff1466" }}>{label}</span>
-              <span className="text-xs font-bold" style={{ color: isPercent ? barColor(val) : "#39ff14" }}>
+              <span className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</span>
+              <span className="text-xs font-bold" style={{ color: isPercent ? barColor(val) : T.green }}>
                 {statusLoading ? "..." : display}
               </span>
             </div>
