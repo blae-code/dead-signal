@@ -194,7 +194,7 @@ export default function ServerMonitor() {
               <div key={i} style={{ color: l.color, fontFamily: "'Share Tech Mono', monospace" }}>{l.text}</div>
             ))}
           </div>
-          <div className="flex border-t" style={{ borderColor: "#1e3a1e" }}>
+          <div className="flex border-t" style={{ borderColor: T.border }}>
             <span className="px-3 py-2 text-xs" style={{ color: "#39ff14" }}>&gt;</span>
             <input
               className="flex-1 bg-transparent text-xs py-2 pr-2 outline-none border-0"
