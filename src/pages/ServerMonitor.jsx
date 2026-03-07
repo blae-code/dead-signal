@@ -135,22 +135,25 @@ export default function ServerMonitor() {
         ))}
       </div>
 
-      {/* CPU/RAM bars */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* CPU/RAM/Disk stats */}
+      <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "CPU LOAD", val: status?.cpu ?? 0, suffix: "%" },
-          { label: "RAM USAGE", val: status?.ram ?? 0, suffix: `% (${status?.ramUsedMB ?? 0}/${status?.ramLimitMB ?? 0} MB)` }
-        ].map(({ label, val, suffix }) => (
+          { label: "CPU LOAD", val: status?.cpu ?? 0, display: `${status?.cpu ?? 0}%`, isPercent: true },
+          { label: "RAM USED", val: 0, display: `${status?.ramUsedMB ?? 0} MB`, isPercent: false },
+          { label: "DISK USED", val: 0, display: `${status?.diskMB ?? 0} MB`, isPercent: false },
+        ].map(({ label, val, display, isPercent }) => (
           <div key={label} className="border p-3" style={{ borderColor: "#1e3a1e", background: "#060606" }}>
             <div className="flex justify-between mb-2">
               <span className="text-xs" style={{ color: "#39ff1466" }}>{label}</span>
-              <span className="text-xs font-bold" style={{ color: barColor(val) }}>
-                {statusLoading ? "..." : `${val}${suffix}`}
+              <span className="text-xs font-bold" style={{ color: isPercent ? barColor(val) : "#39ff14" }}>
+                {statusLoading ? "..." : display}
               </span>
             </div>
-            <div className="progress-bar-terminal">
-              <div className="progress-bar-terminal-fill" style={{ width: statusLoading ? "0%" : `${val}%`, background: barColor(val) }} />
-            </div>
+            {isPercent && (
+              <div className="progress-bar-terminal">
+                <div className="progress-bar-terminal-fill" style={{ width: statusLoading ? "0%" : `${val}%`, background: barColor(val) }} />
+              </div>
+            )}
           </div>
         ))}
       </div>
