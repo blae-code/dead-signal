@@ -162,8 +162,11 @@ export default function ServerMonitor() {
               onKeyDown={e => e.key === "Enter" && handleCommand()}
               placeholder="enter command..."
             />
-            <button onClick={handleCommand} className="px-3 py-2">
-              <Send size={12} style={{ color: "#39ff14" }} />
+            <button onClick={handleCommand} className="px-3 py-2" disabled={rconLoading}>
+              {rconLoading
+                ? <Loader size={12} style={{ color: "#39ff1488", animation: "spin 1s linear infinite" }} />
+                : <Send size={12} style={{ color: "#39ff14" }} />
+              }
             </button>
           </div>
         </div>
