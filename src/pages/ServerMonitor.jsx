@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Cpu, RefreshCw, Send, Trash2, AlertTriangle, Users, Clock, Wifi, Loader, X } from "lucide-react";
+import { Cpu, RefreshCw, Send, Trash2, AlertTriangle, Clock, Wifi, Loader, X } from "lucide-react";
 import AlertRulesPanel from "../components/server/AlertRulesPanel";
 import AlertHistoryPanel from "../components/server/AlertHistoryPanel";
 import RconHistoryPanel from "../components/server/RconHistoryPanel";
+import { T, PageHeader, ActionBtn } from "@/components/ui/TerminalCard";
 
 export default function ServerMonitor() {
   const [events, setEvents] = useState([]);
