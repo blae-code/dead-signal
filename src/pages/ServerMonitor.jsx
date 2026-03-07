@@ -79,14 +79,13 @@ export default function ServerMonitor() {
       const res = await base44.functions.invoke('sendRconCommand', { command: raw });
       if (res.data?.success) {
         setConsoleLines(prev => [...prev, { text: `✓ ${res.data.output}`, color: "#39ff14" }]);
-        // Log admin actions to ServerEvent feed
-        await base44.entities.ServerEvent.create({
-          event_type: "Admin Action",
-          message: `RCON: ${raw}`,
-          severity: "WARN"
-        }).catch(() => {});
+        await Promise.all([
+          base44.entities.ServerEvent.create({ event_type: "Admin Action", message: `RCON: ${raw}`, severity: "WARN" }),
+          base44.entities.RconHistory.create({ command: raw, output: res.data.output, success: true }),
+        ]).catch(() => {});
       } else {
         setConsoleLines(prev => [...prev, { text: `✗ ${res.data?.error || "Unknown error"}`, color: "#ff2020" }]);
+        base44.entities.RconHistory.create({ command: raw, output: res.data?.error || "Unknown error", success: false }).catch(() => {});
       }
     } catch (err) {
       setConsoleLines(prev => [...prev, { text: `✗ ${err.message}`, color: "#ff2020" }]);
