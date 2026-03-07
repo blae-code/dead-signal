@@ -105,6 +105,17 @@ export default function ServerMonitor() {
 
   const barColor = (val) => val > 80 ? "#ff2020" : val > 60 ? "#ffb000" : "#39ff14";
 
+  const handleTriggered = (triggered) => {
+    const banners = triggered.map(t => ({
+      id: Date.now() + Math.random(),
+      message: `ALERT: ${t.rule} — ${t.metric} is ${t.actual} (threshold: ${t.threshold})`,
+    }));
+    setAlertBanners(prev => [...banners, ...prev].slice(0, 5));
+    setAlertRefreshTick(n => n + 1);
+  };
+
+  const dismissBanner = (id) => setAlertBanners(prev => prev.filter(b => b.id !== id));
+
   return (
     <div className="p-4 space-y-4 max-w-7xl mx-auto">
       <div className="flex items-center gap-3 mb-2">
