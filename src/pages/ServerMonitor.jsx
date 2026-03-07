@@ -214,8 +214,8 @@ export default function ServerMonitor() {
         </div>
 
         {/* Event log */}
-        <div className="border" style={{ borderColor: "#1e3a1e", background: "#060606" }}>
-          <div className="flex items-center gap-2 px-3 py-2 border-b flex-wrap" style={{ borderColor: "#1e3a1e" }}>
+        <div className="border" style={{ borderColor: T.border, background: T.bg1 }}>
+          <div className="flex items-center gap-2 px-3 py-2 border-b flex-wrap" style={{ borderColor: T.border }}>
             <span className="text-xs font-bold" style={{ color: "#39ff14" }}>EVENT LOG</span>
             <div className="ml-auto flex gap-1">
               {["ALL", "INFO", "WARN", "CRITICAL"].map(f => (
