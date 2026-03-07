@@ -121,9 +121,9 @@ export default function ServerMonitor() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: "STATE", value: statusLoading ? "..." : (status?.state?.toUpperCase() || "UNKNOWN"), icon: Wifi, color: status?.online ? "#39ff14" : "#ff2020" },
-          { label: "CPU", value: statusLoading ? "..." : `${status?.cpu ?? "--"}%`, icon: Cpu, color: barColor(status?.cpu ?? 0) },
           { label: "UPTIME", value: statusLoading ? "..." : (status?.uptime || "--:--:--"), icon: Clock, color: "#ffb000" },
-          { label: "SERVER", value: statusLoading ? "..." : (status?.name || "Unknown"), icon: Users, color: "#39ff14" },
+          { label: "NET ↓", value: statusLoading ? "..." : `${status?.networkRxKB ?? 0} KB`, icon: RefreshCw, color: "#00e5ff" },
+          { label: "NET ↑", value: statusLoading ? "..." : `${status?.networkTxKB ?? 0} KB`, icon: RefreshCw, color: "#00e5ff" },
         ].map(({ label, value, icon: Icon, color }) => (
           <div key={label} className="border p-3" style={{ borderColor: "#1e3a1e", background: "#060606" }}>
             <div className="flex items-center gap-2 mb-1">
