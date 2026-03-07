@@ -34,11 +34,11 @@ Deno.serve(async (req) => {
 
         // Fetch server resources (cpu, ram, uptime, state)
         const resourcesRes = await fetch(`${PANEL_URL}/api/client/servers/${SERVER_ID}/resources`, { headers });
-        const resourcesData = await resourcesRes.json();
+        const resourcesData = await safeJson(resourcesRes);
 
         // Fetch server details (name, description)
         const detailsRes = await fetch(`${PANEL_URL}/api/client/servers/${SERVER_ID}`, { headers });
-        const detailsData = await detailsRes.json();
+        const detailsData = await safeJson(detailsRes);
 
         const state = resourcesData?.attributes?.current_state;
         const stats = resourcesData?.attributes?.resources || {};
