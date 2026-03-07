@@ -7,6 +7,7 @@ import {
   AlertTriangle, Terminal, Menu, X, Wifi, WifiOff, ChevronRight,
   Shield, Activity, Skull, Bot, Zap, Database, Cloud, CloudRain, Sun } from
 "lucide-react";
+import WorldStatus from "@/components/WorldStatus";
 
 // colour, short code, and section grouping per nav item
 const navSections = [
