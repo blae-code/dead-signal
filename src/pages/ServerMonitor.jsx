@@ -10,6 +10,7 @@ import PerformanceForecast from "../components/server/PerformanceForecast";
 import BottomConsoleDrawer from "../components/server/BottomConsoleDrawer";
 import LiveUptime from "../components/server/LiveUptime";
 import ServerMetricsWidget from "../components/server/ServerMetricsWidget";
+import ServerInsightsWidget from "../components/server/ServerInsightsWidget";
 import { T, PageHeader, ActionBtn } from "@/components/ui/TerminalCard";
 
 // Animated value display component
