@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AlertRulesPanel from "../components/server/AlertRulesPanel";
 import AlertHistoryPanel from "../components/server/AlertHistoryPanel";
 import RconHistoryPanel from "../components/server/RconHistoryPanel";
+import PerformanceCharts from "../components/server/PerformanceCharts";
 import { T, PageHeader, ActionBtn } from "@/components/ui/TerminalCard";
 
 // Animated value display component
