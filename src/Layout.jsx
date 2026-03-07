@@ -263,8 +263,12 @@ export default function Layout({ children, currentPageName }) {
             <div key={section.label}>
                 {/* Section divider */}
                 <div className="flex items-center gap-2 px-3 pt-3 pb-1">
-                  <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.2em" }}>{section.label}</span>
-                  <div style={{ flex: 1, height: "1px", background: C.border }} />
+                  <span style={{ color: C.textDim, fontSize: "8px", letterSpacing: "0.2em" }}>{section.label}</span>
+                  <motion.div 
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.8 }}
+                    style={{ flex: 1, height: "1px", background: C.border, transformOrigin: "left" }} />
                 </div>
 
                 {section.items.map(({ label, page, icon: IconComponent, code, color, dot }) => {
