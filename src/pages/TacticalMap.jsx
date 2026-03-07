@@ -1,36 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Map, Plus, Trash2, Filter, X, Save } from "lucide-react";
+import { Map, Plus, Trash2, X, Save } from "lucide-react";
+import { T, PageHeader, Panel, FormPanel, Field, ActionBtn, EmptyState, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
 
-const PIN_TYPES = ["Loot Cache", "Safe House", "Danger Zone", "Resource Node", "Enemy Sighting", "Clan Base", "Vehicle Spawn", "Objective", "Other"];
-const PIN_COLORS = {
-  "Loot Cache": "#ffb000",
-  "Safe House": "#39ff14",
-  "Danger Zone": "#ff2020",
-  "Resource Node": "#00e5ff",
-  "Enemy Sighting": "#ff2020",
-  "Clan Base": "#39ff14",
-  "Vehicle Spawn": "#00e5ff",
-  "Objective": "#ff8000",
-  "Other": "#888",
-};
-const PIN_ICONS = {
-  "Loot Cache": "◆", "Safe House": "⌂", "Danger Zone": "☢", "Resource Node": "◉",
-  "Enemy Sighting": "☠", "Clan Base": "⚑", "Vehicle Spawn": "⊞", "Objective": "✦", "Other": "●",
-};
-
-const STATUS_COLORS = { Fresh: "#39ff14", Looted: "#555", Unknown: "#ffb000", Active: "#00e5ff", Cleared: "#39ff1444" };
+const PIN_TYPES = ["Loot Cache","Safe House","Danger Zone","Resource Node","Enemy Sighting","Clan Base","Vehicle Spawn","Objective","Other"];
+const PIN_COLORS = { "Loot Cache": T.amber, "Safe House": T.green, "Danger Zone": T.red, "Resource Node": T.cyan, "Enemy Sighting": T.red, "Clan Base": T.green, "Vehicle Spawn": T.cyan, "Objective": T.orange, "Other": T.textDim };
+const PIN_ICONS  = { "Loot Cache": "◆", "Safe House": "⌂", "Danger Zone": "☢", "Resource Node": "◉", "Enemy Sighting": "☠", "Clan Base": "⚑", "Vehicle Spawn": "⊞", "Objective": "✦", "Other": "●" };
+const STATUS_COLORS = { Fresh: T.green, Looted: T.textDim, Unknown: T.amber, Active: T.cyan, Cleared: T.textFaint };
 
 export default function TacticalMap() {
   const canvasRef = useRef(null);
-  const [pins, setPins] = useState([]);
-  const [placing, setPlacing] = useState(false);
+  const [pins, setPins]           = useState([]);
+  const [placing, setPlacing]     = useState(false);
   const [selectedPin, setSelectedPin] = useState(null);
-  const [filterType, setFilterType] = useState("ALL");
-  const [newPin, setNewPin] = useState({ title: "", type: "Loot Cache", note: "", status: "Unknown" });
+  const [filterType, setFilterType]   = useState("ALL");
+  const [newPin, setNewPin]       = useState({ title: "", type: "Loot Cache", note: "", status: "Unknown" });
   const [pendingCoords, setPendingCoords] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [user, setUser] = useState(null);
+  const [showForm, setShowForm]   = useState(false);
+  const [user, setUser]           = useState(null);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -81,83 +68,62 @@ export default function TacticalMap() {
 
   return (
     <div className="p-4 space-y-4 max-w-7xl mx-auto">
-      <div className="flex items-center gap-3 flex-wrap">
-        <Map size={16} style={{ color: "#00e5ff" }} />
-        <span className="text-sm font-bold tracking-widest" style={{ color: "#00e5ff", fontFamily: "'Orbitron', monospace" }}>TACTICAL MAP</span>
-        <div className="ml-auto flex items-center gap-2 flex-wrap">
-          <select
-            className="text-xs px-2 py-1 border bg-black"
-            style={{ borderColor: "#1e3a1e", color: "#39ff14" }}
-            value={filterType}
-            onChange={e => setFilterType(e.target.value)}
-          >
-            <option value="ALL">ALL TYPES</option>
-            {PIN_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-          <button
-            onClick={() => { setPlacing(!placing); setShowForm(false); }}
-            className="text-xs px-3 py-1 border flex items-center gap-1"
-            style={{ borderColor: placing ? "#ffb000" : "#39ff14", color: placing ? "#ffb000" : "#39ff14" }}
-          >
-            <Plus size={11} /> {placing ? "CANCEL PLACE" : "DROP PIN"}
-          </button>
-        </div>
-      </div>
+      <PageHeader icon={Map} title="TACTICAL MAP" color={T.cyan}>
+        <select className="text-xs px-2 py-1.5 border outline-none" style={{ ...selectStyle, minWidth: "120px" }}
+          value={filterType} onChange={e => setFilterType(e.target.value)}>
+          <option value="ALL">ALL TYPES</option>
+          {PIN_TYPES.map(t => <option key={t}>{t}</option>)}
+        </select>
+        <ActionBtn color={placing ? T.amber : T.green} onClick={() => { setPlacing(!placing); setShowForm(false); }}>
+          <Plus size={10} /> {placing ? "CANCEL" : "DROP PIN"}
+        </ActionBtn>
+      </PageHeader>
 
       {placing && (
-        <div className="text-xs px-3 py-2 border" style={{ borderColor: "#ffb000", color: "#ffb000", background: "#1a0f00" }}>
-          ⚠ CLICK ON MAP TO PLACE PIN
+        <div className="text-xs px-3 py-2 border" style={{ borderColor: T.amber + "88", color: T.amber, background: T.amber + "0d" }}>
+          ⚠ CLICK ON THE MAP TO PLACE PIN
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Map canvas */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-2">
           <div
             ref={canvasRef}
             onClick={handleMapClick}
             className="relative border overflow-hidden"
             style={{
-              borderColor: "#1e3a1e",
-              background: "#050f05",
+              borderColor: T.border,
+              background: "#040a04",
               aspectRatio: "16/10",
               cursor: placing ? "crosshair" : "default",
-              backgroundImage: `
-                linear-gradient(rgba(57,255,20,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(57,255,20,0.03) 1px, transparent 1px)
-              `,
+              backgroundImage: `linear-gradient(rgba(57,255,20,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(57,255,20,0.025) 1px, transparent 1px)`,
               backgroundSize: "5% 5%",
             }}
           >
-            {/* Grid labels */}
             {[...Array(10)].map((_, i) => (
-              <span key={`col-${i}`} className="absolute text-xs" style={{ left: `${i * 10 + 1}%`, top: "1%", color: "#39ff1422", fontSize: "8px" }}>
+              <span key={`col-${i}`} className="absolute" style={{ left: `${i * 10 + 1}%`, top: "1%", color: T.textFaint, fontSize: "8px", letterSpacing: "0.05em" }}>
                 {String.fromCharCode(65 + i)}
               </span>
             ))}
             {[...Array(8)].map((_, i) => (
-              <span key={`row-${i}`} className="absolute text-xs" style={{ top: `${i * 12 + 2}%`, left: "0.5%", color: "#39ff1422", fontSize: "8px" }}>
+              <span key={`row-${i}`} className="absolute" style={{ top: `${i * 12 + 2}%`, left: "0.4%", color: T.textFaint, fontSize: "8px" }}>
                 {i + 1}
               </span>
             ))}
+            <div className="absolute top-2 right-2 text-xs font-bold" style={{ color: T.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>N↑</div>
 
-            {/* Compass */}
-            <div className="absolute top-2 right-2 text-xs" style={{ color: "#39ff1455" }}>N↑</div>
-
-            {/* Pins */}
             {filteredPins.map(pin => (
-              <button
-                key={pin.id}
+              <button key={pin.id}
                 onClick={e => { e.stopPropagation(); setSelectedPin(pin === selectedPin ? null : pin); }}
                 className="absolute transform -translate-x-1/2 -translate-y-1/2 hover:scale-125 transition-transform"
-                style={{ left: `${pin.x}%`, top: `${pin.y}%`, color: PIN_COLORS[pin.type] || "#888", fontSize: "14px", lineHeight: 1, background: "none", border: "none" }}
+                style={{ left: `${pin.x}%`, top: `${pin.y}%`, color: PIN_COLORS[pin.type] || T.textDim, fontSize: "14px", lineHeight: 1, background: "none", border: "none" }}
                 title={pin.title}
               >
-                <span style={{ filter: `drop-shadow(0 0 4px ${PIN_COLORS[pin.type]})` }}>{PIN_ICONS[pin.type]}</span>
+                <span style={{ filter: `drop-shadow(0 0 3px ${PIN_COLORS[pin.type]})` }}>{PIN_ICONS[pin.type]}</span>
               </button>
             ))}
 
-            {/* Pending pin indicator */}
             {pendingCoords && (
               <div className="absolute w-3 h-3 border-2 border-white transform -translate-x-1/2 -translate-y-1/2 animate-pulse"
                 style={{ left: `${pendingCoords.x}%`, top: `${pendingCoords.y}%` }} />
@@ -165,96 +131,90 @@ export default function TacticalMap() {
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap gap-3 mt-2">
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
             {PIN_TYPES.map(t => (
               <div key={t} className="flex items-center gap-1">
-                <span style={{ color: PIN_COLORS[t], fontSize: "10px" }}>{PIN_ICONS[t]}</span>
-                <span className="text-xs" style={{ color: "#39ff1444" }}>{t}</span>
+                <span style={{ color: PIN_COLORS[t], fontSize: "9px" }}>{PIN_ICONS[t]}</span>
+                <span style={{ color: T.textFaint, fontSize: "9px" }}>{t}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Sidebar: pin form / details */}
+        {/* Sidebar */}
         <div className="space-y-3">
-          {/* New pin form */}
           {showForm && (
-            <div className="border p-3 space-y-2" style={{ borderColor: "#39ff14", background: "#060606" }}>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold" style={{ color: "#39ff14" }}>// NEW PIN</span>
-                <button onClick={() => { setShowForm(false); setPendingCoords(null); }}><X size={12} style={{ color: "#39ff1455" }} /></button>
-              </div>
-              <input className="w-full text-xs px-2 py-1 border bg-black" style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
-                placeholder="Title..." value={newPin.title} onChange={e => setNewPin(p => ({ ...p, title: e.target.value }))} />
-              <select className="w-full text-xs px-2 py-1 border bg-black" style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
-                value={newPin.type} onChange={e => setNewPin(p => ({ ...p, type: e.target.value }))}>
-                {PIN_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-              <select className="w-full text-xs px-2 py-1 border bg-black" style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
-                value={newPin.status} onChange={e => setNewPin(p => ({ ...p, status: e.target.value }))}>
-                {["Fresh", "Looted", "Unknown", "Active", "Cleared"].map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <textarea className="w-full text-xs px-2 py-1 border bg-black resize-none" style={{ borderColor: "#2a2a2a", color: "#39ff14" }}
-                rows={2} placeholder="Notes..." value={newPin.note} onChange={e => setNewPin(p => ({ ...p, note: e.target.value }))} />
-              <button onClick={handleSavePin} className="w-full text-xs py-1 border flex items-center justify-center gap-1"
-                style={{ borderColor: "#39ff14", color: "#39ff14" }}>
-                <Save size={11} /> SAVE PIN
-              </button>
-            </div>
+            <FormPanel title="NEW PIN" onClose={() => { setShowForm(false); setPendingCoords(null); }}>
+              <Field label="TITLE">
+                <input className="w-full text-xs px-2 py-1.5 border bg-transparent outline-none" style={inputStyle}
+                  placeholder="Title..." value={newPin.title} onChange={e => setNewPin(p => ({ ...p, title: e.target.value }))} />
+              </Field>
+              <Field label="TYPE">
+                <select className="w-full text-xs px-2 py-1.5 border outline-none" style={selectStyle}
+                  value={newPin.type} onChange={e => setNewPin(p => ({ ...p, type: e.target.value }))}>
+                  {PIN_TYPES.map(t => <option key={t}>{t}</option>)}
+                </select>
+              </Field>
+              <Field label="STATUS">
+                <select className="w-full text-xs px-2 py-1.5 border outline-none" style={selectStyle}
+                  value={newPin.status} onChange={e => setNewPin(p => ({ ...p, status: e.target.value }))}>
+                  {["Fresh","Looted","Unknown","Active","Cleared"].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </Field>
+              <Field label="NOTES">
+                <textarea className="w-full text-xs px-2 py-1.5 border bg-transparent outline-none resize-none" style={inputStyle}
+                  rows={2} placeholder="Notes..." value={newPin.note} onChange={e => setNewPin(p => ({ ...p, note: e.target.value }))} />
+              </Field>
+              <ActionBtn color={T.green} onClick={handleSavePin}>
+                <Save size={10} /> SAVE PIN
+              </ActionBtn>
+            </FormPanel>
           )}
 
-          {/* Selected pin details */}
           {selectedPin && !showForm && (
-            <div className="border p-3 space-y-2" style={{ borderColor: PIN_COLORS[selectedPin.type] || "#39ff14", background: "#060606" }}>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold" style={{ color: PIN_COLORS[selectedPin.type] }}>
-                  {PIN_ICONS[selectedPin.type]} {selectedPin.title}
-                </span>
-                <button onClick={() => setSelectedPin(null)}><X size={12} style={{ color: "#39ff1455" }} /></button>
+            <Panel accentBorder={PIN_COLORS[selectedPin.type]}>
+              <div className="p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold" style={{ color: PIN_COLORS[selectedPin.type] }}>
+                    {PIN_ICONS[selectedPin.type]} {selectedPin.title}
+                  </span>
+                  <button onClick={() => setSelectedPin(null)} style={{ color: T.textFaint }}><X size={11} /></button>
+                </div>
+                <div className="text-xs" style={{ color: T.textDim }}>TYPE: {selectedPin.type}</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs" style={{ color: T.textFaint }}>STATUS:</span>
+                  <button onClick={() => handleStatusCycle(selectedPin)}
+                    className="text-xs px-2 py-0.5 border transition-colors"
+                    style={{ borderColor: STATUS_COLORS[selectedPin.status], color: STATUS_COLORS[selectedPin.status] }}>
+                    {selectedPin.status}
+                  </button>
+                </div>
+                {selectedPin.note && <p className="text-xs" style={{ color: T.textDim }}>{selectedPin.note}</p>}
+                <div className="text-xs" style={{ color: T.textFaint }}>COORDS: X{selectedPin.x?.toFixed(1)} Y{selectedPin.y?.toFixed(1)}</div>
+                {selectedPin.placed_by && <div className="text-xs" style={{ color: T.textFaint }}>BY: {selectedPin.placed_by}</div>}
+                <ActionBtn color={T.red} onClick={() => handleDeletePin(selectedPin.id)}>
+                  <Trash2 size={10} /> REMOVE PIN
+                </ActionBtn>
               </div>
-              <div className="text-xs" style={{ color: "#39ff1466" }}>TYPE: {selectedPin.type}</div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs" style={{ color: "#39ff1066" }}>STATUS:</span>
-                <button onClick={() => handleStatusCycle(selectedPin)} className="text-xs px-2 py-0.5 border"
-                  style={{ borderColor: STATUS_COLORS[selectedPin.status], color: STATUS_COLORS[selectedPin.status] }}>
-                  {selectedPin.status}
-                </button>
-              </div>
-              {selectedPin.note && <div className="text-xs" style={{ color: "#39ff1488" }}>{selectedPin.note}</div>}
-              <div className="text-xs" style={{ color: "#39ff1033" }}>
-                COORDS: X{selectedPin.x?.toFixed(1)} Y{selectedPin.y?.toFixed(1)}
-              </div>
-              {selectedPin.placed_by && <div className="text-xs" style={{ color: "#39ff1033" }}>BY: {selectedPin.placed_by}</div>}
-              <button onClick={() => handleDeletePin(selectedPin.id)}
-                className="w-full text-xs py-1 border flex items-center justify-center gap-1 mt-1"
-                style={{ borderColor: "#ff2020", color: "#ff2020" }}>
-                <Trash2 size={11} /> REMOVE PIN
-              </button>
-            </div>
+            </Panel>
           )}
 
-          {/* Pin list */}
-          <div className="border" style={{ borderColor: "#1e3a1e", background: "#060606" }}>
-            <div className="px-3 py-2 border-b text-xs font-bold" style={{ borderColor: "#1e3a1e", color: "#39ff14" }}>
-              ACTIVE PINS ({filteredPins.length})
-            </div>
+          <Panel title={`ACTIVE PINS (${filteredPins.length})`}>
             <div className="overflow-y-auto" style={{ maxHeight: "300px" }}>
               {filteredPins.length === 0
-                ? <div className="p-3 text-xs" style={{ color: "#39ff1033" }}>// NO PINS</div>
+                ? <EmptyState message="NO PINS" />
                 : filteredPins.map(pin => (
                   <button key={pin.id} onClick={() => setSelectedPin(pin)}
-                    className="w-full text-left px-3 py-2 border-b hover:bg-green-950 transition-colors"
-                    style={{ borderColor: "#0f1f0f" }}>
-                    <div className="flex items-center gap-2">
-                      <span style={{ color: PIN_COLORS[pin.type], fontSize: "12px" }}>{PIN_ICONS[pin.type]}</span>
-                      <span className="text-xs flex-1 truncate" style={{ color: "#39ff14" }}>{pin.title}</span>
-                      <span className="text-xs" style={{ color: STATUS_COLORS[pin.status] }}>●</span>
-                    </div>
+                    className="w-full text-left px-3 py-2 border-b flex items-center gap-2 hover:bg-white hover:bg-opacity-5 transition-colors"
+                    style={{ borderColor: T.border + "55" }}>
+                    <span style={{ color: PIN_COLORS[pin.type], fontSize: "11px" }}>{PIN_ICONS[pin.type]}</span>
+                    <span className="text-xs flex-1 truncate" style={{ color: T.text }}>{pin.title}</span>
+                    <span style={{ color: STATUS_COLORS[pin.status], fontSize: "7px" }}>●</span>
                   </button>
                 ))
               }
             </div>
-          </div>
+          </Panel>
         </div>
       </div>
     </div>
