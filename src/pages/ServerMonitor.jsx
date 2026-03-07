@@ -118,6 +118,14 @@ export default function ServerMonitor() {
 
   return (
     <div className="p-4 space-y-4 max-w-7xl mx-auto">
+      {/* In-app alert banners */}
+      {alertBanners.map(b => (
+        <div key={b.id} className="flex items-center justify-between px-3 py-2 border text-xs" style={{ borderColor: "#ff2020", background: "#1a0000", color: "#ff2020" }}>
+          <span><AlertTriangle size={10} className="inline mr-2" />{b.message}</span>
+          <button onClick={() => dismissBanner(b.id)}><X size={10} /></button>
+        </div>
+      ))}
+
       <div className="flex items-center gap-3 mb-2">
         <Cpu size={16} style={{ color: "#39ff14" }} />
         <span className="text-sm font-bold tracking-widest" style={{ color: "#39ff14", fontFamily: "'Orbitron', monospace" }}>SERVER MONITOR</span>
