@@ -353,7 +353,6 @@ export default function Layout({ children, currentPageName }) {
                       }
                     </Link>
                    </motion.div>);
-
               })}
               </div>
             )}
