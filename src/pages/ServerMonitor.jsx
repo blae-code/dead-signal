@@ -167,22 +167,32 @@ export default function ServerMonitor() {
       </PageHeader>
 
       {/* Status cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <motion.div
+        className="grid grid-cols-2 md:grid-cols-4 gap-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         {[
           { label: "STATE",  value: statusLoading ? "..." : (status?.state?.toUpperCase() || "UNKNOWN"), icon: Wifi,      color: status?.online ? T.green : T.red },
           { label: "UPTIME", value: statusLoading ? "..." : (status?.uptime || "--:--:--"),               icon: Clock,     color: T.amber },
           { label: "NET ↓",  value: statusLoading ? "..." : `${status?.networkRxKB ?? 0} KB`,             icon: RefreshCw, color: T.cyan },
           { label: "NET ↑",  value: statusLoading ? "..." : `${status?.networkTxKB ?? 0} KB`,             icon: RefreshCw, color: T.cyan },
         ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="border p-3" style={{ borderColor: T.border, background: T.bg1 }}>
+          <motion.div
+            key={label}
+            className="border p-3"
+            style={{ borderColor: T.border, background: T.bg1 }}
+            whileHover={{ borderColor: color + "66", transition: { duration: 0.2 } }}
+          >
             <div className="flex items-center gap-2 mb-1">
               <Icon size={10} style={{ color: T.textFaint }} />
               <span className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</span>
             </div>
-            <div className="text-sm font-bold truncate" style={{ color }}>{value}</div>
-          </div>
+            <AnimatedValue value={value} color={color} />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* CPU/RAM/Disk stats */}
       <div className="grid grid-cols-3 gap-3">
