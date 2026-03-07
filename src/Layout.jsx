@@ -238,9 +238,10 @@ export default function Layout({ children, currentPageName }) {
           className={`fixed md:relative z-40 h-full flex flex-col transition-transform duration-200 ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
           style={{
             width: "210px",
-            background: "#030303",
+            background: "linear-gradient(135deg, #0f0a07 0%, #1a1410 100%)",
             borderRight: `1px solid ${C.border}`,
-            minHeight: "calc(100vh - 41px)"
+            minHeight: "calc(100vh - 41px)",
+            boxShadow: "inset 1px 0 2px rgba(139, 69, 19, 0.3)"
           }}>
 
           {/* Sidebar top label */}
