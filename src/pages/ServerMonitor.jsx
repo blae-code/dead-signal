@@ -183,24 +183,28 @@ export default function ServerMonitor() {
         transition={{ duration: 0.5 }}
       >
         {[
-          { label: "STATE",  value: statusLoading ? "..." : (status?.state?.toUpperCase() || "UNKNOWN"), icon: Wifi,      color: status?.online ? T.green : T.red },
-          { label: "UPTIME", value: statusLoading ? "..." : (status?.uptime || "--:--:--"),               icon: Clock,     color: T.amber },
-          { label: "NET ↓",  value: statusLoading ? "..." : `${status?.networkRxKB ?? 0} KB`,             icon: RefreshCw, color: T.cyan },
-          { label: "NET ↑",  value: statusLoading ? "..." : `${status?.networkTxKB ?? 0} KB`,             icon: RefreshCw, color: T.cyan },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <motion.div
-            key={label}
-            className="border p-3"
-            style={{ borderColor: T.border, background: T.bg1 }}
-            whileHover={{ borderColor: color + "66", transition: { duration: 0.2 } }}
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <Icon size={10} style={{ color: T.textFaint }} />
-              <span className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</span>
-            </div>
-            <AnimatedValue value={value} color={color} />
-          </motion.div>
-        ))}
+           { label: "STATE",  value: statusLoading ? "..." : (status?.state?.toUpperCase() || "UNKNOWN"), icon: Wifi,      color: status?.online ? T.green : T.red, isUptime: false },
+           { label: "UPTIME", value: statusLoading ? "..." : (status?.uptime || "--:--:--"),               icon: Clock,     color: T.amber, isUptime: true },
+           { label: "NET ↓",  value: statusLoading ? "..." : `${status?.networkRxKB ?? 0} KB`,             icon: RefreshCw, color: T.cyan, isUptime: false },
+           { label: "NET ↑",  value: statusLoading ? "..." : `${status?.networkTxKB ?? 0} KB`,             icon: RefreshCw, color: T.cyan, isUptime: false },
+         ].map(({ label, value, icon: Icon, color, isUptime }) => (
+           <motion.div
+             key={label}
+             className="border p-3"
+             style={{ borderColor: T.border, background: T.bg1 }}
+             whileHover={{ borderColor: color + "66", transition: { duration: 0.2 } }}
+           >
+             <div className="flex items-center gap-2 mb-1">
+               <Icon size={10} style={{ color: T.textFaint }} />
+               <span className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</span>
+             </div>
+             {isUptime ? (
+               <LiveUptime initialUptime={value} statusLoading={statusLoading} />
+             ) : (
+               <AnimatedValue value={value} color={color} />
+             )}
+           </motion.div>
+         ))}
       </motion.div>
 
       {/* CPU/RAM/Disk stats */}
