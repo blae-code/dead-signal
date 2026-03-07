@@ -241,13 +241,13 @@ export default function ServerMonitor() {
               ))
             }
           </div>
-          <div className="px-3 py-2 border-t flex gap-2" style={{ borderColor: "#1e3a1e" }}>
+          <div className="px-3 py-2 border-t flex gap-2" style={{ borderColor: T.border }}>
             <button onClick={() => logEvent("Broadcast", "Server restarting in 10 min", "WARN")}
-              className="text-xs px-3 py-1 border" style={{ borderColor: "#ffb000", color: "#ffb000" }}>
+              className="text-xs px-3 py-1 border transition-opacity hover:opacity-80" style={{ borderColor: T.amber + "88", color: T.amber }}>
               WARN RESTART
             </button>
             <button onClick={() => logEvent("Server Start", "Server online", "INFO")}
-              className="text-xs px-3 py-1 border" style={{ borderColor: "#39ff14", color: "#39ff14" }}>
+              className="text-xs px-3 py-1 border transition-opacity hover:opacity-80" style={{ borderColor: T.green + "88", color: T.green }}>
               LOG ONLINE
             </button>
           </div>
