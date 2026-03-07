@@ -288,6 +288,23 @@ export default function ServerMonitor() {
         <AlertRulesPanel onTriggered={handleTriggered} />
         <AlertHistoryPanel refreshTick={alertRefreshTick} />
       </motion.div>
+
+      {/* Bottom Console Drawer */}
+      <BottomConsoleDrawer
+        consoleLines={consoleLines}
+        onConsoleInput={handleCommand}
+        onConsoleClear={() => setConsoleLines([{ text: "> Console cleared.", color: T.textFaint }])}
+        events={events}
+        logFilter={logFilter}
+        onLogFilterChange={setLogFilter}
+        onLogEvent={logEvent}
+        rconHistory={rconHistory}
+        onRconRerun={(cmd) => setCmd(cmd)}
+        onRconClear={() => setRconHistory([])}
+        cmd={cmd}
+        onCmdChange={setCmd}
+        rconLoading={rconLoading}
+      />
     </div>
   );
 }
