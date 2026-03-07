@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-const PANEL_URL = "https://panel.bisecthosting.com";
+const PANEL_URL = "https://games.bisecthosting.com";
 const SERVER_ID = "299b51cf";
 
 Deno.serve(async (req) => {
