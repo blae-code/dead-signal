@@ -5,33 +5,33 @@
 
 // ── Extended palette ──────────────────────────────────────────────────────────
 export const T = {
-  // ── Backgrounds (darkest → lightest)
-  bg0:  "linear-gradient(160deg, #0a0806 0%, #0d0a07 100%)",
-  bg1:  "linear-gradient(160deg, #1a1410 0%, #201609 100%)",
-  bg2:  "linear-gradient(160deg, #222018 0%, #2a2410 100%)",
-  bg3:  "linear-gradient(160deg, #2a2418 0%, #322a10 100%)",
+  // ── Backgrounds (deep & layered for maximum contrast)
+  bg0:  "linear-gradient(160deg, #0a0806 0%, #0d0a07 100%)",  // page background
+  bg1:  "linear-gradient(160deg, #1c1e21 0%, #14161a 100%)",  // primary card (ServerMonitor standard)
+  bg2:  "linear-gradient(160deg, #252930 0%, #1d202a 100%)",  // secondary card (slightly lighter)
+  bg3:  "linear-gradient(160deg, #2e333f 0%, #242a38 100%)",  // tertiary card
 
-  // ── Borders
+  // ── Borders (deep with bright accent options)
   border:   "#2a1e10",
   borderHi: "#3e2c18",
   borderBt: "#4e3a22",  // bright touch
 
-  // ── Text
+  // ── Text (warm, readable)
   text:      "#e8dcc8",
   textDim:   "#c0aa88",
   textFaint: "#7a6a52",
   textGhost: "#3a2e20",
 
-  // ── Status — military / industrial spectrum (high contrast, no pastels)
-  green:   "#39ff14",   // phosphor green  (operational / clear)
-  amber:   "#ffaa00",   // command amber   (standby / caution)
-  red:     "#ff2020",   // hard red        (critical / danger)
-  cyan:    "#00d4e8",   // steel-blue      (server / comms)
-  orange:  "#ff6600",   // hazard orange   (warning / elevated)
-  olive:   "#a8c820",   // field olive     (intel / secondary)
-  steel:   "#4ab8d4",   // cold steel-blue (network / data)
-  teal:    "#00b896",   // military teal   (logistics / supply)
-  gold:    "#d4a800",   // tactical gold   (high-value / loot)
+  // ── Status — military/industrial spectrum (pure, high-saturation)
+  green:   "#39ff14",   // phosphor green (operational / clear)
+  amber:   "#ffaa00",   // command amber (standby / caution)
+  red:     "#ff2020",   // hard red (critical / danger)
+  cyan:    "#00d4e8",   // steel cyan (server / comms)
+  orange:  "#ff6600",   // hazard orange (warning / elevated)
+  olive:   "#a8c820",   // field olive (intel / secondary)
+  steel:   "#4ab8d4",   // cold steel (network / data)
+  teal:    "#00b896",   // military teal (logistics / supply)
+  gold:    "#d4a800",   // tactical gold (high-value / loot)
 
   // ── Semantic shortcuts
   online:  "#39ff14",
