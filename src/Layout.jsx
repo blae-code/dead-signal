@@ -31,7 +31,7 @@ const navSections = [
     items: [
       { label: "INVENTORY",    page: "Inventory",     icon: Package,   code: "INV", color: "#ff6a00", dot: "#ff6a00" },
       { label: "INTEL FEED",   page: "Intel",         icon: Radio,     code: "INT", color: "#ffaa00", dot: "#ffaa00" },
-      { label: "AI AGENT",     page: "AIAgent",       icon: Bot,       code: "AI",  color: "#b060ff", dot: "#b060ff" },
+      { label: "AI AGENT",     page: "AIAgent",       icon: Bot,       code: "AI",  color: "#a8c820", dot: "#a8c820" },
     ],
   },
 ];
