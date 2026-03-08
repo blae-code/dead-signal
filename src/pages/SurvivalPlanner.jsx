@@ -4,9 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { T, Panel, PageHeader, ActionBtn, Field } from "@/components/ui/TerminalCard";
 import { Map, AlertTriangle, Package, Zap, Users, Cpu } from "lucide-react";
-import LootRoutePlanner from "@/components/survival/LootRoutePlanner";
-import HazardForecast from "@/components/survival/HazardForecast";
-import LoadoutOptimizer from "@/components/survival/LoadoutOptimizer";
+import LootRoutePlanner from "@/components/survival/LootRoutePlanner.jsx";
+import HazardForecast from "@/components/survival/HazardForecast.jsx";
+import LoadoutOptimizer from "@/components/survival/LoadoutOptimizer.jsx";
 
 export default function SurvivalPlanner() {
   const [activeTab, setActiveTab] = useState("route");
