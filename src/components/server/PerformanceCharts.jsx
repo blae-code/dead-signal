@@ -202,7 +202,7 @@ export default function PerformanceCharts({ status, statusLoading }) {
       <ChartCard title="CPU %"     data={cpuHistory}  dataKey="cpu"  color={T.green}   unit="%"   threshold={80} />
       <ChartCard title="RAM (GB)"  data={ramHistory}  dataKey="ram"  color={T.cyan}    unit=" GB" threshold={28} />
       <ChartCard title="DISK (GB)" data={diskHistory} dataKey="disk" color={T.gold}    unit=" GB" />
-      <ChartCard title="SRV FPS"   data={fpsHistory}  dataKey="fps"  color={T.purple}  unit=""    />
+      <ChartCard title="SRV FPS"   data={fpsHistory}  dataKey="fps"  color={T.olive}   unit=""    />
     </div>
   );
 }
