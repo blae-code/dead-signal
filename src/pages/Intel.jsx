@@ -54,9 +54,11 @@ export default function Intel() {
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
       <PageHeader icon={Radio} title="INTEL FEED" color={T.amber}>
-        <ActionBtn color={T.amber} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
-          <Plus size={10} /> BROADCAST
-        </ActionBtn>
+        {isAdmin && (
+          <ActionBtn color={T.amber} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
+            <Plus size={10} /> BROADCAST
+          </ActionBtn>
+        )}
       </PageHeader>
 
       {/* Filter tabs */}
@@ -68,7 +70,7 @@ export default function Intel() {
         ))}
       </div>
 
-      {showForm && (
+      {showForm && isAdmin && (
         <FormPanel title={editing ? "EDIT BROADCAST" : "NEW BROADCAST"} titleColor={T.amber}
           onClose={() => { setShowForm(false); setEditing(null); }}>
           <div className="grid grid-cols-2 gap-3">
@@ -129,6 +131,7 @@ export default function Intel() {
                       <span>{new Date(a.created_date).toLocaleString()}</span>
                     </div>
                   </div>
+                  {isAdmin && (
                   <div className="flex flex-col gap-1 flex-shrink-0">
                     <button onClick={() => handlePin(a)} className="p-1 hover:opacity-80" title="Toggle pin">
                       <Pin size={11} style={{ color: a.pinned ? T.amber : T.textFaint }} />
@@ -141,6 +144,7 @@ export default function Intel() {
                       <Trash2 size={11} style={{ color: T.red + "66" }} />
                     </button>
                   </div>
+                  )}
                 </div>
               </div>
             );
