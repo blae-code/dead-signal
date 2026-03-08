@@ -109,7 +109,7 @@ function QuickRconButton({ label, command, onRun, color = T.textDim }) {
 }
 
 // ── Main panel ────────────────────────────────────────────────────────────────
-export default function AdminToolsPanel({ status }) {
+export default function AdminToolsPanel({ status, events = [] }) {
   const [aiLoading,     setAiLoading]     = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState(null);
   const [aiError,       setAiError]       = useState(null);
