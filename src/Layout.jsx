@@ -194,17 +194,9 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
 
-        {/* Center: Threat level — retains status colours intentionally */}
+        {/* Center: Command Prompt Terminal */}
         <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-          <Shield size={11} style={{ color: threat.color }} />
-          <span className="text-xs font-bold tracking-widest" style={{
-            color: threat.color,
-            fontFamily: "'Orbitron', monospace",
-            fontSize: "9px",
-            animation: threatLevel > 0 ? "threat-blink 1s infinite" : "none"
-          }}>
-            THREAT: {threat.label}
-          </span>
+          <HeaderCommandPrompt currentPageName={currentPageName} inGameTime={inGameTime} />
         </div>
 
         <div className="hidden sm:flex items-center gap-1 text-xs relative flex-1">
