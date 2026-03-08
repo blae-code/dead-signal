@@ -215,7 +215,7 @@ button {
   border: 1px solid var(--rust-border);
   padding: 1rem;
   position: relative;
-  background: linear-gradient(135deg, rgba(30, 20, 15, 0.5) 0%, rgba(40, 25, 15, 0.5) 100%);
+  background: rgba(30, 20, 15, 0.5);
 }
 
 .progress-bar-terminal {

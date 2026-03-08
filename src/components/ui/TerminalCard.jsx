@@ -6,10 +6,10 @@
 // ── Extended palette ──────────────────────────────────────────────────────────
 export const T = {
   // ── Backgrounds (deep & layered for maximum contrast)
-  bg0:  "linear-gradient(160deg, #0a0806 0%, #0d0a07 100%)",  // page background
-  bg1:  "linear-gradient(160deg, #1c1e21 0%, #14161a 100%)",  // primary card (ServerMonitor standard)
-  bg2:  "linear-gradient(160deg, #252930 0%, #1d202a 100%)",  // secondary card (slightly lighter)
-  bg3:  "linear-gradient(160deg, #2e333f 0%, #242a38 100%)",  // tertiary card
+  bg0:  "#0a0806",  // page background
+  bg1:  "#1c1e21",  // primary card (ServerMonitor standard)
+  bg2:  "#252930",  // secondary card (slightly lighter)
+  bg3:  "#2e333f",  // tertiary card
 
   // ── Borders (deep with bright accent options)
   border:   "#2a1e10",
