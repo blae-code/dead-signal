@@ -434,10 +434,10 @@ export default function ServerMonitor() {
                     {rx} <span style={{ fontSize: "9px", opacity: 0.7 }}>MB/s</span>
                   </div>
                 </div>
-                <div className="relative p-3" style={{ border: `1px solid ${T.amber}22`, background: `${T.amber}08` }}>
-                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.amber}44, transparent)` }} />
+                <div className="relative p-3" style={{ border: `1px solid ${T.steel}22`, background: `${T.steel}08` }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.steel}44, transparent)` }} />
                   <div style={{ color: T.textFaint, fontSize: "7.5px", letterSpacing: "0.15em", marginBottom: "4px" }}>↑ UPLOAD</div>
-                  <div style={{ color: T.amber, fontFamily: "'Orbitron', monospace", fontSize: "13px", fontWeight: "bold", textShadow: `0 0 8px ${T.amber}66` }}>
+                  <div style={{ color: T.steel, fontFamily: "'Orbitron', monospace", fontSize: "13px", fontWeight: "bold", textShadow: `0 0 8px ${T.steel}66` }}>
                     {tx} <span style={{ fontSize: "9px", opacity: 0.7 }}>MB/s</span>
                   </div>
                 </div>
