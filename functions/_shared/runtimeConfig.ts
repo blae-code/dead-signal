@@ -6,6 +6,7 @@ export interface RuntimeConfigRecord {
 }
 
 export const RUNTIME_CONFIG_KEY = "global";
+export const CURRENT_RUNTIME_CONFIG_VERSION = "runtime-config-v2-live-reset";
 
 export const DEFAULT_RUNTIME_CONFIG: Record<string, unknown> = {
   app: {
@@ -20,6 +21,7 @@ export const DEFAULT_RUNTIME_CONFIG: Record<string, unknown> = {
         label: "// OPS CENTER",
         items: [
           { label: "COMMAND", page: "Dashboard", code: "HQ", color: "#ffb000", dot: "#39ff14", icon: "Terminal" },
+          { label: "FUNCTION MATRIX", page: "FunctionConsole", code: "FCX", color: "#ff5d5d", dot: "#ff5d5d", icon: "Activity" },
           { label: "SERVER", page: "ServerMonitor", code: "SRV", color: "#00e5ff", dot: "#00e5ff", icon: "Cpu" },
         ],
       },
@@ -27,15 +29,21 @@ export const DEFAULT_RUNTIME_CONFIG: Record<string, unknown> = {
         label: "// FIELD OPS",
         items: [
           { label: "TACTICAL MAP", page: "TacticalMap", code: "MAP", color: "#ffb000", dot: "#ffb000", icon: "Map" },
+          { label: "CLAN MAP", page: "ClanMap", code: "CMAP", color: "#00e5ff", dot: "#00e5ff", icon: "Map" },
           { label: "CLAN ROSTER", page: "ClanRoster", code: "OPS", color: "#b8a890", dot: "#39ff14", icon: "Users" },
           { label: "MISSIONS", page: "Missions", code: "MIS", color: "#ff2020", dot: "#ff2020", icon: "Crosshair" },
+          { label: "SQUAD VITALS", page: "SquadVitalsMonitor", code: "VTL", color: "#39ff14", dot: "#39ff14", icon: "Activity" },
         ],
       },
       {
         label: "// LOGISTICS",
         items: [
           { label: "INVENTORY", page: "Inventory", code: "INV", color: "#b8a890", dot: "#8a7a6a", icon: "Package" },
+          { label: "SUPPLY CHAIN", page: "SupplyChainManager", code: "SCM", color: "#00d4e8", dot: "#00d4e8", icon: "Package" },
+          { label: "RESOURCE HUB", page: "ResourceTradingHub", code: "RTH", color: "#ffaa00", dot: "#ffaa00", icon: "Radio" },
           { label: "ENGINEERING", page: "EngineeringOps", code: "ENG", color: "#00e5ff", dot: "#00e5ff", icon: "Wrench" },
+          { label: "SURVIVAL", page: "SurvivalPlanner", code: "SVR", color: "#00b896", dot: "#00b896", icon: "Crosshair" },
+          { label: "POST-MISSION", page: "PostMissionAnalysis", code: "PMA", color: "#ff6600", dot: "#ff6600", icon: "Skull" },
           { label: "INTEL FEED", page: "Intel", code: "INT", color: "#ffb000", dot: "#ffb000", icon: "Radio" },
           { label: "AI AGENT", page: "AIAgent", code: "AI", color: "#39ff14", dot: "#39ff14", icon: "Bot" },
         ],
@@ -45,12 +53,19 @@ export const DEFAULT_RUNTIME_CONFIG: Record<string, unknown> = {
   terminal: {
     pages: [
       { cmd: "goto dashboard", label: "COMMAND HQ", page: "Dashboard" },
+      { cmd: "goto functions", label: "FUNCTION MATRIX", page: "FunctionConsole" },
       { cmd: "goto server", label: "SERVER MONITOR", page: "ServerMonitor" },
       { cmd: "goto map", label: "TACTICAL MAP", page: "TacticalMap" },
+      { cmd: "goto clanmap", label: "CLAN MAP", page: "ClanMap" },
       { cmd: "goto roster", label: "CLAN ROSTER", page: "ClanRoster" },
       { cmd: "goto missions", label: "MISSIONS", page: "Missions" },
+      { cmd: "goto vitals", label: "SQUAD VITALS", page: "SquadVitalsMonitor" },
       { cmd: "goto inventory", label: "INVENTORY", page: "Inventory" },
       { cmd: "goto engineering", label: "ENGINEERING OPS", page: "EngineeringOps" },
+      { cmd: "goto supply", label: "SUPPLY CHAIN", page: "SupplyChainManager" },
+      { cmd: "goto trade", label: "RESOURCE HUB", page: "ResourceTradingHub" },
+      { cmd: "goto survival", label: "SURVIVAL PLANNER", page: "SurvivalPlanner" },
+      { cmd: "goto analysis", label: "POST-MISSION ANALYSIS", page: "PostMissionAnalysis" },
       { cmd: "goto intel", label: "INTEL FEED", page: "Intel" },
       { cmd: "goto ai", label: "AI AGENT", page: "AIAgent" },
       { cmd: "goto stats", label: "MY STATS", page: "MyStats" },

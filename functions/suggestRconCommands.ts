@@ -1,22 +1,25 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.20";
+import {
+  errorResponse,
+  parseJsonBody,
+  requireAdmin,
+  requireMethod,
+} from "./_shared/backend.ts";
 
 Deno.serve(async (req) => {
-  if (req.method !== 'POST') {
-    return Response.json({ error: 'Method not allowed' }, { status: 405 });
-  }
-
   try {
+    requireMethod(req, "POST");
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
-    }
+    requireAdmin(await base44.auth.me());
 
-    const body = await req.json();
-    const context = body.context || body.serverStatus || {};
-    const recentEvents = body.recentEvents || [];
-    
+    const body = await parseJsonBody<{
+      context?: unknown;
+      serverStatus?: unknown;
+      recentEvents?: unknown;
+    }>(req);
+    const context = (body.context && typeof body.context === "object" ? body.context : body.serverStatus) || {};
+    const recentEvents = Array.isArray(body.recentEvents) ? body.recentEvents : [];
+
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: `You are a server admin assistant. Given this server status and recent events, suggest 5 useful RCON commands to improve the server.
 
@@ -28,24 +31,28 @@ For each command, consider: performance optimization, player management, mainten
 
 Return a JSON object with a "commands" array. Each command should have: command (the RCON command string), and reason (brief explanation of why this command is useful now).`,
       response_json_schema: {
-        type: 'object',
+        type: "object",
         properties: {
           commands: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'object',
+              type: "object",
               properties: {
-                command: { type: 'string' },
-                reason: { type: 'string' }
-              }
-            }
-          }
-        }
-      }
+                command: { type: "string" },
+                reason: { type: "string" },
+              },
+            },
+          },
+        },
+      },
     });
 
-    return Response.json({ success: true, commands: result.commands || [] });
+    return Response.json({
+      success: true,
+      commands: Array.isArray(result?.commands) ? result.commands : [],
+      generated_at: new Date().toISOString(),
+    });
   } catch (error) {
-    return Response.json({ error: error.message || 'Failed to generate suggestions' }, { status: 500 });
+    return errorResponse(error);
   }
 });

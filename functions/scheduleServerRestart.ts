@@ -1,84 +1,106 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.20";
+import {
+  AppError,
+  errorResponse,
+  parseJsonBody,
+  requireAdmin,
+  requireMethod,
+} from "./_shared/backend.ts";
+
+const isScheduledTime = (): boolean => {
+  const now = new Date();
+  const hour = now.getUTCHours();
+  const day = now.getUTCDay();
+  return (day === 2 || day === 6) && hour === 3;
+};
 
 Deno.serve(async (req) => {
   try {
+    requireMethod(req, "POST");
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    
-    if (!user?.role !== 'admin') {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
-    }
+    requireAdmin(await base44.auth.me());
 
-    const { restartType = 'scheduled', cpuThreshold = 85, memThreshold = 90, gracefulWait = 300 } = await req.json();
+    const body = await parseJsonBody<{
+      restartType?: unknown;
+      cpuThreshold?: unknown;
+      memThreshold?: unknown;
+      gracefulWait?: unknown;
+      dry_run?: unknown;
+    }>(req);
+    const restartType = body.restartType === "performance" || body.restartType === "scheduled"
+      ? body.restartType
+      : "scheduled";
+    const cpuThreshold = Number.isFinite(Number(body.cpuThreshold)) ? Number(body.cpuThreshold) : 85;
+    const memThreshold = Number.isFinite(Number(body.memThreshold)) ? Number(body.memThreshold) : 90;
+    const gracefulWait = Math.max(5, Math.min(900, Number(body.gracefulWait) || 300));
+    const dryRun = body.dry_run === true;
 
-    // Fetch current metrics
-    const statusRes = await base44.functions.invoke('getServerStatus', {});
-    const status = statusRes.data;
-
+    const statusRes = await base44.functions.invoke("getServerStatus", {});
+    const status = statusRes?.data || null;
     if (!status || status.error) {
-      return Response.json({ error: 'Could not fetch server status' }, { status: 500 });
+      throw new AppError(502, "status_unavailable", "Could not fetch server status.");
     }
 
-    const shouldRestart = 
-      (restartType === 'performance' && (status.cpu > cpuThreshold || status.ramUsedMB / 1024 > memThreshold)) ||
-      (restartType === 'scheduled' && isScheduledTime());
+    const cpu = Number(status.cpu);
+    const ramUsedMB = Number(status.ramUsedMB);
+    const memoryPercent = Number.isFinite(ramUsedMB) ? ramUsedMB / 1024 : 0;
+    const shouldRestart = (
+      restartType === "performance" && (
+        (Number.isFinite(cpu) && cpu > cpuThreshold) ||
+        (Number.isFinite(memoryPercent) && memoryPercent > memThreshold)
+      )
+    ) || (restartType === "scheduled" && isScheduledTime());
 
     if (!shouldRestart) {
       return Response.json({
         restart_needed: false,
-        cpu: status.cpu,
-        memory_gb: (status.ramUsedMB / 1024).toFixed(1),
-        reason: 'Metrics within acceptable thresholds'
+        dry_run: dryRun,
+        cpu: Number.isFinite(cpu) ? cpu : null,
+        memory_gb: Number.isFinite(ramUsedMB) ? (ramUsedMB / 1024).toFixed(1) : null,
+        reason: "Restart conditions not met.",
       });
     }
 
-    // Announce restart
-    await base44.functions.invoke('sendRconCommand', {
-      command: `say Server restarting in ${gracefulWait}s for maintenance. Save your progress!`
-    }).catch(() => {});
+    let restartResult: unknown = null;
+    if (!dryRun) {
+      await base44.functions.invoke("sendRconCommand", {
+        command: `say Server restarting in ${gracefulWait}s for maintenance. Save your progress!`,
+      }).catch(() => null);
+      await new Promise((resolve) => setTimeout(resolve, gracefulWait * 1000));
+      restartResult = await base44.functions.invoke("sendRconCommand", { command: "restart" }).catch(() => null);
+    }
 
-    // Wait graceful period
-    await new Promise(resolve => setTimeout(resolve, gracefulWait * 1000));
-
-    // Kill and restart
-    const restartRes = await base44.functions.invoke('sendRconCommand', {
-      command: 'restart'
-    }).catch(() => ({ data: { success: false } }));
-
-    // Log restart event
     await base44.entities.ScheduledCommand.create({
-      command_type: 'SERVER_RESTART',
+      command_type: "SERVER_RESTART",
       trigger: restartType,
-      status: restartRes.data?.success ? 'SUCCESS' : 'PENDING',
-      cpu_before: status.cpu,
-      memory_before: status.ramUsedMB / 1024,
-      timestamp: new Date().toISOString()
-    }).catch(() => {});
+      status: dryRun ? "DRY_RUN" : (restartResult as any)?.data?.success ? "SUCCESS" : "PENDING",
+      cpu_before: Number.isFinite(cpu) ? cpu : null,
+      memory_before: Number.isFinite(ramUsedMB) ? ramUsedMB / 1024 : null,
+      timestamp: new Date().toISOString(),
+    }).catch(() => null);
 
     await base44.entities.ServerEvent.create({
-      event_type: 'Server Restart',
-      message: `Automated ${restartType} restart executed (CPU: ${status.cpu.toFixed(0)}%, RAM: ${(status.ramUsedMB / 1024).toFixed(1)}GB)`,
-      severity: 'WARN'
-    }).catch(() => {});
+      event_type: "Server Restart",
+      message: `${dryRun ? "Dry-run " : ""}${restartType} restart processed (CPU: ${
+        Number.isFinite(cpu) ? cpu.toFixed(0) : "n/a"
+      }%, RAM: ${Number.isFinite(ramUsedMB) ? (ramUsedMB / 1024).toFixed(1) : "n/a"}GB)`,
+      severity: "WARN",
+    }).catch(() => null);
 
     return Response.json({
-      restart_initiated: true,
+      success: true,
+      restart_initiated: !dryRun,
+      dry_run: dryRun,
       restart_type: restartType,
       graceful_wait_seconds: gracefulWait,
       metrics_before: {
-        cpu: status.cpu,
-        memory_gb: (status.ramUsedMB / 1024).toFixed(1)
-      }
+        cpu: Number.isFinite(cpu) ? cpu : null,
+        memory_gb: Number.isFinite(ramUsedMB) ? (ramUsedMB / 1024).toFixed(1) : null,
+      },
+      scheduled_time_window_utc: "Tue/Sat 03:00 UTC",
+      executed_at: new Date().toISOString(),
     });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return errorResponse(error);
   }
 });
-
-function isScheduledTime() {
-  const now = new Date();
-  const hour = now.getHours();
-  const day = now.getDay();
-  // Restart Tuesday and Saturday at 3 AM UTC
-  return (day === 2 || day === 6) && hour === 3;
-}

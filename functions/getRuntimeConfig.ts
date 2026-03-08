@@ -1,12 +1,16 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.20";
 import { errorResponse, requireAuthenticated, requireMethod } from "./_shared/backend.ts";
-import { DEFAULT_RUNTIME_CONFIG, RUNTIME_CONFIG_KEY } from "./_shared/runtimeConfig.ts";
+import {
+  CURRENT_RUNTIME_CONFIG_VERSION,
+  DEFAULT_RUNTIME_CONFIG,
+  RUNTIME_CONFIG_KEY,
+} from "./_shared/runtimeConfig.ts";
 import { tryGetEntityCollection } from "./_shared/liveTelemetryStore.ts";
 
 const parseVersion = (value: unknown): string => (
   typeof value === "string" && value.trim()
     ? value.trim()
-    : "runtime-config-v1"
+    : CURRENT_RUNTIME_CONFIG_VERSION
 );
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => (
@@ -36,7 +40,7 @@ const mergeMissingKeys = (
 const nowIso = (): string => new Date().toISOString();
 
 const buildConfigResponse = ({
-  version = "runtime-config-v1",
+  version = CURRENT_RUNTIME_CONFIG_VERSION,
   source,
   updatedAt,
   config,
@@ -77,7 +81,7 @@ Deno.serve(async (req) => {
       const createdAt = nowIso();
       const created = await runtimeConfigEntity.create({
         key: RUNTIME_CONFIG_KEY,
-        version: "runtime-config-v1",
+        version: CURRENT_RUNTIME_CONFIG_VERSION,
         source: "live",
         updated_at: createdAt,
         config: DEFAULT_RUNTIME_CONFIG,
@@ -102,15 +106,20 @@ Deno.serve(async (req) => {
     const updatedAt = typeof latest.updated_at === "string"
       ? latest.updated_at
       : (typeof latest.updated_date === "string" ? latest.updated_date : nowIso());
+    const currentVersion = parseVersion(latest.version);
+    const needsHardReset = currentVersion !== CURRENT_RUNTIME_CONFIG_VERSION;
     const config = latest.config && typeof latest.config === "object"
       ? latest.config as Record<string, unknown>
       : DEFAULT_RUNTIME_CONFIG;
-    const enrichedConfig = mergeMissingKeys(config, DEFAULT_RUNTIME_CONFIG) as Record<string, unknown>;
-    const configChanged = JSON.stringify(config) !== JSON.stringify(enrichedConfig);
+    const enrichedConfig = needsHardReset
+      ? DEFAULT_RUNTIME_CONFIG
+      : mergeMissingKeys(config, DEFAULT_RUNTIME_CONFIG) as Record<string, unknown>;
+    const configChanged = needsHardReset || JSON.stringify(config) !== JSON.stringify(enrichedConfig);
     if (configChanged) {
       const id = typeof latest.id === "string" ? latest.id : null;
       if (id) {
         await runtimeConfigEntity.update(id, {
+          version: CURRENT_RUNTIME_CONFIG_VERSION,
           config: enrichedConfig,
           updated_at: nowIso(),
         }).catch(() => null);
@@ -118,7 +127,7 @@ Deno.serve(async (req) => {
     }
 
     return buildConfigResponse({
-      version: parseVersion(latest.version),
+      version: CURRENT_RUNTIME_CONFIG_VERSION,
       source: "live",
       updatedAt: configChanged ? nowIso() : updatedAt,
       config: enrichedConfig,

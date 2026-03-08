@@ -1,21 +1,31 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.20";
+import {
+  errorResponse,
+  requireAdmin,
+  requireMethod,
+} from "./_shared/backend.ts";
 
 Deno.serve(async (req) => {
   try {
+    requireMethod(req, "POST");
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    
-    if (!user?.role !== 'admin') {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
+    requireAdmin(await base44.auth.me());
+
+    const logs = await base44.entities.ServerEvent.list("-created_date", 100);
+    if (!Array.isArray(logs) || logs.length === 0) {
+      return Response.json({
+        critical_issues: [],
+        performance_concerns: [],
+        resource_alerts: [],
+        patterns: [],
+        recommendations: ["No recent logs available for analysis."],
+        overall_severity: "LOW",
+      });
     }
 
-    const logs = await base44.entities.ServerEvent.list('-created_date', 100);
-    
-    if (!logs || logs.length === 0) {
-      return Response.json({ issues: [], severity: 'LOW' });
-    }
-
-    const logText = logs.map(l => `[${l.severity}] ${l.event_type}: ${l.message}`).join('\n');
+    const logText = logs
+      .map((entry) => `[${entry.severity || "INFO"}] ${entry.event_type || "Event"}: ${entry.message || ""}`)
+      .join("\n");
 
     const analysis = await base44.integrations.Core.InvokeLLM({
       prompt: `Analyze these server logs and identify:
@@ -38,28 +48,31 @@ Respond in JSON format:
   "overall_severity": "LOW|MEDIUM|HIGH|CRITICAL"
 }`,
       response_json_schema: {
-        type: 'object',
+        type: "object",
         properties: {
-          critical_issues: { type: 'array', items: { type: 'string' } },
-          performance_concerns: { type: 'array', items: { type: 'string' } },
-          resource_alerts: { type: 'array', items: { type: 'string' } },
-          patterns: { type: 'array', items: { type: 'string' } },
-          recommendations: { type: 'array', items: { type: 'string' } },
-          overall_severity: { type: 'string' }
-        }
-      }
+          critical_issues: { type: "array", items: { type: "string" } },
+          performance_concerns: { type: "array", items: { type: "string" } },
+          resource_alerts: { type: "array", items: { type: "string" } },
+          patterns: { type: "array", items: { type: "string" } },
+          recommendations: { type: "array", items: { type: "string" } },
+          overall_severity: { type: "string" },
+        },
+      },
     });
 
-    // Store analysis results
     await base44.entities.IntelSummary.create({
-      analysis_type: 'Log Analysis',
+      analysis_type: "Log Analysis",
       findings: JSON.stringify(analysis),
-      severity: analysis.overall_severity,
-      timestamp: new Date().toISOString()
-    }).catch(() => {});
+      severity: analysis?.overall_severity || "LOW",
+      timestamp: new Date().toISOString(),
+    }).catch(() => null);
 
-    return Response.json(analysis);
+    return Response.json({
+      ...analysis,
+      analyzed_at: new Date().toISOString(),
+      analyzed_entries: logs.length,
+    });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return errorResponse(error);
   }
 });
