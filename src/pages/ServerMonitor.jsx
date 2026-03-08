@@ -235,7 +235,7 @@ export default function ServerMonitor() {
   return (
     <div
       className="p-4 pb-24 space-y-4 max-w-screen-2xl mx-auto"
-      style={{ minHeight: "100vh", background: "linear-gradient(160deg, #080c10 0%, #060a0d 100%)" }}
+      style={{ minHeight: "100vh", background: "linear-gradient(160deg, #181a1c 0%, #111315 100%)" }}
     >
       <style>{`
         @keyframes threat-blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
