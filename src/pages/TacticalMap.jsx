@@ -126,8 +126,13 @@ export default function TacticalMap() {
           <option value="ALL">ALL TYPES</option>
           {PIN_TYPES.map(t => <option key={t}>{t}</option>)}
         </select>
+        <ActionBtn color={sharing ? T.green : T.textDim}
+          onClick={() => setSharing(s => !s)}>
+          {sharing ? <RadioTower size={10} /> : <Radio size={10} />}
+          {sharing ? "SHARING POS" : "SHARE POS"}
+        </ActionBtn>
         {isAdmin && (
-          <ActionBtn color={placing ? T.amber : T.green} onClick={() => { setPlacing(!placing); setShowForm(false); }}>
+          <ActionBtn color={placing ? T.amber : T.cyan} onClick={() => { setPlacing(!placing); setShowForm(false); }}>
             <Plus size={10} /> {placing ? "CANCEL" : "DROP PIN"}
           </ActionBtn>
         )}
