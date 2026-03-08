@@ -208,7 +208,7 @@ export default function Dashboard() {
 
           <Panel
             title="LATEST INTEL"
-            titleColor={T.amber}
+            titleColor={ENTITY_COLORS.IntelSummary}
             headerRight={
               <Link to={createPageUrl("Intel")} className="text-xs" style={{ color: T.textFaint, fontSize: "9px", textDecoration: "none" }}>
                 FULL FEED →
