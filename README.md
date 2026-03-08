@@ -21,6 +21,10 @@ Any change pushed to the repo will also be reflected in the Base44 Builder.
 VITE_BASE44_APP_ID=your_app_id
 VITE_BASE44_APP_BASE_URL=your_backend_url
 
+# Optional header DEPLOY launch fallbacks (used if runtime app.launch URLs are empty)
+VITE_DEAD_SIGNAL_GAME_URL=
+VITE_DEAD_SIGNAL_SERVER_URL=
+
 e.g.
 VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
 VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app

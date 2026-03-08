@@ -44,6 +44,8 @@ const C = {
   textFaint: "#a79b8f",
   border: "#2a1e10",
   accent: "#ffaa00",
+  cyan: "#00e8ff",
+  red: "#ff2020",
   scan: "rgba(255, 170, 0, 0.05)",
 };
 
@@ -104,22 +106,33 @@ const asNumber = (value, fallback) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
-const openExternalUri = (uri) => {
-  if (!uri) return;
-  const anchor = document.createElement("a");
-  anchor.href = uri;
-  anchor.target = "_self";
-  anchor.rel = "noopener noreferrer";
-  anchor.style.display = "none";
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
+const openLaunchWindow = () => {
+  const handle = window.open("", "_blank");
+  if (!handle) return null;
+  try {
+    handle.opener = null;
+  } catch {
+    // ignore browser security constraints
+  }
+  return handle;
+};
+
+const assignWindowLocation = (handle, uri) => {
+  if (!handle || !uri) return false;
+  try {
+    if (handle.closed) return false;
+    handle.location.href = uri;
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [online, setOnline] = useState(() => (typeof navigator !== "undefined" ? navigator.onLine : true));
   const [launching, setLaunching] = useState(false);
+  const [launchWarning, setLaunchWarning] = useState("");
   const animationEnabled = useAnimationEnabled();
   const runtimeConfig = useRuntimeConfig();
 
@@ -140,16 +153,25 @@ export default function Layout({ children, currentPageName }) {
   const appVersion = typeof appConfig.version === "string" ? appConfig.version : "UNAVAILABLE";
   const timezone = typeof appConfig.timezone === "string" ? appConfig.timezone : "America/Vancouver";
   const launchConfig = asObject(appConfig.launch);
+  const envLaunchGameUrl = asString(import.meta.env.VITE_DEAD_SIGNAL_GAME_URL);
+  const envLaunchServerUrl = asString(import.meta.env.VITE_DEAD_SIGNAL_SERVER_URL);
+  const launchGameUrl = asString(launchConfig.game_url) || asString(launchConfig.gameUrl) || envLaunchGameUrl;
+  const launchServerUrl = asString(launchConfig.server_url) || asString(launchConfig.serverUrl) || envLaunchServerUrl;
+  const launchDelayRaw = launchConfig.open_server_delay_ms ?? launchConfig.openServerDelayMs;
+  const launchDelayMs = Math.max(0, asNumber(launchDelayRaw, 2500));
   const launchLabel = asString(launchConfig.label) || "DEPLOY";
-  const launchGameUrl = asString(launchConfig.game_url);
-  const launchServerUrl = asString(launchConfig.server_url);
-  const launchDelayMs = Math.max(0, asNumber(launchConfig.open_server_delay_ms, 2500));
-  const launchEnabled = launchConfig.enabled !== false && Boolean(launchGameUrl || launchServerUrl);
-  const launchTooltip = asString(launchConfig.tooltip) || (
-    launchEnabled
-      ? `Launch game and connect (${launchDelayMs}ms relay)`
-      : "Configure app.launch.game_url and/or app.launch.server_url in RuntimeConfig to enable one-click deploy."
-  );
+  const launchEnabledFlag = launchConfig.enabled !== false;
+  const launchHasTargets = Boolean(launchGameUrl || launchServerUrl);
+  const launchDisabledReason = !launchEnabledFlag
+    ? "launch_disabled"
+    : (!launchHasTargets ? "missing_urls" : null);
+  const launchEnabled = launchDisabledReason === null;
+  const launchTooltip = launchWarning
+    || (launchDisabledReason === "launch_disabled"
+      ? "Launch disabled via app.launch.enabled=false."
+      : launchDisabledReason === "missing_urls"
+        ? "Launch URLs not configured. Set app.launch.game_url/app.launch.server_url (or gameUrl/serverUrl), or VITE_DEAD_SIGNAL_GAME_URL/VITE_DEAD_SIGNAL_SERVER_URL."
+        : asString(launchConfig.tooltip) || `Launch game and connect (${launchDelayMs}ms relay)`);
 
   useEffect(() => {
     const onOnline = () => setOnline(true);
@@ -167,20 +189,45 @@ export default function Layout({ children, currentPageName }) {
     if (!launchEnabled) return;
 
     setLaunching(true);
-    if (launchGameUrl) {
-      openExternalUri(launchGameUrl);
+    setLaunchWarning("");
+    let blocked = false;
+    const markLaunchBlocked = () => {
+      setLaunchWarning("Launch blocked by browser pop-up settings.");
+      window.setTimeout(() => setLaunchWarning(""), 5000);
+    };
+
+    const hasGameTarget = Boolean(launchGameUrl);
+    const hasServerTarget = Boolean(launchServerUrl);
+    const gameWindow = hasGameTarget ? openLaunchWindow() : null;
+    const serverWindow = hasServerTarget ? openLaunchWindow() : null;
+
+    if (hasGameTarget && !gameWindow) blocked = true;
+    if (hasServerTarget && !serverWindow) blocked = true;
+
+    if (hasGameTarget && gameWindow) {
+      if (!assignWindowLocation(gameWindow, launchGameUrl)) blocked = true;
     }
 
-    if (launchServerUrl) {
-      const openServer = () => openExternalUri(launchServerUrl);
-      if (launchGameUrl) {
-        window.setTimeout(openServer, launchDelayMs);
+    const openServer = () => {
+      if (!hasServerTarget) return;
+      if (!serverWindow || !assignWindowLocation(serverWindow, launchServerUrl)) {
+        markLaunchBlocked();
+      }
+    };
+    const serverDelayMs = hasGameTarget && hasServerTarget ? launchDelayMs : 0;
+    if (hasServerTarget) {
+      if (serverDelayMs > 0) {
+        window.setTimeout(openServer, serverDelayMs);
       } else {
         openServer();
       }
     }
 
-    window.setTimeout(() => setLaunching(false), Math.max(launchDelayMs + 1500, 2000));
+    if (blocked) {
+      markLaunchBlocked();
+    }
+
+    window.setTimeout(() => setLaunching(false), Math.max(serverDelayMs + 1500, 2000));
   };
 
   return (
@@ -206,7 +253,7 @@ export default function Layout({ children, currentPageName }) {
           <HeaderCommandPrompt currentPageName={currentPageName} />
         </div>
 
-        <div className="ml-auto flex items-center mr-2 ds-header-segment p-1">
+        <div className="ml-auto flex items-center mr-2 ds-header-segment p-1 gap-2">
           <button
             type="button"
             onClick={handleLaunch}
@@ -214,19 +261,26 @@ export default function Layout({ children, currentPageName }) {
             title={launchTooltip}
             className="flex items-center gap-1.5 border px-2 py-1 transition-opacity"
             style={{
-              borderColor: launchEnabled ? `${C.cyan}88` : C.border,
-              background: launchEnabled ? "rgba(0, 232, 255, 0.14)" : "rgba(24, 24, 28, 0.8)",
-              color: launchEnabled ? C.cyan : C.textFaint,
+              borderColor: launchEnabled ? (launchWarning ? `${C.red}88` : `${C.cyan}88`) : C.border,
+              background: launchEnabled ? (launchWarning ? "rgba(255, 32, 32, 0.14)" : "rgba(0, 232, 255, 0.14)") : "rgba(24, 24, 28, 0.8)",
+              color: launchEnabled ? (launchWarning ? C.red : C.cyan) : C.textFaint,
               opacity: launchEnabled ? 1 : 0.65,
               fontSize: "9px",
               letterSpacing: "0.14em",
               fontFamily: "'Orbitron', monospace",
-              boxShadow: launchEnabled ? "0 0 10px rgba(0, 232, 255, 0.22)" : "none",
+              boxShadow: launchEnabled
+                ? (launchWarning ? "0 0 10px rgba(255, 32, 32, 0.22)" : "0 0 10px rgba(0, 232, 255, 0.22)")
+                : "none",
             }}
           >
             <Rocket size={11} />
             <span>{launching ? "DEPLOYING..." : launchLabel}</span>
           </button>
+          {launchWarning && (
+            <span style={{ color: C.red, fontSize: "8px", letterSpacing: "0.08em", maxWidth: "170px", lineHeight: 1.2 }}>
+              {launchWarning}
+            </span>
+          )}
         </div>
 
         <HeaderChronometer animationEnabled={animationEnabled} runtimeConfig={runtimeConfig} appTimezone={timezone} />

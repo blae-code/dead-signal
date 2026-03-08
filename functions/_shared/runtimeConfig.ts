@@ -19,7 +19,7 @@ export const DEFAULT_RUNTIME_CONFIG: Record<string, unknown> = {
       game_url: "",
       server_url: "",
       open_server_delay_ms: 2500,
-      tooltip: "Set game_url/server_url for one-click launch and server connect.",
+      tooltip: "Set app.launch.game_url/server_url (or gameUrl/serverUrl). Optional env fallback: VITE_DEAD_SIGNAL_GAME_URL / VITE_DEAD_SIGNAL_SERVER_URL.",
     },
   },
   world: {
