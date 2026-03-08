@@ -21,7 +21,7 @@ const navSections = [
   {
     label: "FIELD OPS",
     items: [
-      { label: "TACTICAL MAP", page: "TacticalMap",   icon: Map,       code: "MAP", color: "#e8b800", dot: "#e8b800" },
+      { label: "CLAN MAP",     page: "ClanMap",       icon: Map,       code: "CMAP", color: "#00e8ff", dot: "#00e8ff" },
       { label: "CLAN ROSTER",  page: "ClanRoster",    icon: Users,     code: "OPS", color: "#00c8a0", dot: "#30ff60" },
       { label: "MISSIONS",     page: "Missions",      icon: Crosshair, code: "MIS", color: "#ff2828", dot: "#ff2828" },
     ],
