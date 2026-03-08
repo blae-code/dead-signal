@@ -8,10 +8,12 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
+import { CORE, STATUS_COLORS, ENTITY_COLORS, PAGE_PALETTES } from "@/components/ColorSystem";
 
-const SEV_COLORS = { INFO: T.textDim, WARN: T.amber, ALERT: T.orange, CRITICAL: T.red };
-const ANN_COLORS = { Emergency: T.red, Intel: T.cyan, Ops: T.orange, General: T.green, Maintenance: T.amber };
-const SNAPSHOT_PALETTE = [T.red, T.orange, "#ff5555", T.green, T.cyan, T.amber];
+const PAGE = PAGE_PALETTES.Dashboard;
+const SEV_COLORS = { INFO: T.textDim, WARN: CORE.warning, ALERT: CORE.warning, CRITICAL: CORE.critical };
+const ANN_COLORS = { Emergency: CORE.critical, Intel: CORE.info, Ops: CORE.warning, General: CORE.operational, Maintenance: CORE.standby };
+const SNAPSHOT_PALETTE = [ENTITY_COLORS.InventoryItem || CORE.info, ENTITY_COLORS.ResourceListing || CORE.operational, ENTITY_COLORS.SupplyCacheLocation || CORE.info, ENTITY_COLORS.TradeOffer || CORE.olive];
 
 const pickByToken = (values, token) =>
   values.find((value) => typeof value === "string" && value.toLowerCase() === token) || "";
