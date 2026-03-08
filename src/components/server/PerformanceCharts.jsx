@@ -198,12 +198,14 @@ export default function PerformanceCharts({ status, statusLoading }) {
     return () => clearInterval(interval);
   }, [lastStatus]);
 
+  const ramMax = lastStatus?.ramTotal ? Math.round((lastStatus.ramTotal ?? 32768) / 1024) : 32;
+  
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       <ChartCard title="CPU %"     data={cpuHistory}  dataKey="cpu"  color={T.green}   unit="%"   threshold={80} />
-      <ChartCard title="RAM (GB)"  data={ramHistory}  dataKey="ram"  color={T.cyan}    unit=" GB" threshold={28} />
+      <ChartCard title="RAM (GB)"  data={ramHistory}  dataKey="ram"  color={T.cyan}    unit=" GB" maxValue={ramMax} />
       <ChartCard title="DISK (GB)" data={diskHistory} dataKey="disk" color={T.gold}    unit=" GB" />
-      <ChartCard title="SRV FPS"   data={fpsHistory}  dataKey="fps"  color={T.olive}   unit=""    />
+      <ChartCard title="SRV FPS"   data={fpsHistory}  dataKey="fps"  color={T.olive}   unit=""    threshold={60} />
     </div>
   );
 }
