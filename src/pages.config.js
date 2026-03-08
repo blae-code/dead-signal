@@ -66,6 +66,7 @@ import LootSharing from './pages/LootSharing';
 import ClanCalendar from './pages/ClanCalendar';
 import ClanTreasury from './pages/ClanTreasury';
 import ClanVoting from './pages/ClanVoting';
+import ClanWiki from './pages/ClanWiki';
 import __Layout from './Layout.jsx';
 
 
@@ -89,6 +90,7 @@ export const PAGES = {
     "ClanCalendar": ClanCalendar,
     "ClanTreasury": ClanTreasury,
     "ClanVoting": ClanVoting,
+    "ClanWiki": ClanWiki,
 }
 
 export const pagesConfig = {
