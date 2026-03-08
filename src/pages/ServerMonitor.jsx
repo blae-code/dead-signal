@@ -560,7 +560,7 @@ export default function ServerMonitor() {
                     </span>
                     <div style={{ fontSize: "9px", color: T.textFaint, fontFamily: "'Orbitron', monospace", letterSpacing: "0.12em", opacity: 0.5 }}>
                       [REDACTED]
-                    </span>
+                    </div>
                   </div>
                   <div className="px-3 py-3 space-y-2">
                     {Array.from({ length: 3 }).map((_, i) => (
