@@ -69,6 +69,7 @@ import ServerMonitor from './pages/ServerMonitor';
 import TacticalMap from './pages/TacticalMap';
 import SurvivalPlanner from './pages/SurvivalPlanner';
 import SquadVitalsMonitor from './pages/SquadVitalsMonitor';
+import SupplyChainManager from './pages/SupplyChainManager';
 import __Layout from './Layout.jsx';
 
 
@@ -95,6 +96,7 @@ export const PAGES = {
     "TacticalMap": TacticalMap,
     "SurvivalPlanner": SurvivalPlanner,
     "SquadVitalsMonitor": SquadVitalsMonitor,
+    "SupplyChainManager": SupplyChainManager,
 }
 
 export const pagesConfig = {
