@@ -54,7 +54,18 @@ export default function ServerMonitor() {
   const fetchStatus = async () => {
     try {
       const res = await base44.functions.invoke('getServerStatus', {});
-      if (res.data && !res.data.error) setStatus(res.data);
+      if (res.data && !res.data.error) {
+        const newStatus = res.data;
+        setStatus(newStatus);
+        setLastPolled(new Date().toLocaleTimeString("en-US", { hour12: false }));
+        // Detect transition to offline
+        if (prevOnlineRef.current === true && newStatus.online === false) {
+          setDowntimeAlert(true);
+          logEvent("Downtime", "Server went offline — downtime detected", "CRITICAL");
+        }
+        if (newStatus.online === true) setDowntimeAlert(false);
+        prevOnlineRef.current = newStatus.online;
+      }
     } catch (e) {
       // silently fail, keep last known status
     } finally {
