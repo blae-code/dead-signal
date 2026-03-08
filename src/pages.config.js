@@ -66,7 +66,6 @@ import Missions from './pages/Missions';
 import MyStats from './pages/MyStats';
 import PlayerProfile from './pages/PlayerProfile';
 import ServerMonitor from './pages/ServerMonitor';
-import TacticalMap from './pages/TacticalMap';
 import SurvivalPlanner from './pages/SurvivalPlanner';
 import SquadVitalsMonitor from './pages/SquadVitalsMonitor';
 import SupplyChainManager from './pages/SupplyChainManager';
@@ -95,7 +94,6 @@ export const PAGES = {
     "MyStats": MyStats,
     "PlayerProfile": PlayerProfile,
     "ServerMonitor": ServerMonitor,
-    "TacticalMap": TacticalMap,
     "SurvivalPlanner": SurvivalPlanner,
     "SquadVitalsMonitor": SquadVitalsMonitor,
     "SupplyChainManager": SupplyChainManager,
