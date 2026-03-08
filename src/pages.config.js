@@ -67,6 +67,7 @@ import MyStats from './pages/MyStats';
 import PlayerProfile from './pages/PlayerProfile';
 import ServerMonitor from './pages/ServerMonitor';
 import TacticalMap from './pages/TacticalMap';
+import SurvivalPlanner from './pages/SurvivalPlanner';
 import __Layout from './Layout.jsx';
 
 
@@ -91,6 +92,7 @@ export const PAGES = {
     "PlayerProfile": PlayerProfile,
     "ServerMonitor": ServerMonitor,
     "TacticalMap": TacticalMap,
+    "SurvivalPlanner": SurvivalPlanner,
 }
 
 export const pagesConfig = {
