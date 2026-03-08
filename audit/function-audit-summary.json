@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-03-08T16:32:53.737Z",
+  "function_count": 38,
+  "capability_count": 38,
+  "payload_template_count": 38,
+  "route_count": 28,
+  "passed_functions": 38,
+  "failed_functions": 0,
+  "missing_capabilities": [],
+  "extra_capabilities": [],
+  "missing_schemas": [],
+  "missing_payload_templates": [],
+  "missing_surface_routes": [],
+  "global_issues": [],
+  "function_console_route": true,
+  "function_console_dynamic_coverage": true
+}
