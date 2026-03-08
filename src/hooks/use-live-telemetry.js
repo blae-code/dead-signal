@@ -1,16 +1,24 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { invokeFunctionOrFallback } from "@/api/function-invoke";
 
 const fetchLiveTelemetry = async ({ targetId, windowMinutes }) => {
-  const response = await base44.functions.invoke("getLiveTelemetry", {
+  return invokeFunctionOrFallback("getLiveTelemetry", {
     target_id: targetId || undefined,
     window_minutes: windowMinutes,
-  });
-  if (response?.data && !response.data.error) {
-    return response.data;
-  }
-  throw new Error(response?.data?.error || "Failed to fetch live telemetry.");
+  }, () => ({
+    success: false,
+    target_id: targetId || null,
+    source: "unavailable",
+    retrieved_at: new Date().toISOString(),
+    window_minutes: windowMinutes,
+    current: null,
+    samples: [],
+    rollups: [],
+    source_health: [],
+  }));
+
 };
 
 export const useLiveTelemetry = ({

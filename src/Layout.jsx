@@ -46,6 +46,21 @@ const C = {
   scan: "rgba(184, 134, 11, 0.01)",
 };
 
+const weatherCodeToLabel = (code) => {
+  const normalized = Number(code);
+  if (!Number.isFinite(normalized)) return "Unknown";
+  if (normalized === 0) return "Clear";
+  if ([1, 2, 3].includes(normalized)) return "Cloudy";
+  if ([45, 48].includes(normalized)) return "Fog";
+  if ([51, 53, 55, 56, 57].includes(normalized)) return "Drizzle";
+  if ([61, 63, 65, 66, 67].includes(normalized)) return "Rain";
+  if ([71, 73, 75, 77].includes(normalized)) return "Snow";
+  if ([80, 81, 82].includes(normalized)) return "Showers";
+  if ([85, 86].includes(normalized)) return "Snow Showers";
+  if ([95, 96, 99].includes(normalized)) return "Storm";
+  return "Unknown";
+};
+
 const FALLBACK_NAV_SECTIONS = [
   {
     label: "// OPS CENTER",
@@ -167,20 +182,18 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchWeather = async () => {
       try {
-        const response = await fetch("https://api.weather.gov/points/49.28,-123.12");
+        const response = await fetch("https://api.open-meteo.com/v1/forecast?latitude=49.2827&longitude=-123.1207&current=temperature_2m,is_day,weather_code&temperature_unit=fahrenheit");
+        if (!response.ok) return;
         const data = await response.json();
-        const forecastUrl = data.properties?.forecast;
-        if (!forecastUrl) return;
-        const forecastResponse = await fetch(forecastUrl);
-        const forecastData = await forecastResponse.json();
-        const current = forecastData.properties?.periods?.[0];
-        if (!current) return;
+        const current = data?.current;
+        if (!current || cancelled) return;
         setWeather({
-          temp: current.temperature,
-          shortForecast: current.shortForecast,
-          isDaytime: current.isDaytime,
+          temp: Math.round(Number(current.temperature_2m)),
+          shortForecast: weatherCodeToLabel(current.weather_code),
+          isDaytime: current.is_day === 1,
         });
       } catch {
         // Intentionally silent for ambient weather display.
@@ -188,7 +201,10 @@ export default function Layout({ children, currentPageName }) {
     };
     fetchWeather();
     const weatherInterval = setInterval(fetchWeather, 600_000);
-    return () => clearInterval(weatherInterval);
+    return () => {
+      cancelled = true;
+      clearInterval(weatherInterval);
+    };
   }, []);
 
   return (

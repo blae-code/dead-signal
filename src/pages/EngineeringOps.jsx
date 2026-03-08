@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/TerminalCard";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
+import { invokeFunctionOrFallback } from "@/api/function-invoke";
 
 const ALL_FILTER = "__all__";
 
@@ -219,11 +220,7 @@ export default function EngineeringOps() {
   });
   const { data: serverStatus = null } = useQuery({
     queryKey: ["engineering", "server-status"],
-    queryFn: async () => {
-      const response = await base44.functions.invoke("getServerStatus", {});
-      if (response?.data && !response.data.error) return response.data;
-      return null;
-    },
+    queryFn: async () => invokeFunctionOrFallback("getServerStatus", {}, () => null),
     staleTime: 5_000,
     refetchInterval: 15_000,
     retry: 1,

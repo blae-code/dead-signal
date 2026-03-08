@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { motion } from 'framer-motion';
 import { TrendingUp } from 'lucide-react';
+import SafeResponsiveContainer from '@/components/ui/SafeResponsiveContainer';
 
 export default function PerformanceAnalytics() {
   const [logs, setLogs] = useState([]);
@@ -51,7 +52,7 @@ export default function PerformanceAnalytics() {
             </div>
           </div>
           
-          <ResponsiveContainer width="100%" height={200}>
+          <SafeResponsiveContainer height={200} minHeight={160}>
             <LineChart data={logs.slice(-20)}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
               <XAxis dataKey="timestamp" tick={{ fontSize: 8 }} stroke="#666" />
@@ -59,7 +60,7 @@ export default function PerformanceAnalytics() {
               <Tooltip contentStyle={{ background: '#0a0a0a', border: '1px solid #2a2a2a' }} />
               <Line type="monotone" dataKey="cpu_percent" stroke="#39ff14" dot={false} />
             </LineChart>
-          </ResponsiveContainer>
+          </SafeResponsiveContainer>
         </>
       )}
     </motion.div>

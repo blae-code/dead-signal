@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAnimationEnabled } from "@/hooks/use-animation-enabled";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
+import { invokeFunctionOrFallback } from "@/api/function-invoke";
 
 const C = {
   green: "#39ff14",
@@ -150,12 +151,16 @@ export default function HeaderCommandPrompt({ currentPageName }) {
     if (cmd === "status") {
       push("Fetching live server status...", C.textFaint);
       try {
-        const response = await base44.functions.invoke("getServerStatus", {});
-        const status = response?.data;
-        if (status?.error) {
-          push(`ERROR: ${status.error}`, C.red);
-          return;
-        }
+        const status = await invokeFunctionOrFallback("getServerStatus", {}, () => ({
+          state: null,
+          online: null,
+          uptime: null,
+          cpu: null,
+          ramUsedMB: null,
+          responseTime: null,
+          playerCount: null,
+          metric_available: {},
+        }));
         push(`SERVER STATE: ${status?.state?.toUpperCase?.() || "UNAVAILABLE"}`, status?.online ? C.green : C.red);
         push(`UPTIME:       ${status?.uptime || "UNAVAILABLE"}`, C.amber);
         push(`CPU:          ${status?.metric_available?.cpu ? `${status.cpu}%` : "UNAVAILABLE"}`, C.text);

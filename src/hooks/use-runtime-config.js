@@ -1,13 +1,17 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { invokeFunctionOrFallback } from "@/api/function-invoke";
 
 const fetchRuntimeConfig = async () => {
-  const response = await base44.functions.invoke("getRuntimeConfig", {});
-  if (response?.data && !response.data.error) {
-    return response.data;
-  }
-  throw new Error(response?.data?.error || "Failed to load runtime configuration.");
+  return invokeFunctionOrFallback("getRuntimeConfig", {}, () => ({
+    version: null,
+    source: "unavailable",
+    key: "runtime_config_global",
+    retrieved_at: new Date().toISOString(),
+    updated_at: null,
+    config: null,
+  }));
 };
 
 const getArray = (config, path) => {

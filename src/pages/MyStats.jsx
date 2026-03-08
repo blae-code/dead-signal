@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { BarChart2, Skull } from "lucide-react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { T, PageHeader, Panel, StatGrid } from "@/components/ui/TerminalCard";
+import SafeResponsiveContainer from "@/components/ui/SafeResponsiveContainer";
 
 export default function MyStats() {
   const [user, setUser] = useState(null);
@@ -91,8 +92,8 @@ export default function MyStats() {
           {/* Kill/Death trend */}
           {dailyData.length > 0 && (
             <Panel title="KILL / DEATH TREND (14 DAYS)" titleColor={T.red}>
-              <div className="p-3" style={{ height: 180 }}>
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="p-3">
+                <SafeResponsiveContainer height={180} minHeight={140}>
                   <LineChart data={dailyData}>
                     <CartesianGrid strokeDasharray="2 4" stroke={T.border} />
                     <XAxis dataKey="day" tick={{ fill: T.textFaint, fontSize: 9 }} tickFormatter={v => v.slice(5)} />
@@ -101,7 +102,7 @@ export default function MyStats() {
                     <Line type="monotone" dataKey="kills" stroke={T.red} strokeWidth={2} dot={false} name="Kills" />
                     <Line type="monotone" dataKey="deaths" stroke={T.amber} strokeWidth={2} dot={false} name="Deaths" />
                   </LineChart>
-                </ResponsiveContainer>
+                </SafeResponsiveContainer>
               </div>
             </Panel>
           )}
@@ -109,8 +110,8 @@ export default function MyStats() {
           {/* Activity breakdown */}
           {breakdown.length > 0 && (
             <Panel title="ACTIVITY BREAKDOWN" titleColor={T.cyan}>
-              <div className="p-3" style={{ height: 160 }}>
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="p-3">
+                <SafeResponsiveContainer height={160} minHeight={130}>
                   <BarChart data={breakdown}>
                     <CartesianGrid strokeDasharray="2 4" stroke={T.border} />
                     <XAxis dataKey="type" tick={{ fill: T.textFaint, fontSize: 9 }} />
@@ -118,7 +119,7 @@ export default function MyStats() {
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="count" fill={T.cyan} name="Count" />
                   </BarChart>
-                </ResponsiveContainer>
+                </SafeResponsiveContainer>
               </div>
             </Panel>
           )}

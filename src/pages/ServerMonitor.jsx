@@ -14,6 +14,7 @@ import ServerInsightsWidget from "../components/server/ServerInsightsWidget";
 import LiveHealthBar from "../components/server/LiveHealthBar";
 import { T, PageHeader } from "@/components/ui/TerminalCard";
 import { useLiveTelemetry } from "@/hooks/use-live-telemetry";
+import { invokeFunctionOrFallback } from "@/api/function-invoke";
 
 function AnimatedValue({ value, color = T.green, format = (v) => v }) {
   return (
@@ -31,11 +32,30 @@ function AnimatedValue({ value, color = T.green, format = (v) => v }) {
 }
 
 const fetchStatus = async () => {
-  const response = await base44.functions.invoke("getServerStatus", {});
-  if (response?.data && !response.data.error) {
-    return response.data;
-  }
-  throw new Error(response?.data?.error || "Unable to fetch server status.");
+  return invokeFunctionOrFallback("getServerStatus", {}, () => ({
+    online: null,
+    state: null,
+    cpu: null,
+    ramUsedMB: null,
+    diskMB: null,
+    uptime: null,
+    uptimeSeconds: null,
+    networkRxKB: null,
+    networkTxKB: null,
+    playerCount: null,
+    serverFps: null,
+    responseTime: null,
+    processCount: null,
+    activeConnections: null,
+    retrieved_at: new Date().toISOString(),
+    target_id: null,
+    metric_source: {},
+    metric_available: {},
+    metrics: {},
+    stale: true,
+    stale_after_ms: 30_000,
+    data_source: "unavailable",
+  }));
 };
 
 export default function ServerMonitor() {

@@ -6,10 +6,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
 } from "recharts";
 import { AlertTriangle } from "lucide-react";
 import { T, Panel } from "@/components/ui/TerminalCard";
+import SafeResponsiveContainer from "@/components/ui/SafeResponsiveContainer";
 
 const FORECAST_HOURS = 48;
 
@@ -81,8 +81,7 @@ function ForecastCard({ title, color, history, threshold = 80 }) {
   return (
     <Panel title={title} titleColor={color} accentBorder={color + "55"}>
       <div className="p-3 space-y-3">
-        <div style={{ width: "100%", height: "140px" }}>
-          <ResponsiveContainer width="100%" height="100%">
+        <SafeResponsiveContainer height={140} minHeight={120}>
             <LineChart data={forecast} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
               <XAxis dataKey="hour" tick={{ fontSize: 9, fill: T.textFaint }} />
@@ -94,8 +93,7 @@ function ForecastCard({ title, color, history, threshold = 80 }) {
               <Line type="monotone" dataKey="predicted" stroke={color} dot={false} strokeWidth={1.5} isAnimationActive={false} />
               <Line type="monotone" dataKey={() => threshold} stroke={T.amber + "88"} strokeDasharray="2 2" dot={false} strokeWidth={1} isAnimationActive={false} />
             </LineChart>
-          </ResponsiveContainer>
-        </div>
+        </SafeResponsiveContainer>
 
         <div className="grid grid-cols-3 gap-2 text-center border-t" style={{ borderColor: T.border, paddingTop: "8px" }}>
           <div>

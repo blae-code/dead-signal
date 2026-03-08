@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Zap } from 'lucide-react';
+import SafeResponsiveContainer from '@/components/ui/SafeResponsiveContainer';
 
 export default function ClanAnalyticsWidget() {
   const [analytics, setAnalytics] = useState([]);
@@ -54,7 +55,7 @@ export default function ClanAnalyticsWidget() {
       </div>
 
       {analytics.length > 0 && (
-        <ResponsiveContainer width="100%" height={150}>
+        <SafeResponsiveContainer height={150} minHeight={120}>
           <BarChart data={analytics}>
             <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
             <XAxis dataKey="date" tick={{ fontSize: 8 }} stroke="#666" />
@@ -62,7 +63,7 @@ export default function ClanAnalyticsWidget() {
             <Tooltip contentStyle={{ background: '#0a0a0a', border: '1px solid #2a2a2a' }} />
             <Bar dataKey="missions_completed" fill="#39ff14" />
           </BarChart>
-        </ResponsiveContainer>
+        </SafeResponsiveContainer>
       )}
     </motion.div>
   );

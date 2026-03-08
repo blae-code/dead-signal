@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { useLiveMetric } from "@/hooks/use-live-metric";
+import { invokeFunctionOrFallback } from "@/api/function-invoke";
 
 const C = {
   text: "#e0d4c0",
@@ -14,11 +14,20 @@ const C = {
 };
 
 const fetchStatus = async () => {
-  const response = await base44.functions.invoke("getServerStatus", {});
-  if (response?.data && !response.data.error) {
-    return response.data;
-  }
-  throw new Error(response?.data?.error || "Unable to fetch live world status.");
+  return invokeFunctionOrFallback("getServerStatus", {}, () => ({
+    online: null,
+    state: null,
+    playerCount: null,
+    serverFps: null,
+    responseTime: null,
+    retrieved_at: new Date().toISOString(),
+    data_source: "unavailable",
+    metric_source: {},
+    metric_available: {},
+    metrics: {},
+    stale: true,
+    stale_after_ms: 30_000,
+  }));
 };
 
 function StatusBlock({ label, value, color = C.textDim, source = "unavailable" }) {

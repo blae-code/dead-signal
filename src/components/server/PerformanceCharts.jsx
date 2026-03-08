@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { T } from "@/components/ui/TerminalCard";
 import { useLiveMetric } from "@/hooks/use-live-metric";
+import SafeResponsiveContainer from "@/components/ui/SafeResponsiveContainer";
 
 const toTimeLabel = () =>
   new Date().toLocaleTimeString("en-US", {
@@ -40,8 +41,7 @@ function ChartCard({ title, data, dataKey, color, unit, available, source }) {
           </span>
         </div>
       </div>
-      <div style={{ width: "100%", height: "150px" }}>
-        <ResponsiveContainer>
+      <SafeResponsiveContainer height={150} minHeight={120}>
           <LineChart data={data}>
             <CartesianGrid stroke={T.border} strokeDasharray="3 3" />
             <XAxis dataKey="time" hide />
@@ -52,8 +52,7 @@ function ChartCard({ title, data, dataKey, color, unit, available, source }) {
             />
             <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} isAnimationActive={false} connectNulls={false} />
           </LineChart>
-        </ResponsiveContainer>
-      </div>
+      </SafeResponsiveContainer>
     </motion.div>
   );
 }
