@@ -80,13 +80,16 @@ function EkgCanvas({ data, dataKey, color, height = 90, minVal = 0, maxVal = 100
 }
 
 // ── Chart card ────────────────────────────────────────────────────────────────
-function ChartCard({ title, data, dataKey, color, unit, threshold, maxValue }) {
+function ChartCard({ title, data, dataKey, color, unit, threshold, maxValue, minVal = 0 }) {
   const latest = data.length > 0 ? data[data.length - 1][dataKey] : 0;
   const thresholdValue = threshold || maxValue;
   const latestColor =
     thresholdValue && latest > thresholdValue * 0.9 ? T.red :
     thresholdValue && latest > thresholdValue * 0.7 ? T.amber :
     color;
+
+  const displayMin = minVal;
+  const displayMax = thresholdValue || maxValue || 100;
 
   return (
     <div
@@ -118,24 +121,40 @@ function ChartCard({ title, data, dataKey, color, unit, threshold, maxValue }) {
         </span>
       </div>
 
-      {/* EKG canvas */}
-      <div style={{ padding: "2px 0 0", background: "rgba(0,0,0,0.3)" }}>
-        {data.length < 2 ? (
-          <div
-            className="flex items-center justify-center"
-            style={{ height: "90px", color: T.textFaint, fontSize: "8px", letterSpacing: "0.15em" }}
-          >
-            // AWAITING SIGNAL...
-          </div>
-        ) : (
-          <EkgCanvas data={data} dataKey={dataKey} color={color} />
-        )}
+      {/* Chart container with Y-axis labels */}
+      <div style={{ display: "flex", padding: "2px 0 0" }}>
+        {/* Y-axis labels */}
+        <div style={{ width: "28px", display: "flex", flexDirection: "column", justifyContent: "space-between", paddingRight: "4px", paddingTop: "2px", paddingBottom: "4px" }}>
+          <span style={{ color: T.textFaint, fontSize: "6.5px", lineHeight: "1", textAlign: "right" }}>
+            {displayMax}
+          </span>
+          <span style={{ color: T.textFaint, fontSize: "6.5px", lineHeight: "1", textAlign: "right", opacity: 0.6 }}>
+            {((displayMax + displayMin) / 2).toFixed(0)}
+          </span>
+          <span style={{ color: T.textFaint, fontSize: "6.5px", lineHeight: "1", textAlign: "right" }}>
+            {displayMin}
+          </span>
+        </div>
+
+        {/* Canvas */}
+        <div style={{ flex: 1, background: "rgba(0,0,0,0.3)" }}>
+          {data.length < 2 ? (
+            <div
+              className="flex items-center justify-center"
+              style={{ height: "90px", color: T.textFaint, fontSize: "8px", letterSpacing: "0.15em" }}
+            >
+              // AWAITING SIGNAL...
+            </div>
+          ) : (
+            <EkgCanvas data={data} dataKey={dataKey} color={color} minVal={displayMin} maxVal={displayMax} />
+          )}
+        </div>
       </div>
 
       {/* Threshold marker */}
       {(threshold || maxValue) && (
         <div className="flex items-center justify-between px-3 py-1 border-t" style={{ borderColor: T.border + "55" }}>
-          <span style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.1em" }}>MAX</span>
+          <span style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.1em" }}>THRESHOLD</span>
           <span style={{ color: T.amber + "99", fontSize: "7px", fontFamily: "'Orbitron', monospace" }}>{(threshold || maxValue)}{unit}</span>
         </div>
       )}
