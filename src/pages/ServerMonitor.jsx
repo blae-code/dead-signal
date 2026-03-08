@@ -11,6 +11,7 @@ import BottomConsoleDrawer from "../components/server/BottomConsoleDrawer";
 import LiveUptime from "../components/server/LiveUptime";
 import ServerMetricsWidget from "../components/server/ServerMetricsWidget";
 import ServerInsightsWidget from "../components/server/ServerInsightsWidget";
+import LiveHealthBar from "../components/server/LiveHealthBar";
 import { T, PageHeader, ActionBtn } from "@/components/ui/TerminalCard";
 
 // Animated value display component
