@@ -103,7 +103,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 space-y-4 max-w-7xl mx-auto">
-      <PageHeader icon={Terminal} title="COMMAND HQ" color={T.amber}>
+      <PageHeader icon={Terminal} title="COMMAND HQ" color={PAGE.primary}>
         <span className="text-xs" style={{ color: T.textFaint, fontSize: "9px", letterSpacing: "0.15em" }}>
           {user ? `OPERATOR: ${user.full_name || user.email}` : "AUTHENTICATING..."}
         </span>
