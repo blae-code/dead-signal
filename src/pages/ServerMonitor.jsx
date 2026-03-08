@@ -507,8 +507,11 @@ export default function ServerMonitor() {
           <EventFeed events={events} maxHeight="500px" />
         </div>
 
-        {/* RIGHT: Admin Tools */}
+        {/* RIGHT: Admin Tools & Automation */}
         <div className="space-y-3">
+          {/* Automation Dashboard */}
+          {isAdmin && <AutomationDashboard />}
+
           <div className="space-y-2">
           {/* Redacted Admin Header */}
           <div
