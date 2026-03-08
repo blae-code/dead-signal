@@ -10,6 +10,7 @@ import {
 "lucide-react";
 import WorldStatus from "@/components/WorldStatus";
 import InAppNotifications from "@/components/features/InAppNotifications";
+import HeaderCommandPrompt from "@/components/HeaderCommandPrompt";
 
 // Rust-apocalypse nav structure
 const navSections = [
