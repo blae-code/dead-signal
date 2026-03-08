@@ -275,11 +275,11 @@ export default function Dashboard() {
           <Panel title="MODULES">
             <div className="grid grid-cols-2 gap-px" style={{ background: T.border }}>
               {[
-                { label: "TACTICAL MAP", page: "TacticalMap", icon: Activity, color: T.cyan },
-                { label: "INVENTORY", page: "Inventory", icon: Package, color: T.green },
-                { label: "ENGINEERING", page: "EngineeringOps", icon: Wrench, color: T.cyan },
-                { label: "SERVER", page: "ServerMonitor", icon: Zap, color: T.cyan },
-                { label: "AI AGENT", page: "AIAgent", icon: Skull, color: T.green },
+                { label: "TACTICAL MAP", page: "TacticalMap", icon: Activity, color: ENTITY_COLORS.TacticalOverlay },
+                { label: "INVENTORY", page: "Inventory", icon: Package, color: ENTITY_COLORS.InventoryItem },
+                { label: "ENGINEERING", page: "EngineeringOps", icon: Wrench, color: PAGE.secondary },
+                { label: "SERVER", page: "ServerMonitor", icon: Zap, color: PAGE.primary },
+                { label: "AI AGENT", page: "AIAgent", icon: Skull, color: PAGE.accent },
               ].map(({ label, page, icon: Icon, color }) => (
                 <Link
                   key={page}
