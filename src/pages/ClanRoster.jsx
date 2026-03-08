@@ -19,6 +19,7 @@ export default function ClanRoster() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(empty);
   const [user, setUser] = useState(null);
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});

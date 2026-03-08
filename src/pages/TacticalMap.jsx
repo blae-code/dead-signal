@@ -17,7 +17,8 @@ export default function TacticalMap() {
   const [newPin, setNewPin]       = useState({ title: "", type: "Loot Cache", note: "", status: "Unknown" });
   const [pendingCoords, setPendingCoords] = useState(null);
   const [showForm, setShowForm]   = useState(false);
-  const [user, setUser]           = useState(null);
+  const [user, setUser] = useState(null);
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});

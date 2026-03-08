@@ -11,7 +11,8 @@ const empty = { title: "", body: "", type: "General", pinned: false };
 
 export default function Intel() {
   const [announcements, setAnnouncements] = useState([]);
-  const [user, setUser]     = useState(null);
+  const [user, setUser] = useState(null);
+  const isAdmin = user?.role === "admin";
   const [showForm, setShowForm] = useState(false);
   const [form, setForm]     = useState(empty);
   const [editing, setEditing] = useState(null);
