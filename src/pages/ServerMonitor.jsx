@@ -513,38 +513,40 @@ export default function ServerMonitor() {
           {isAdmin && <AutomationDashboard />}
 
           <div className="space-y-2">
-          {/* Redacted Admin Header */}
-          <div
-            className="relative flex items-center gap-3 px-3 py-2.5 overflow-hidden"
-            style={{
-              border: `1px solid ${T.red}22`,
-              background: "linear-gradient(135deg, #1a0a04, #0a0404)",
-              boxShadow: `inset 0 1px 0 ${T.red}08`,
-            }}
-          >
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.red}33, transparent)` }} />
-            <div style={{
-              width: "24px", height: "24px",
-              border: `1px solid ${T.red}22`,
-              background: `radial-gradient(circle, ${T.red}10, transparent 70%)`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: `0 0 8px ${T.red}12`,
-            }}>
-              <Lock size={11} style={{ color: T.red }} />
-            </div>
-            <div>
-              <div style={{ color: T.red, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.24em", textShadow: `0 0 8px ${T.red}33` }}>
-                ADMIN TOOLS
+          {/* Redacted Admin Header (only show if not admin) */}
+          {!isAdmin && (
+            <div
+              className="relative flex items-center gap-3 px-3 py-2.5 overflow-hidden"
+              style={{
+                border: `1px solid ${T.red}22`,
+                background: "linear-gradient(135deg, #1a0a04, #0a0404)",
+                boxShadow: `inset 0 1px 0 ${T.red}08`,
+              }}
+            >
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.red}33, transparent)` }} />
+              <div style={{
+                width: "24px", height: "24px",
+                border: `1px solid ${T.red}22`,
+                background: `radial-gradient(circle, ${T.red}10, transparent 70%)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: `0 0 8px ${T.red}12`,
+              }}>
+                <Lock size={11} style={{ color: T.red }} />
               </div>
-              <div style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.16em" }}>ACCESS DENIED</div>
+              <div>
+                <div style={{ color: T.red, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.24em", textShadow: `0 0 8px ${T.red}33` }}>
+                  ADMIN TOOLS
+                </div>
+                <div style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.16em" }}>ACCESS DENIED</div>
+              </div>
+              <div className="ml-auto flex items-center gap-1.5">
+                <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: T.red, boxShadow: `0 0 5px ${T.red}` }} />
+                <span style={{ color: T.red, fontSize: "7px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.14em" }}>UNAUTHORIZED</span>
+              </div>
             </div>
-            <div className="ml-auto flex items-center gap-1.5">
-              <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: T.red, boxShadow: `0 0 5px ${T.red}` }} />
-              <span style={{ color: T.red, fontSize: "7px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.14em" }}>UNAUTHORIZED</span>
-            </div>
-          </div>
+          )}
 
-          {/* Redacted Content */}
+          {/* Admin Content */}
           {isAdmin ? (
             <AdminToolsPanel status={status} events={events} />
           ) : (
