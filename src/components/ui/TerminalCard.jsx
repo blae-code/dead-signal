@@ -39,6 +39,12 @@ export const T = {
   warn:    "#ffaa00",
   info:    "#00d4e8",
   ai:      "#a8c820",
+
+  // ── Shadows (layered depth)
+  shadow0: "0 2px 4px rgba(0,0,0,0.3)",
+  shadow1: "0 4px 12px rgba(0,0,0,0.5)",
+  shadow2: "0 8px 24px rgba(0,0,0,0.7)",
+  shadow3: "0 16px 40px rgba(0,0,0,0.9)",
 };
 
 // ── Panel top-hairline gradient ───────────────────────────────────────────────
