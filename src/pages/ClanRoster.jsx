@@ -49,9 +49,11 @@ export default function ClanRoster() {
   return (
     <div className="p-4 space-y-4 max-w-7xl mx-auto">
       <PageHeader icon={Users} title="CLAN ROSTER" color={T.amber}>
-        <ActionBtn color={T.green} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
-          <Plus size={10} /> ENLIST
-        </ActionBtn>
+        {isAdmin && (
+          <ActionBtn color={T.green} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
+            <Plus size={10} /> ENLIST
+          </ActionBtn>
+        )}
       </PageHeader>
 
       <StatGrid stats={[
@@ -60,7 +62,7 @@ export default function ClanRoster() {
         { label: "AVG K/D",         value: kdrAvg,          color: T.cyan },
       ]} />
 
-      {showForm && (
+      {showForm && isAdmin && (
         <FormPanel title={editing ? "EDIT OPERATOR" : "NEW OPERATOR"} onClose={() => { setShowForm(false); setEditing(null); setForm(empty); }}>
           <div className="grid grid-cols-2 gap-3">
             <Field label="CALLSIGN *">
@@ -124,12 +126,14 @@ export default function ClanRoster() {
                   className="p-1 hover:opacity-80" title="View Profile" style={{ textDecoration: "none" }}>
                   <ExternalLink size={10} style={{ color: T.cyan }} />
                 </Link>
-                <button onClick={e => { e.stopPropagation(); handleEdit(m); }} className="p-1 hover:opacity-80">
-                  <Edit2 size={10} style={{ color: T.textDim }} />
-                </button>
-                <button onClick={e => { e.stopPropagation(); handleDelete(m.id); }} className="p-1 hover:opacity-80">
-                  <Trash2 size={10} style={{ color: T.red + "88" }} />
-                </button>
+                {isAdmin && <>
+                  <button onClick={e => { e.stopPropagation(); handleEdit(m); }} className="p-1 hover:opacity-80">
+                    <Edit2 size={10} style={{ color: T.textDim }} />
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); handleDelete(m.id); }} className="p-1 hover:opacity-80">
+                    <Trash2 size={10} style={{ color: T.red + "88" }} />
+                  </button>
+                </>}
               </div>
             </TableRow>
           ))
