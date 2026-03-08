@@ -121,13 +121,16 @@ export default function Inventory() {
 
       {/* Location filter */}
       <div className="flex gap-1.5 flex-wrap">
-        <FilterPill label="ALL LOCATIONS" active={filterLoc === ALL_FILTER} color={T.green} onClick={() => setFilterLoc(ALL_FILTER)} />
-        {LOCATIONS.map(l => (
-          <FilterPill key={l} label={l} active={filterLoc === l} color={T.textDim} onClick={() => setFilterLoc(filterLoc === l ? ALL_FILTER : l)} />
-        ))}
-      </div>
+         <FilterPill label="ALL LOCATIONS" active={filterLoc === ALL_FILTER} color={T.green} onClick={() => setFilterLoc(ALL_FILTER)} />
+         {LOCATIONS.map(l => (
+           <FilterPill key={l} label={l} active={filterLoc === l} color={T.textDim} onClick={() => setFilterLoc(filterLoc === l ? ALL_FILTER : l)} />
+         ))}
+       </div>
 
-      {showForm && isAdmin && (
+      {/* Supply Forecast Component */}
+      <SupplyForecast items={items} />
+
+       {showForm && isAdmin && (
         <FormPanel title={editing ? "EDIT ITEM" : "ADD ITEM"} onClose={() => { setShowForm(false); setEditing(null); setForm(buildEmpty(CATEGORIES, CONDITIONS, LOCATIONS)); }}>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <div className="md:col-span-2">
