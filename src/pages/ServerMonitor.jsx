@@ -85,7 +85,7 @@ export default function ServerMonitor() {
     });
 
     fetchStatus();
-    const pollInterval = setInterval(fetchStatus, 30000); // refresh every 30s
+    const pollInterval = setInterval(fetchStatus, 10000); // refresh every 10s for live feel
     return () => {
       unsub();
       unsubHistory();
