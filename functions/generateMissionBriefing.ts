@@ -1,12 +1,30 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import {
+  AppError,
+  enforceRateLimit,
+  errorResponse,
+  parseJsonBody,
+  requireAuthenticated,
+  requireMethod,
+} from './_shared/backend.ts';
 
 Deno.serve(async (req) => {
   try {
+    requireMethod(req, 'POST');
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = requireAuthenticated(await base44.auth.me()) as { id?: string; email?: string };
+    const actorId = user.id || user.email || 'unknown-user';
+    enforceRateLimit(`llm:generateMissionBriefing:${actorId}`, 12, 60_000, 'llm_rate_limited');
 
-    const { missionTitle, objectiveCoords } = await req.json();
+    const body = await parseJsonBody<{ missionTitle?: unknown; objectiveCoords?: unknown }>(req);
+    if (typeof body.missionTitle !== 'string' || !body.missionTitle.trim()) {
+      throw new AppError(400, 'invalid_mission_title', 'missionTitle must be a non-empty string.');
+    }
+    const missionTitle = body.missionTitle.trim().slice(0, 200);
+    const objectiveCoords = typeof body.objectiveCoords === 'string' && body.objectiveCoords.trim()
+      ? body.objectiveCoords.trim().slice(0, 120)
+      : 'Unknown';
+
     const players = await base44.entities.PlayerLocation.list('-timestamp', 50);
     const storage = await base44.entities.ClanStorage.list('', 10);
 
@@ -30,8 +48,8 @@ Return JSON: { briefing: string, tactical_plan: string, resource_recommendations
       }
     });
 
-    return Response.json(result);
+    return Response.json({ success: true, ...result });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return errorResponse(error);
   }
 });

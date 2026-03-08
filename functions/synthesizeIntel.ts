@@ -1,10 +1,18 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import {
+  enforceRateLimit,
+  errorResponse,
+  requireAuthenticated,
+  requireMethod,
+} from './_shared/backend.ts';
 
 Deno.serve(async (req) => {
   try {
+    requireMethod(req, 'POST');
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = requireAuthenticated(await base44.auth.me()) as { id?: string; email?: string };
+    const actorId = user.id || user.email || 'unknown-user';
+    enforceRateLimit(`llm:synthesizeIntel:${actorId}`, 10, 60_000, 'llm_rate_limited');
 
     const events = await base44.entities.ServerEvent.list('-created_date', 50);
     const activities = await base44.entities.ActivityLog.list('-timestamp', 30);
@@ -29,8 +37,8 @@ Return JSON: { critical_alerts: [string], achievements: [string], patterns: [str
       }
     });
 
-    return Response.json(result);
+    return Response.json({ success: true, ...result });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return errorResponse(error);
   }
 });

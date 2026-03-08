@@ -1,14 +1,36 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import {
+  enforceRateLimit,
+  errorResponse,
+  parseJsonBody,
+  requireAdmin,
+  requireMethod,
+} from './_shared/backend.ts';
 
 Deno.serve(async (req) => {
   try {
+    requireMethod(req, 'POST');
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    requireAdmin(user);
+    const body = await parseJsonBody<{ sample_size?: unknown }>(req);
+    const actorId = user?.id || user?.email || 'unknown-admin';
+    enforceRateLimit(`llm:anomalyDetection:${actorId}`, 10, 60_000, 'llm_rate_limited');
+
+    const sampleSizeRaw = Number(body.sample_size);
+    const sampleSize = Number.isFinite(sampleSizeRaw) && sampleSizeRaw > 0
+      ? Math.min(100, Math.floor(sampleSizeRaw))
+      : 50;
 
     // Fetch recent performance logs
     const logs = await base44.entities.ServerPerformanceLog.list('-timestamp', 100);
-    if (logs.length < 10) return Response.json({ anomalies: [], message: 'Insufficient data' });
+    if (logs.length < 10) {
+      return Response.json({
+        success: true,
+        anomalies: [],
+        message: 'Insufficient data for anomaly analysis.',
+      });
+    }
 
     // Prepare data for AI analysis
     const analysisPrompt = `Analyze these server performance logs for anomalies. Look for unusual patterns like:
@@ -17,7 +39,7 @@ Deno.serve(async (req) => {
 - Suspicious resource patterns indicating attacks
 - Performance degradation trends
 
-Logs (last 100 entries): ${JSON.stringify(logs.slice(0, 50).map(l => ({
+Logs (last 100 entries): ${JSON.stringify(logs.slice(0, sampleSize).map(l => ({
       timestamp: l.timestamp,
       cpu: l.cpu_percent,
       ram_mb: l.ram_used_mb,
@@ -50,8 +72,12 @@ Return a JSON object with: { anomalies: [{type, severity, description, timestamp
       }
     });
 
-    return Response.json(result);
+    return Response.json({
+      success: true,
+      ...result,
+      analyzed_entries: Math.min(logs.length, sampleSize),
+    });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return errorResponse(error);
   }
 });

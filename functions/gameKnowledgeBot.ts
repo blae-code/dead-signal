@@ -1,12 +1,26 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import {
+  AppError,
+  enforceRateLimit,
+  errorResponse,
+  parseJsonBody,
+  requireAuthenticated,
+  requireMethod,
+} from './_shared/backend.ts';
 
 Deno.serve(async (req) => {
   try {
+    requireMethod(req, 'POST');
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = requireAuthenticated(await base44.auth.me());
+    const actorId = (user as any)?.id || (user as any)?.email || 'unknown-user';
+    enforceRateLimit(`llm:gameKnowledgeBot:${actorId}`, 20, 60_000, 'llm_rate_limited');
 
-    const { question } = await req.json();
+    const body = await parseJsonBody<{ question?: unknown }>(req);
+    if (typeof body.question !== 'string' || !body.question.trim()) {
+      throw new AppError(400, 'invalid_question', 'question must be a non-empty string.');
+    }
+    const question = body.question.trim().slice(0, 1_500);
 
     const botPrompt = `You are an expert Dead Signal game knowledge bot. Answer this player question comprehensively and in-character:
 Question: "${question}"
@@ -26,8 +40,8 @@ Return JSON: { answer: string, tips: [string], related_topics: [string] }`;
       }
     });
 
-    return Response.json(result);
+    return Response.json({ success: true, ...result });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return errorResponse(error);
   }
 });

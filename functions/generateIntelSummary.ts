@@ -1,25 +1,37 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import {
+  AppError,
+  enforceRateLimit,
+  errorResponse,
+  parseJsonBody,
+  requireAuthenticated,
+  requireMethod,
+} from './_shared/backend.ts';
 
 Deno.serve(async (req) => {
   try {
+    requireMethod(req, 'POST');
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = requireAuthenticated(await base44.auth.me()) as { id?: string; email?: string };
+    const actorId = user.id || user.email || 'unknown-user';
+    enforceRateLimit(`llm:generateIntelSummary:${actorId}`, 12, 60_000, 'llm_rate_limited');
+
+    const body = await parseJsonBody<{ summary_type?: unknown }>(req);
+    const summaryType = typeof body.summary_type === 'string' && body.summary_type.trim()
+      ? body.summary_type.trim()
+      : 'server_events';
+    if (summaryType !== 'server_events' && summaryType !== 'clan_activity') {
+      throw new AppError(400, 'invalid_summary_type', 'summary_type must be server_events or clan_activity.');
     }
 
-    const body = await req.json();
-    const { summary_type = 'server_events' } = body;
-
     let sourceData = [];
-    if (summary_type === 'server_events') {
+    if (summaryType === 'server_events') {
       sourceData = await base44.entities.ServerEvent.list('-created_date', 20);
-    } else if (summary_type === 'clan_activity') {
+    } else if (summaryType === 'clan_activity') {
       sourceData = await base44.entities.ActivityLog.list('-timestamp', 20);
     }
 
-    const prompt = `Summarize the following ${summary_type} data concisely and professionally. Focus on key insights and actionable intelligence:\n\n${JSON.stringify(sourceData, null, 2)}`;
+    const prompt = `Summarize the following ${summaryType} data concisely and professionally. Focus on key insights and actionable intelligence:\n\n${JSON.stringify(sourceData, null, 2)}`;
 
     const response = await base44.integrations.Core.InvokeLLM({
       prompt,
@@ -27,15 +39,15 @@ Deno.serve(async (req) => {
     });
 
     const summary = await base44.entities.IntelSummary.create({
-      summary_type,
-      title: `${summary_type.toUpperCase()} Summary - ${new Date().toLocaleDateString()}`,
+      summary_type: summaryType,
+      title: `${summaryType.toUpperCase()} Summary - ${new Date().toLocaleDateString()}`,
       content: response,
-      source_entity: summary_type === 'server_events' ? 'ServerEvent' : 'ActivityLog',
+      source_entity: summaryType === 'server_events' ? 'ServerEvent' : 'ActivityLog',
       generated_at: new Date().toISOString()
     });
 
-    return Response.json({ summary });
+    return Response.json({ success: true, summary });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return errorResponse(error);
   }
 });

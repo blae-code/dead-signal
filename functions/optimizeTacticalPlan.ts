@@ -1,10 +1,18 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import {
+  enforceRateLimit,
+  errorResponse,
+  requireAuthenticated,
+  requireMethod,
+} from './_shared/backend.ts';
 
 Deno.serve(async (req) => {
   try {
+    requireMethod(req, 'POST');
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = requireAuthenticated(await base44.auth.me()) as { id?: string; email?: string };
+    const actorId = user.id || user.email || 'unknown-user';
+    enforceRateLimit(`llm:optimizeTacticalPlan:${actorId}`, 12, 60_000, 'llm_rate_limited');
 
     const playerLocations = await base44.entities.PlayerLocation.list('-timestamp', 30);
     const missions = await base44.entities.Mission.filter({ status: 'Active' });
@@ -38,8 +46,8 @@ Return JSON: { strategy: string, positioning: {callsign: string, recommendation:
       }
     });
 
-    return Response.json(result);
+    return Response.json({ success: true, ...result });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return errorResponse(error);
   }
 });
