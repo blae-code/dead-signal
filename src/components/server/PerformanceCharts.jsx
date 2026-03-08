@@ -124,7 +124,7 @@ function ChartCard({ title, data, dataKey, color, unit, threshold, maxValue, min
       {/* Chart container with Y-axis labels */}
       <div style={{ display: "flex", padding: "2px 0 0" }}>
         {/* Y-axis labels */}
-        <div style={{ width: "28px", display: "flex", flexDirection: "column", justifyContent: "space-between", paddingRight: "4px", paddingTop: "2px", paddingBottom: "4px" }}>
+        <div style={{ width: "28px", display: "flex", flexDirection: "column", justifyContent: "space-between", paddingRight: "4px", paddingTop: "2px", paddingBottom: "4px", background: "linear-gradient(180deg, rgba(20, 14, 8, 0.9) 0%, rgba(18, 12, 6, 0.95) 100%)" }}>
           <span style={{ color: T.textFaint, fontSize: "6.5px", lineHeight: "1", textAlign: "right" }}>
             {displayMax}
           </span>
@@ -137,7 +137,7 @@ function ChartCard({ title, data, dataKey, color, unit, threshold, maxValue, min
         </div>
 
         {/* Canvas */}
-        <div style={{ flex: 1, background: "rgba(0,0,0,0.3)" }}>
+        <div style={{ flex: 1, background: "linear-gradient(180deg, rgba(20, 14, 8, 0.95) 0%, rgba(15, 10, 5, 0.98) 100%)", borderLeft: `1px solid ${T.border}` }}>
           {data.length < 2 ? (
             <div
               className="flex items-center justify-center"
