@@ -58,9 +58,11 @@ export default function Inventory() {
   return (
     <div className="p-4 space-y-4 max-w-6xl mx-auto">
       <PageHeader icon={Package} title="INVENTORY" color={T.green}>
-        <ActionBtn color={T.green} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
-          <Plus size={10} /> ADD ITEM
-        </ActionBtn>
+        {isAdmin && (
+          <ActionBtn color={T.green} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
+            <Plus size={10} /> ADD ITEM
+          </ActionBtn>
+        )}
       </PageHeader>
 
       {/* Stats */}
@@ -95,7 +97,7 @@ export default function Inventory() {
         ))}
       </div>
 
-      {showForm && (
+      {showForm && isAdmin && (
         <FormPanel title={editing ? "EDIT ITEM" : "ADD ITEM"} onClose={() => { setShowForm(false); setEditing(null); setForm(empty); }}>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <div className="md:col-span-2">
@@ -150,10 +152,12 @@ export default function Inventory() {
               <span className="text-xs" style={{ color: COND_COLORS[item.condition] }}>{item.condition}</span>
               <span className="text-xs" style={{ color: T.textDim }}>{item.location}</span>
               <span className="text-xs" style={{ color: T.textFaint }}>{((item.weight || 0) * (item.quantity || 1)).toFixed(1)}kg</span>
+              {isAdmin && (
               <div className="flex justify-end gap-1">
                 <button onClick={() => handleEdit(item)} className="p-1 hover:opacity-80"><Package size={10} style={{ color: T.textDim }} /></button>
                 <button onClick={() => handleDelete(item.id)} className="p-1 hover:opacity-80"><Trash2 size={10} style={{ color: T.red + "88" }} /></button>
               </div>
+              )}
             </TableRow>
           ))
         }
