@@ -179,7 +179,7 @@ export default function Dashboard() {
           </Panel>
 
           {/* Inventory summary */}
-          <Panel title="INVENTORY SNAPSHOT" titleColor={T.amber}>
+          <Panel title="INVENTORY SNAPSHOT" titleColor={T.orange}>
             <div className="p-3 space-y-2">
               {["Weapon", "Ammo", "Medical", "Food"].map(cat => {
                 const count = items.filter(i => i.category === cat).reduce((a, i) => a + (i.quantity || 1), 0);
