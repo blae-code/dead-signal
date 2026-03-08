@@ -80,6 +80,7 @@ Deno.serve(async (req) => {
             playerCount,
             serverFps,
             responseTime,
+            packetLoss,
             processCount,
             activeConnections,
         });
