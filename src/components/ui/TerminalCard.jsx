@@ -137,9 +137,9 @@ export function Panel({ title, titleColor = T.amber, headerRight, accentBorder, 
     <div
       className="relative overflow-hidden"
       style={{
-        border: `1px solid ${T.border}`,
+        border: `1px solid ${accent}33`,
         background: T.bg1,
-        boxShadow: `inset 0 1px 0 ${accent}14, 0 4px 16px rgba(0,0,0,0.5)`,
+        boxShadow: `inset 0 1px 0 ${accent}22, inset 0 -1px 0 rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.7), 0 0 20px ${accent}12`,
       }}
     >
       <div style={accentLine(accent)} />
