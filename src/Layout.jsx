@@ -140,6 +140,14 @@ export default function Layout({ children, currentPageName }) {
           0%, 100% { opacity: 0.4; }
           50%       { opacity: 1; }
         }
+        @keyframes glowDotPulse {
+          0%, 100% { transform: scale(1); opacity: 0.4; }
+          50%       { transform: scale(2.5); opacity: 0; }
+        }
+        @keyframes spectrum-shift {
+          0%,100% { filter: hue-rotate(0deg); }
+          50%      { filter: hue-rotate(20deg); }
+        }
 
         /* ── nav item ── */
         .nav-link {
