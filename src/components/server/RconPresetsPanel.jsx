@@ -24,12 +24,13 @@ export default function RconPresetsPanel({ status, events, onCommandSend, cmdLoa
   // Generate AI suggestions
   const handleGenerateSuggestions = async () => {
     setLoadingSuggest(true);
+    setSuggestedCommands([]);
     try {
       const res = await base44.functions.invoke("suggestRconCommands", {
         serverStatus: status,
         recentEvents: events.slice(0, 10),
       });
-      setSuggestedCommands(res.data?.commands || []);
+      setSuggestedCommands(res.data?.commands || res.data?.suggestions || []);
     } catch (err) {
       console.error("Failed to generate suggestions:", err);
     } finally {
