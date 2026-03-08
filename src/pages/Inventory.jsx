@@ -5,6 +5,7 @@ import { T, PageHeader, Panel, FormPanel, Field, FilterPill, ActionBtn, TableHea
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import SupplyForecast from "@/components/inventory/SupplyForecast";
 
 const CAT_COLORS  = { Weapon: T.red, Ammo: T.orange, Medical: "#ff5555", Food: T.green, Water: T.cyan, Tool: T.amber, Material: T.textDim, Clothing: "#b088ff", Misc: T.textFaint };
 const COND_COLORS = { Pristine: T.green, Good: T.green + "88", Worn: T.amber, Damaged: T.orange, Ruined: T.red };
