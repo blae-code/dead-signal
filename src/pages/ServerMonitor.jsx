@@ -192,6 +192,14 @@ export default function ServerMonitor() {
         </button>
       </PageHeader>
 
+      {/* Live health bar — ping, packet loss, players, health */}
+      <LiveHealthBar
+        status={status}
+        statusLoading={statusLoading}
+        lastPolled={lastPolled}
+        downtimeAlert={downtimeAlert}
+      />
+
       {/* Status cards */}
       <motion.div
         className="grid grid-cols-2 md:grid-cols-4 gap-3"
