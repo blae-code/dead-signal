@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const STATUS_COLORS = { Pending: T.gold, Active: T.green, Complete: T.teal, Failed: T.red, Aborted: T.textDim };
-const SEV_COLORS    = { INFO: T.textFaint, WARN: T.amber, ALERT: T.orange, CRITICAL: T.pink };
+const SEV_COLORS    = { INFO: T.textFaint, WARN: T.amber, ALERT: T.orange, CRITICAL: T.red };
 const ANN_COLORS    = { Emergency: T.pink, Intel: T.cyan, Ops: T.orange, General: T.teal, Maintenance: T.gold };
 
 export default function Dashboard() {
