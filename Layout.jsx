@@ -38,9 +38,9 @@ const iconByName = {
 };
 
 const C = {
-  text: "#e8dcc8",
-  textDim: "#c0aa88",
-  textFaint: "#8a7a6a",
+  text: "#eee5d6",
+  textDim: "#d0bfa6",
+  textFaint: "#a79b8f",
   border: "#2a1e10",
   accent: "#ffaa00",
   scan: "rgba(255, 170, 0, 0.05)",
@@ -73,14 +73,14 @@ const FALLBACK_NAV_SECTIONS = [
     label: "// FIELD OPS",
     items: [
       { label: "TACTICAL MAP", page: "TacticalMap", code: "MAP", color: "#ffaa00", dot: "#ffaa00", icon: "Map" },
-      { label: "CLAN ROSTER", page: "ClanRoster", code: "OPS", color: "#c0aa88", dot: "#39ff14", icon: "Users" },
+      { label: "CLAN ROSTER", page: "ClanRoster", code: "OPS", color: "#d0bfa6", dot: "#39ff14", icon: "Users" },
       { label: "MISSIONS", page: "Missions", code: "MIS", color: "#ff2020", dot: "#ff2020", icon: "Crosshair" },
     ],
   },
   {
     label: "// LOGISTICS",
     items: [
-      { label: "INVENTORY", page: "Inventory", code: "INV", color: "#c0aa88", dot: "#8a7a6a", icon: "Package" },
+      { label: "INVENTORY", page: "Inventory", code: "INV", color: "#d0bfa6", dot: "#a79b8f", icon: "Package" },
       { label: "ENGINEERING", page: "EngineeringOps", code: "ENG", color: "#00e8ff", dot: "#00e8ff", icon: "Wrench" },
       { label: "INTEL FEED", page: "Intel", code: "INT", color: "#ffaa00", dot: "#ffaa00", icon: "Radio" },
       { label: "AI AGENT", page: "AIAgent", code: "AI", color: "#39ff14", dot: "#39ff14", icon: "Bot" },
@@ -356,3 +356,4 @@ export default function Layout({ children, currentPageName }) {
     </div>
   );
 }
+

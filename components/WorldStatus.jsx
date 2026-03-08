@@ -3,9 +3,9 @@ import { useLiveMetric } from "@/hooks/use-live-metric";
 import { invokeFunctionOrFallback } from "@/api/function-invoke";
 
 const C = {
-  text: "#e8dcc8",
-  textDim: "#c0aa88",
-  textFaint: "#8a7a6a",
+  text: "#eee5d6",
+  textDim: "#d0bfa6",
+  textFaint: "#a79b8f",
   border: "#2a1e10",
   green: "#39ff14",
   amber: "#ffaa00",
@@ -109,5 +109,6 @@ export default function WorldStatus({ weather }) {
     </div>
   );
 }
+
 
 

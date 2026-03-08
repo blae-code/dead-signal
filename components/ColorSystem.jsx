@@ -127,7 +127,7 @@ export const STATUS_COLORS = {
   pending:          "#ffaa00",  // Amber
   in_progress:      "#00e8ff",  // Cyan
   completed:        "#39ff14",  // Green
-  cancelled:        "#8a7a6a",  // Rust gray
+  cancelled:        "#a79b8f",  // Rust gray
   failed:           "#ff2020",  // Red
   archived:         "#4a4a4a",  // Dark gray
 
@@ -342,4 +342,5 @@ export default {
   getColorBorderGlow,
   getColorBackground,
 };
+
 

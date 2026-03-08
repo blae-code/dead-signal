@@ -29,14 +29,14 @@ const RouteSkeleton = () => (
 );
 
 const RouteLoadError = ({ error, onRetry }) => (
-  <div className="fixed inset-0 flex items-center justify-center p-6" style={{ background: "#27272a", color: "#e8dcc8" }}>
+  <div className="fixed inset-0 flex items-center justify-center p-6" style={{ background: "#27272a", color: "#eee5d6" }}>
     <div className="w-full max-w-xl border p-6 space-y-4 terminal-card" style={{ borderColor: "#2a1e10", background: "#1c1c20" }}>
       <h1 className="text-lg font-semibold" style={{ fontFamily: "'Orbitron', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffaa00" }}>Page Module Failed To Load</h1>
-      <p className="text-sm" style={{ color: "#c0aa88" }}>
+      <p className="text-sm" style={{ color: "#d0bfa6" }}>
         The selected page failed to load in preview. Try again or open another route.
       </p>
       {error?.message && (
-        <pre className="text-xs whitespace-pre-wrap border p-3" style={{ borderColor: "#2a1e10", background: "#18181c", color: "#c0aa88" }}>
+        <pre className="text-xs whitespace-pre-wrap border p-3" style={{ borderColor: "#2a1e10", background: "#18181c", color: "#d0bfa6" }}>
           {error.message}
         </pre>
       )}
@@ -97,10 +97,10 @@ const isEmbeddedContext = () => {
 };
 
 const AuthRequiredFallback = ({ onLogin }) => (
-  <div className="fixed inset-0 flex items-center justify-center p-6" style={{ background: "#27272a", color: "#e8dcc8" }}>
+  <div className="fixed inset-0 flex items-center justify-center p-6" style={{ background: "#27272a", color: "#eee5d6" }}>
     <div className="w-full max-w-md border p-6 space-y-4 terminal-card" style={{ borderColor: "#2a1e10", background: "#1c1c20" }}>
       <h1 className="text-lg font-semibold" style={{ fontFamily: "'Orbitron', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffaa00" }}>Authentication Required</h1>
-      <p className="text-sm" style={{ color: "#c0aa88" }}>
+      <p className="text-sm" style={{ color: "#d0bfa6" }}>
         This preview is embedded. Use login to continue, then reopen preview if needed.
       </p>
       <button
@@ -260,3 +260,4 @@ function App() {
 }
 
 export default App
+

@@ -12,9 +12,9 @@ const C = {
   amber: "#ffaa00",
   red: "#ff2020",
   cyan: "#00e8ff",
-  text: "#e8dcc8",
-  textDim: "#c0aa88",
-  textFaint: "#8a7a6a",
+  text: "#eee5d6",
+  textDim: "#d0bfa6",
+  textFaint: "#a79b8f",
   border: "#2a1e10",
   accent: "#ffaa00",
 };
@@ -400,4 +400,5 @@ export default function HeaderCommandPrompt({ currentPageName }) {
     </>
   );
 }
+
 

@@ -4,9 +4,9 @@ import { History, RotateCcw, Trash2 } from "lucide-react";
 
 const S = {
   border: "#2a1e10",
-  dim: "#8a7a6a",
-  text: "#e8dcc8",
-  faint: "#4a3a2a",
+  dim: "#a79b8f",
+  text: "#eee5d6",
+  faint: "#776b5f",
   cyan: "#00e8ff",
   green: "#39ff14",
   red: "#ff2020",
@@ -76,3 +76,4 @@ export default function RconHistoryPanel({ onRerun }) {
     </div>
   );
 }
+

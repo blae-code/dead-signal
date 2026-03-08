@@ -21,9 +21,9 @@ const EMPTY = {
 
 const S = {
   border: "#2a1e10",
-  dim: "#8a7a6a",
-  text: "#e8dcc8",
-  faint: "#4a3a2a",
+  dim: "#a79b8f",
+  text: "#eee5d6",
+  faint: "#776b5f",
   active: "#39ff14",
   warn: "#ffaa00",
   danger: "#ff2020",
@@ -258,4 +258,5 @@ export default function AlertRulesPanel({ onTriggered }) {
     </div>
   );
 }
+
 

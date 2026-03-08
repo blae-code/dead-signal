@@ -6,11 +6,11 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const S = {
   border: "#2a1e10",
-  dim: "#8a7a6a",
-  faint: "#4a3a2a",
+  dim: "#a79b8f",
+  faint: "#776b5f",
   warn: "#ffaa00",
   danger: "#ff2020",
-  text: "#e8dcc8",
+  text: "#eee5d6",
 };
 
 const opLabel = (op) => ({
@@ -102,3 +102,4 @@ export default function AlertHistoryPanel({ refreshTick }) {
     </div>
   );
 }
+

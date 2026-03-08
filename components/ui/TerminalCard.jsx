@@ -17,10 +17,10 @@ export const T = {
   borderBt: "#4e3a22",
 
   // ── Text
-  text:      "#e8dcc8",
-  textDim:   "#c0aa88",
-  textFaint: "#8a7a6a",
-  textGhost: "#4a3a2a",
+  text:      "#eee5d6",
+  textDim:   "#d0bfa6",
+  textFaint: "#a79b8f",
+  textGhost: "#776b5f",
 
   // ── Status spectrum (strict)
   green:   "#39ff14",
@@ -369,3 +369,4 @@ export function GlowDot({ color, size = 6, pulse = false }) {
     </div>
   );
 }
+
