@@ -72,9 +72,9 @@ export default function MyStats() {
           {/* Identity */}
           <div className="border p-3" style={{ borderColor: T.border, background: T.bg1 }}>
             <div className="flex items-center gap-3">
-              <Skull size={20} style={{ color: T.amber }} />
+              <Skull size={20} style={{ color: T.gold }} />
               <div>
-                <div style={{ color: T.amber, fontFamily: "'Orbitron', monospace", fontSize: "14px", fontWeight: "bold" }}>{member.callsign}</div>
+                <div style={{ color: T.gold, fontFamily: "'Orbitron', monospace", fontSize: "14px", fontWeight: "bold" }}>{member.callsign}</div>
                 <div style={{ color: T.textDim, fontSize: "10px" }}>{member.role} · {member.status}</div>
               </div>
             </div>

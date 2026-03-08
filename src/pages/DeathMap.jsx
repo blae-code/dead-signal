@@ -90,7 +90,7 @@ export default function DeathMap() {
           onClick={handleMapClick}
           style={{
             position: "relative", width: "100%", paddingTop: "56.25%",
-            background: "linear-gradient(135deg, #1a2a1a 0%, #0a1a0a 100%)",
+            background: `linear-gradient(135deg, ${T.bg1} 0%, ${T.bg1} 100%)`,
             border: placing ? `2px solid ${T.red}` : "none",
             cursor: placing ? "crosshair" : "default",
             overflow: "hidden"
@@ -99,7 +99,7 @@ export default function DeathMap() {
           <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
             <defs>
               <pattern id="grid-death" width="50" height="50" patternUnits="userSpaceOnUse">
-                <path d="M 50 0 L 0 0 0 50" fill="none" stroke={T.border} strokeWidth="0.5" />
+                <path d="M 50 0 L 0 0 0 50" fill="none" stroke={T.borderBright} strokeWidth="0.5" />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid-death)" />

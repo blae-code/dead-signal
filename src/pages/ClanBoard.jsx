@@ -4,7 +4,7 @@ import { MessageSquare, Send, Pin, Trash2 } from "lucide-react";
 import { T, PageHeader, ActionBtn } from "@/components/ui/TerminalCard";
 
 const CHANNELS = ["General","Ops","Loot","Tactical","Off-Topic"];
-const CHAN_COLORS = { General: T.text, Ops: T.red, Loot: T.amber, Tactical: T.cyan, "Off-Topic": T.textDim };
+const CHAN_COLORS = { General: T.green, Ops: T.red, Loot: T.gold, Tactical: T.cyan, "Off-Topic": T.steel };
 
 export default function ClanBoard() {
   const [user, setUser] = useState(null);

@@ -21,7 +21,7 @@ function SupplyCache({ cache, onSelect }) {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MapPin size={11} style={{ color: T.teal }} />
+          <MapPin size={11} style={{ color: T.gold }} />
           <span style={{ color: T.text, fontSize: "10px", fontFamily: "'Orbitron', monospace", fontWeight: "bold" }}>
             {cache.cache_name}
           </span>
