@@ -147,6 +147,11 @@ export default function AdminToolsPanel({ status, events = [] }) {
     setCustomLoading(false);
   };
 
+  const handlePresetCommand = async (cmd) => {
+    await runCmd(cmd);
+    setCustomCmd("");
+  };
+
   const priorityColor = (p) => ({ HIGH: T.red, MEDIUM: T.amber, LOW: T.green }[p] || T.textDim);
 
   return (
