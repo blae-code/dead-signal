@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { T, FormPanel, Field, ActionBtn, inputStyle } from "@/components/ui/TerminalCard";
@@ -13,7 +13,6 @@ export default function ListingDetailModal({ listing, user, onClose, onListingUp
   });
   const [newOfferedItem, setNewOfferedItem] = useState({ item_name: "", quantity: 1 });
 
-  // Fetch offers for this listing
   const { data: offers = [], refetch: refetchOffers } = useQuery({
     queryKey: ["offers", listing.id],
     queryFn: () => base44.entities.TradeOffer.filter({ listing_id: listing.id }),
@@ -68,12 +67,8 @@ export default function ListingDetailModal({ listing, user, onClose, onListingUp
   const handleAcceptOffer = async (offer) => {
     setIsLoading(true);
     try {
-      // Update offer status
       await base44.entities.TradeOffer.update(offer.id, { status: "accepted" });
-      
-      // Update listing status to pending_trade
       await base44.entities.ResourceListing.update(listing.id, { status: "pending_trade" });
-      
       refetchOffers();
       onListingUpdated();
     } catch (err) {
@@ -104,7 +99,6 @@ export default function ListingDetailModal({ listing, user, onClose, onListingUp
           onClose={onClose}
         >
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {/* Listing details */}
             <div style={{ padding: "12px", background: "rgba(0,0,0,0.2)", borderLeft: `2px solid ${T.border}` }}>
               <div style={{ color: T.textFaint, fontSize: "8px", marginBottom: "4px" }}>LISTING DETAILS</div>
               <div style={{ color: T.textDim, fontSize: "9px", lineHeight: "1.6" }}>
@@ -116,7 +110,6 @@ export default function ListingDetailModal({ listing, user, onClose, onListingUp
               </div>
             </div>
 
-            {/* Desired items for trades */}
             {listing.listing_type === "trade" && listing.desired_items?.length > 0 && (
               <div style={{ padding: "12px", background: "rgba(0,0,0,0.2)", borderLeft: `2px solid ${T.amber}` }}>
                 <div style={{ color: T.textFaint, fontSize: "8px", marginBottom: "4px" }}>LISTER WANTS</div>
@@ -128,7 +121,6 @@ export default function ListingDetailModal({ listing, user, onClose, onListingUp
               </div>
             )}
 
-            {/* Make an offer (if user can) */}
             {canMakeOffer && (
               <form onSubmit={handleMakeOffer} className="space-y-2 pt-2 border-t" style={{ borderColor: T.border }}>
                 <div style={{ color: T.green, fontSize: "9px", letterSpacing: "0.1em" }}>MAKE AN OFFER</div>
@@ -208,7 +200,6 @@ export default function ListingDetailModal({ listing, user, onClose, onListingUp
               </form>
             )}
 
-            {/* Offers section */}
             {offers.length > 0 && (
               <div className="space-y-2 pt-2 border-t" style={{ borderColor: T.border }}>
                 <div style={{ color: T.amber, fontSize: "9px", letterSpacing: "0.1em" }}>
