@@ -7,7 +7,8 @@ export default function WebGLMapRenderer({
   broadcasts = [],
   containerStyle = {},
   mapWidth = 100,
-  mapHeight = 100
+  mapHeight = 100,
+  mapImageUrl = null
 }) {
   const containerRef = useRef(null);
   const sceneRef = useRef(null);
@@ -38,20 +39,32 @@ export default function WebGLMapRenderer({
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Grid background
-    const gridGeometry = new THREE.BufferGeometry();
-    const gridPoints = [];
-    const gridSpacing = 10;
-    for (let i = 0; i <= mapWidth; i += gridSpacing) {
-      gridPoints.push(i, 0, 0, i, mapHeight, 0);
+    // Background map or grid
+    if (mapImageUrl) {
+      const textureLoader = new THREE.TextureLoader();
+      textureLoader.load(mapImageUrl, (texture) => {
+        const mapGeometry = new THREE.PlaneGeometry(mapWidth, mapHeight);
+        const mapMaterial = new THREE.MeshBasicMaterial({ map: texture });
+        const mapMesh = new THREE.Mesh(mapGeometry, mapMaterial);
+        mapMesh.position.set(mapWidth / 2, mapHeight / 2, 0);
+        scene.add(mapMesh);
+      });
+    } else {
+      // Fallback grid
+      const gridGeometry = new THREE.BufferGeometry();
+      const gridPoints = [];
+      const gridSpacing = 10;
+      for (let i = 0; i <= mapWidth; i += gridSpacing) {
+        gridPoints.push(i, 0, 0, i, mapHeight, 0);
+      }
+      for (let i = 0; i <= mapHeight; i += gridSpacing) {
+        gridPoints.push(0, i, 0, mapWidth, i, 0);
+      }
+      gridGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(gridPoints), 3));
+      const gridMaterial = new THREE.LineBasicMaterial({ color: 0x2a1e10, linewidth: 1 });
+      const grid = new THREE.LineSegments(gridGeometry, gridMaterial);
+      scene.add(grid);
     }
-    for (let i = 0; i <= mapHeight; i += gridSpacing) {
-      gridPoints.push(0, i, 0, mapWidth, i, 0);
-    }
-    gridGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(gridPoints), 3));
-    const gridMaterial = new THREE.LineBasicMaterial({ color: 0x2a1e10, linewidth: 1 });
-    const grid = new THREE.LineSegments(gridGeometry, gridMaterial);
-    scene.add(grid);
 
     // Handle resize
     const handleResize = () => {
