@@ -48,49 +48,49 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AIAgent from './pages/AIAgent';
-import ClanRoster from './pages/ClanRoster';
-import Intel from './pages/Intel';
-import Inventory from './pages/Inventory';
-import Missions from './pages/Missions';
-import ServerMonitor from './pages/ServerMonitor';
-import TacticalMap from './pages/TacticalMap';
-import Dashboard from './pages/Dashboard';
-import PlayerProfile from './pages/PlayerProfile';
-import MyStats from './pages/MyStats';
-import LootTracker from './pages/LootTracker';
-import DeathMap from './pages/DeathMap';
 import Challenges from './pages/Challenges';
-import LoadoutPlanner from './pages/LoadoutPlanner';
 import ClanBoard from './pages/ClanBoard';
-import LootSharing from './pages/LootSharing';
 import ClanCalendar from './pages/ClanCalendar';
+import ClanRoster from './pages/ClanRoster';
 import ClanTreasury from './pages/ClanTreasury';
 import ClanVoting from './pages/ClanVoting';
 import ClanWiki from './pages/ClanWiki';
+import Dashboard from './pages/Dashboard';
+import DeathMap from './pages/DeathMap';
+import Intel from './pages/Intel';
+import Inventory from './pages/Inventory';
+import LoadoutPlanner from './pages/LoadoutPlanner';
+import LootSharing from './pages/LootSharing';
+import LootTracker from './pages/LootTracker';
+import Missions from './pages/Missions';
+import MyStats from './pages/MyStats';
+import PlayerProfile from './pages/PlayerProfile';
+import ServerMonitor from './pages/ServerMonitor';
+import TacticalMap from './pages/TacticalMap';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAgent": AIAgent,
-    "ClanRoster": ClanRoster,
-    "Intel": Intel,
-    "Inventory": Inventory,
-    "Missions": Missions,
-    "ServerMonitor": ServerMonitor,
-    "TacticalMap": TacticalMap,
-    "Dashboard": Dashboard,
-    "PlayerProfile": PlayerProfile,
-    "MyStats": MyStats,
-    "LootTracker": LootTracker,
-    "DeathMap": DeathMap,
     "Challenges": Challenges,
-    "LoadoutPlanner": LoadoutPlanner,
     "ClanBoard": ClanBoard,
-    "LootSharing": LootSharing,
     "ClanCalendar": ClanCalendar,
+    "ClanRoster": ClanRoster,
     "ClanTreasury": ClanTreasury,
     "ClanVoting": ClanVoting,
     "ClanWiki": ClanWiki,
+    "Dashboard": Dashboard,
+    "DeathMap": DeathMap,
+    "Intel": Intel,
+    "Inventory": Inventory,
+    "LoadoutPlanner": LoadoutPlanner,
+    "LootSharing": LootSharing,
+    "LootTracker": LootTracker,
+    "Missions": Missions,
+    "MyStats": MyStats,
+    "PlayerProfile": PlayerProfile,
+    "ServerMonitor": ServerMonitor,
+    "TacticalMap": TacticalMap,
 }
 
 export const pagesConfig = {

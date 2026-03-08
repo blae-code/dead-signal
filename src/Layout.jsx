@@ -206,23 +206,26 @@ export default function Layout({ children, currentPageName }) {
           </span>
         </div>
 
-        <div className="flex items-center gap-3 text-xs relative flex-1">
-          <div className="hidden sm:flex flex-col items-end" style={{ lineHeight: 1.2 }}>
-            <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>LOCAL TIME</span>
-            <motion.span 
+        <div className="hidden sm:flex items-center gap-1 text-xs relative flex-1">
+          {/* Blinking cursor beacon */}
+          <motion.div
+            animate={{ opacity: [1, 0, 1] }}
+            transition={{ duration: 1, repeat: Infinity }}
+            style={{ width: "5px", height: "5px", borderRadius: "50%", background: C.accent, flexShrink: 0 }}
+          />
+          <div className="flex flex-col" style={{ lineHeight: 1.3 }}>
+            <motion.span
               key={timeStr}
-              initial={{ opacity: 0.5 }}
+              initial={{ opacity: 0.4 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}
+              transition={{ duration: 0.2 }}
+              style={{ color: C.active, fontFamily: "'Orbitron', monospace", fontSize: "12px", letterSpacing: "0.12em" }}
             >
               {timeStr}
             </motion.span>
-          </div>
-          <span className="hidden sm:block" style={{ color: C.border }}>|</span>
-          <div className="hidden sm:flex flex-col items-end" style={{ lineHeight: 1.2 }}>
-            <span style={{ color: C.textFaint, fontSize: "9px", letterSpacing: "0.1em" }}>DATE</span>
-            <span style={{ color: C.textDim, fontSize: "10px" }}>{dateStr}</span>
+            <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.15em" }}>
+              {dateStr} · AMERICA/VANCOUVER
+            </span>
           </div>
         </div>
 
