@@ -46,6 +46,33 @@ const C = {
   scan: "rgba(184, 134, 11, 0.01)",
 };
 
+const FALLBACK_NAV_SECTIONS = [
+  {
+    label: "// OPS CENTER",
+    items: [
+      { label: "COMMAND", page: "Dashboard", code: "HQ", color: "#ffb000", dot: "#39ff14", icon: "Terminal" },
+      { label: "SERVER", page: "ServerMonitor", code: "SRV", color: "#00e5ff", dot: "#00e5ff", icon: "Cpu" },
+    ],
+  },
+  {
+    label: "// FIELD OPS",
+    items: [
+      { label: "TACTICAL MAP", page: "TacticalMap", code: "MAP", color: "#ffb000", dot: "#ffb000", icon: "Map" },
+      { label: "CLAN ROSTER", page: "ClanRoster", code: "OPS", color: "#b8a890", dot: "#39ff14", icon: "Users" },
+      { label: "MISSIONS", page: "Missions", code: "MIS", color: "#ff2020", dot: "#ff2020", icon: "Crosshair" },
+    ],
+  },
+  {
+    label: "// LOGISTICS",
+    items: [
+      { label: "INVENTORY", page: "Inventory", code: "INV", color: "#b8a890", dot: "#8a7a6a", icon: "Package" },
+      { label: "ENGINEERING", page: "EngineeringOps", code: "ENG", color: "#00e5ff", dot: "#00e5ff", icon: "Wrench" },
+      { label: "INTEL FEED", page: "Intel", code: "INT", color: "#ffb000", dot: "#ffb000", icon: "Radio" },
+      { label: "AI AGENT", page: "AIAgent", code: "AI", color: "#39ff14", dot: "#39ff14", icon: "Bot" },
+    ],
+  },
+];
+
 const HeaderClock = memo(function HeaderClock({ animationEnabled, timezoneLabel = "America/Vancouver" }) {
   const [time, setTime] = useState(() => new Date());
   const timeStr = time.toLocaleTimeString("en-US", { hour12: false });
@@ -111,10 +138,12 @@ export default function Layout({ children, currentPageName }) {
   const animationEnabled = useAnimationEnabled();
   const runtimeConfig = useRuntimeConfig();
 
-  const navSections = useMemo(
+  const configuredNavSections = useMemo(
     () => normalizeNavSections(runtimeConfig.getArray(["navigation", "sections"])),
     [runtimeConfig],
   );
+  const hasConfiguredNavSections = configuredNavSections.length > 0;
+  const navSections = hasConfiguredNavSections ? configuredNavSections : FALLBACK_NAV_SECTIONS;
   const appConfig = runtimeConfig.config?.app && typeof runtimeConfig.config.app === "object"
     ? runtimeConfig.config.app
     : {};
@@ -214,9 +243,9 @@ export default function Layout({ children, currentPageName }) {
           </motion.div>
 
           <div className="flex-1 overflow-y-auto py-1">
-            {runtimeConfig.error && (
-              <div className="px-3 py-2 text-xs border-b" style={{ borderColor: C.border, color: "#ff2020" }}>
-                RUNTIME CONFIG UNAVAILABLE
+            {runtimeConfig.error && !hasConfiguredNavSections && (
+              <div className="px-3 py-2 text-xs border-b" style={{ borderColor: C.border, color: C.accent }}>
+                RUNTIME CONFIG UNAVAILABLE - USING DEFAULT NAV
               </div>
             )}
             {navSections.map((section, sectionIndex) => (

@@ -1,7 +1,7 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.20";
 import { errorResponse, requireAuthenticated, requireMethod } from "./_shared/backend.ts";
 import { DEFAULT_RUNTIME_CONFIG, RUNTIME_CONFIG_KEY } from "./_shared/runtimeConfig.ts";
-import { requireEntityCollection } from "./_shared/liveTelemetryStore.ts";
+import { tryGetEntityCollection } from "./_shared/liveTelemetryStore.ts";
 
 const parseVersion = (value: unknown): string => (
   typeof value === "string" && value.trim()
@@ -33,56 +33,94 @@ const mergeMissingKeys = (
   return merged;
 };
 
+const nowIso = (): string => new Date().toISOString();
+
+const buildConfigResponse = ({
+  version = "runtime-config-v1",
+  source,
+  updatedAt,
+  config,
+}: {
+  version?: string;
+  source: "live" | "fallback";
+  updatedAt?: string;
+  config: Record<string, unknown>;
+}) => {
+  const retrievedAt = nowIso();
+  return Response.json({
+    version,
+    source,
+    key: RUNTIME_CONFIG_KEY,
+    retrieved_at: retrievedAt,
+    updated_at: updatedAt || retrievedAt,
+    config,
+  });
+};
+
 Deno.serve(async (req) => {
   try {
     requireMethod(req, "POST");
     const base44 = createClientFromRequest(req);
     requireAuthenticated(await base44.auth.me());
 
-    const runtimeConfigEntity = requireEntityCollection(base44, "RuntimeConfig");
+    const runtimeConfigEntity = tryGetEntityCollection(base44, "RuntimeConfig");
+    if (!runtimeConfigEntity) {
+      return buildConfigResponse({
+        source: "fallback",
+        config: DEFAULT_RUNTIME_CONFIG,
+      });
+    }
+
     const existing = await runtimeConfigEntity.filter({ key: RUNTIME_CONFIG_KEY }, "-updated_date", 1).catch(() => []);
 
     if (!Array.isArray(existing) || existing.length === 0) {
-      const createdAt = new Date().toISOString();
+      const createdAt = nowIso();
       const created = await runtimeConfigEntity.create({
         key: RUNTIME_CONFIG_KEY,
         version: "runtime-config-v1",
         source: "live",
         updated_at: createdAt,
         config: DEFAULT_RUNTIME_CONFIG,
-      });
-      return Response.json({
-        version: "runtime-config-v1",
+      }).catch(() => null);
+
+      if (!created) {
+        return buildConfigResponse({
+          source: "fallback",
+          updatedAt: createdAt,
+          config: DEFAULT_RUNTIME_CONFIG,
+        });
+      }
+
+      return buildConfigResponse({
         source: "live",
-        key: RUNTIME_CONFIG_KEY,
-        retrieved_at: createdAt,
-        updated_at: createdAt,
-        config: created?.config || DEFAULT_RUNTIME_CONFIG,
+        updatedAt: createdAt,
+        config: (created?.config as Record<string, unknown>) || DEFAULT_RUNTIME_CONFIG,
       });
     }
 
     const latest = existing[0] as Record<string, unknown>;
     const updatedAt = typeof latest.updated_at === "string"
       ? latest.updated_at
-      : (typeof latest.updated_date === "string" ? latest.updated_date : new Date().toISOString());
+      : (typeof latest.updated_date === "string" ? latest.updated_date : nowIso());
     const config = latest.config && typeof latest.config === "object"
       ? latest.config as Record<string, unknown>
       : DEFAULT_RUNTIME_CONFIG;
     const enrichedConfig = mergeMissingKeys(config, DEFAULT_RUNTIME_CONFIG) as Record<string, unknown>;
     const configChanged = JSON.stringify(config) !== JSON.stringify(enrichedConfig);
     if (configChanged) {
-      await runtimeConfigEntity.update(latest.id as string, {
-        config: enrichedConfig,
-        updated_at: new Date().toISOString(),
-      }).catch(() => null);
+      const id = typeof latest.id === "string" ? latest.id : null;
+      if (id) {
+        await runtimeConfigEntity.update(id, {
+          config: enrichedConfig,
+          updated_at: nowIso(),
+        }).catch(() => null);
+      }
     }
 
-    return Response.json({
+    return buildConfigResponse({
       version: parseVersion(latest.version),
       source: "live",
-      key: RUNTIME_CONFIG_KEY,
-      retrieved_at: new Date().toISOString(),
-      updated_at: configChanged ? new Date().toISOString() : updatedAt,
+      updatedAt: configChanged ? nowIso() : updatedAt,
       config: enrichedConfig,
     });
   } catch (error) {
