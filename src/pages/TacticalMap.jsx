@@ -298,6 +298,24 @@ export default function TacticalMap() {
             </Panel>
           )}
 
+          {/* Online players */}
+          {(() => {
+            const activeLocs = playerLocs.filter(loc => Date.now() - new Date(loc.timestamp).getTime() < 5 * 60 * 1000);
+            return activeLocs.length > 0 ? (
+              <Panel title={`PLAYERS ONLINE (${activeLocs.length})`} titleColor={T.cyan}>
+                <div className="overflow-y-auto" style={{ maxHeight: "120px" }}>
+                  {activeLocs.map(loc => (
+                    <div key={loc.id} className="flex items-center gap-2 px-3 py-1.5 border-b" style={{ borderColor: T.border + "44" }}>
+                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: loc.player_callsign === myCallsign ? T.green : T.cyan, boxShadow: `0 0 4px ${T.cyan}`, flexShrink: 0 }} />
+                      <span className="text-xs flex-1 truncate" style={{ color: loc.player_callsign === myCallsign ? T.green : T.text }}>{loc.player_callsign}</span>
+                      {loc.in_vehicle && <span style={{ color: T.amber, fontSize: "8px" }}>IN VEH</span>}
+                    </div>
+                  ))}
+                </div>
+              </Panel>
+            ) : null;
+          })()}
+
           <Panel title={`ACTIVE PINS (${filteredPins.length})`}>
             <div className="overflow-y-auto" style={{ maxHeight: "300px" }}>
               {filteredPins.length === 0
