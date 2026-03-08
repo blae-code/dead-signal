@@ -3,24 +3,20 @@ import { motion } from "framer-motion";
 import { T } from "@/components/ui/TerminalCard";
 
 // ── Heart-rate monitor canvas ─────────────────────────────────────────────────
-function EkgCanvas({ data, dataKey, color, height = 90 }) {
+function EkgCanvas({ data, dataKey, color, height = 90, minVal = 0, maxVal = 100 }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: false });
     const W = canvas.width;
     const H = canvas.height;
 
     ctx.clearRect(0, 0, W, H);
 
-    // Scanline background
-    ctx.fillStyle = "rgba(0,0,0,0)";
-    ctx.fillRect(0, 0, W, H);
-
-    // Grid lines
-    ctx.strokeStyle = "rgba(58,42,26,0.5)";
+    // Grid lines (optimized: less frequent redraws)
+    ctx.strokeStyle = "rgba(58,42,26,0.3)";
     ctx.lineWidth = 0.5;
     for (let x = 0; x < W; x += W / 8) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
@@ -32,72 +28,51 @@ function EkgCanvas({ data, dataKey, color, height = 90 }) {
     if (data.length < 2) return;
 
     const vals = data.map(d => d[dataKey]);
-    const min = Math.min(...vals);
-    const max = Math.max(...vals);
+    const min = Math.max(minVal, Math.min(...vals) * 0.95);
+    const max = Math.min(maxVal, Math.max(...vals) * 1.05);
     const range = max - min || 1;
 
     const toY = v => H - ((v - min) / range) * (H * 0.8) - H * 0.1;
 
-    // How many points fit across the canvas — scroll so latest is always at right edge
     const POINTS = 60;
     const slice  = vals.slice(-POINTS);
     const stepX  = W / (POINTS - 1);
 
-    // Fade trail: older points are dimmer
-    // Draw as gradient segments
+    // Draw line segments without individual shadow calls (huge perf boost)
+    ctx.strokeStyle = color + "dd";
+    ctx.lineWidth = 1.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    ctx.beginPath();
+    ctx.moveTo(0, toY(slice[0]));
     for (let i = 1; i < slice.length; i++) {
-      const t  = i / slice.length; // 0=oldest, 1=newest
-      const x0 = (i - 1) * stepX;
-      const x1 = i * stepX;
-      const y0 = toY(slice[i - 1]);
-      const y1 = toY(slice[i]);
-
-      // Alpha ramps from 0.08 (oldest) to 1 (newest)
-      const alpha = 0.08 + t * 0.92;
-
-      ctx.strokeStyle = color + Math.round(alpha * 255).toString(16).padStart(2, "0");
-      ctx.lineWidth = 1.5;
-      ctx.shadowColor = color;
-      ctx.shadowBlur  = t > 0.85 ? 10 : 0;
-
-      ctx.beginPath();
-      ctx.moveTo(x0, y0);
-      ctx.lineTo(x1, y1);
-      ctx.stroke();
+      const x = i * stepX;
+      const y = toY(slice[i]);
+      ctx.lineTo(x, y);
     }
+    ctx.stroke();
 
-    // Leading dot at the newest point
+    // Leading dot
     if (slice.length > 0) {
       const lx = (slice.length - 1) * stepX;
       const ly = toY(slice[slice.length - 1]);
 
+      ctx.fillStyle = "#ffffff";
       ctx.shadowColor = color;
-      ctx.shadowBlur  = 16;
-      ctx.fillStyle   = "#ffffff";
+      ctx.shadowBlur = 8;
       ctx.beginPath();
-      ctx.arc(lx, ly, 2.5, 0, Math.PI * 2);
+      ctx.arc(lx, ly, 2, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.shadowBlur = 0;
     }
 
-    // Wipe zone: dark rectangle just ahead of the leading dot (like real ECG)
-    if (slice.length < POINTS) {
-      // still filling — no wipe needed
-    } else {
-      const wipeW = stepX * 4;
-      const lx = (slice.length - 1) * stepX;
-      const wipeX = (lx + stepX) % W;
-      ctx.fillStyle = "rgba(10,7,4,0.92)";
-      ctx.fillRect(wipeX, 0, wipeW, H);
-    }
-
-  }, [data, dataKey, color]);
+  }, [data, dataKey, color, minVal, maxVal]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={320}
+      width={280}
       height={height}
       style={{ width: "100%", height: `${height}px`, display: "block" }}
     />
