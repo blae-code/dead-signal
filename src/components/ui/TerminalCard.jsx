@@ -7,9 +7,9 @@
 export const T = {
   // ── Backgrounds (darkest → lightest)
   bg0:  "linear-gradient(160deg, #0a0806 0%, #0d0a07 100%)",
-  bg1:  "linear-gradient(160deg, #0f0c09 0%, #120e0a 100%)",
-  bg2:  "linear-gradient(160deg, #161009 0%, #1a1208 100%)",
-  bg3:  "linear-gradient(160deg, #1c1509 0%, #221808 100%)",
+  bg1:  "linear-gradient(160deg, #1a1410 0%, #201609 100%)",
+  bg2:  "linear-gradient(160deg, #222018 0%, #2a2410 100%)",
+  bg3:  "linear-gradient(160deg, #2a2418 0%, #322a10 100%)",
 
   // ── Borders
   border:   "#2a1e10",
