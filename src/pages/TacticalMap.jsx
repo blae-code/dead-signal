@@ -143,6 +143,11 @@ export default function TacticalMap() {
           ⚠ CLICK ON THE MAP TO PLACE PIN
         </div>
       )}
+      {sharing && (
+        <div className="text-xs px-3 py-2 border" style={{ borderColor: T.green + "88", color: T.green, background: T.green + "0d" }}>
+          ● LOCATION SHARING ACTIVE — CLICK MAP TO UPDATE YOUR POSITION
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Map canvas */}
