@@ -313,15 +313,15 @@ export default function ServerMonitor() {
           <div className="flex items-center gap-3">
             <div style={{
               width: "28px", height: "28px",
-              border: `1px solid ${T.amber}44`,
-              background: `radial-gradient(circle, ${T.amber}18 0%, transparent 70%)`,
+              border: `1px solid ${T.cyan}44`,
+              background: `radial-gradient(circle, ${T.cyan}18 0%, transparent 70%)`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: `inset 0 0 6px ${T.amber}22`,
+              boxShadow: `inset 0 0 6px ${T.cyan}22`,
             }}>
-              <Cpu size={13} style={{ color: T.amber }} />
+              <Cpu size={13} style={{ color: T.cyan }} />
             </div>
             <div>
-              <div style={{ color: T.amber, fontFamily: "'Orbitron', monospace", fontSize: "11px", fontWeight: "bold", letterSpacing: "0.22em", textShadow: `0 0 12px ${T.amber}66` }}>
+              <div style={{ color: T.cyan, fontFamily: "'Orbitron', monospace", fontSize: "11px", fontWeight: "bold", letterSpacing: "0.22em", textShadow: `0 0 12px ${T.cyan}66` }}>
                 SERVER MONITOR
               </div>
               <div style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.18em" }}>HUMANITZ · BISECT HOSTING</div>
