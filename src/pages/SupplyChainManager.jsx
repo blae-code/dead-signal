@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { T, Panel, PageHeader, ActionBtn, StatusBadge } from "@/components/ui/TerminalCard";
-import { Map, Package, TrendingDown, AlertTriangle, MapPin } from "lucide-react";
+import { T, Panel, PageHeader, StatusBadge } from "@/components/ui/TerminalCard";
+import { Package, MapPin } from "lucide-react";
 
 function SupplyCache({ cache, onSelect }) {
   const usedSlots = cache.contents.reduce((sum, item) => sum + item.quantity, 0);

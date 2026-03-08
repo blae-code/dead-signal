@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { T, Panel, ActionBtn, StatusBadge } from "@/components/ui/TerminalCard";
 import { motion } from "framer-motion";
-import { Clock, MapPin, TrendingUp, AlertCircle } from "lucide-react";
 
 export default function LootRoutePlanner({ hotspots, hazards, missions }) {
   const [selectedRoute, setSelectedRoute] = useState(null);

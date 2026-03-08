@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { T, Panel, PageHeader, StatusBadge, GlowDot } from "@/components/ui/TerminalCard";
-import { Heart, Droplet, Zap, Thermometer, AlertTriangle, Users } from "lucide-react";
+import { T, Panel, PageHeader, StatusBadge } from "@/components/ui/TerminalCard";
+import { Heart, Droplet, Zap, Thermometer, AlertTriangle } from "lucide-react";
 
 function VitalBar({ label, value, icon: Icon, color, warning = 30, critical = 15 }) {
   const getColor = () => {

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { T, Panel, StatusBadge } from "@/components/ui/TerminalCard";
 import { motion } from "framer-motion";
-import { AlertTriangle, MapPin, TrendingUp } from "lucide-react";
 
 const HAZARD_ICONS = {
   radiation: "☢",

@@ -51,6 +51,7 @@ const FALLBACK_NAV_SECTIONS = [
     label: "// OPS CENTER",
     items: [
       { label: "COMMAND", page: "Dashboard", code: "HQ", color: "#ffb000", dot: "#39ff14", icon: "Terminal" },
+      { label: "FUNCTION MATRIX", page: "FunctionConsole", code: "FCX", color: "#ff5d5d", dot: "#ff5d5d", icon: "Activity" },
       { label: "SERVER", page: "ServerMonitor", code: "SRV", color: "#00e5ff", dot: "#00e5ff", icon: "Cpu" },
     ],
   },
@@ -58,15 +59,21 @@ const FALLBACK_NAV_SECTIONS = [
     label: "// FIELD OPS",
     items: [
       { label: "TACTICAL MAP", page: "TacticalMap", code: "MAP", color: "#ffb000", dot: "#ffb000", icon: "Map" },
+      { label: "CLAN MAP", page: "ClanMap", code: "CMAP", color: "#00e5ff", dot: "#00e5ff", icon: "Map" },
       { label: "CLAN ROSTER", page: "ClanRoster", code: "OPS", color: "#b8a890", dot: "#39ff14", icon: "Users" },
       { label: "MISSIONS", page: "Missions", code: "MIS", color: "#ff2020", dot: "#ff2020", icon: "Crosshair" },
+      { label: "SQUAD VITALS", page: "SquadVitalsMonitor", code: "VTL", color: "#39ff14", dot: "#39ff14", icon: "Activity" },
     ],
   },
   {
     label: "// LOGISTICS",
     items: [
       { label: "INVENTORY", page: "Inventory", code: "INV", color: "#b8a890", dot: "#8a7a6a", icon: "Package" },
+      { label: "SUPPLY CHAIN", page: "SupplyChainManager", code: "SCM", color: "#00d4e8", dot: "#00d4e8", icon: "Package" },
+      { label: "RESOURCE HUB", page: "ResourceTradingHub", code: "RTH", color: "#ffaa00", dot: "#ffaa00", icon: "Radio" },
       { label: "ENGINEERING", page: "EngineeringOps", code: "ENG", color: "#00e5ff", dot: "#00e5ff", icon: "Wrench" },
+      { label: "SURVIVAL", page: "SurvivalPlanner", code: "SVR", color: "#00b896", dot: "#00b896", icon: "Crosshair" },
+      { label: "POST-MISSION", page: "PostMissionAnalysis", code: "PMA", color: "#ff6600", dot: "#ff6600", icon: "Skull" },
       { label: "INTEL FEED", page: "Intel", code: "INT", color: "#ffb000", dot: "#ffb000", icon: "Radio" },
       { label: "AI AGENT", page: "AIAgent", code: "AI", color: "#39ff14", dot: "#39ff14", icon: "Bot" },
     ],

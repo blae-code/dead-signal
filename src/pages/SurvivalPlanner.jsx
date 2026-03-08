@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { T, Panel, PageHeader, ActionBtn, Field } from "@/components/ui/TerminalCard";
-import { Map, AlertTriangle, Package, Zap, Users, Cpu } from "lucide-react";
+import { T, PageHeader } from "@/components/ui/TerminalCard";
+import { Map, AlertTriangle, Package, Cpu } from "lucide-react";
 import LootRoutePlanner from "@/components/survival/LootRoutePlanner.jsx";
 import HazardForecast from "@/components/survival/HazardForecast.jsx";
 import LoadoutOptimizer from "@/components/survival/LoadoutOptimizer.jsx";

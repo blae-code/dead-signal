@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { T, Panel, Field, ActionBtn, StatusBadge } from "@/components/ui/TerminalCard";
+import { T, Panel, ActionBtn, StatusBadge } from "@/components/ui/TerminalCard";
 
 export default function ListingCard({ listing, onSelect, showActions, onMakeOffer }) {
   const [isExpanded, setIsExpanded] = useState(false);

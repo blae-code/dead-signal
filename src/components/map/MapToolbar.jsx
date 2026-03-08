@@ -1,5 +1,5 @@
 import { T, ActionBtn } from "@/components/ui/TerminalCard";
-import { Plus, Radio, RadioTower, Route, Eye, EyeOff, Flame, Megaphone } from "lucide-react";
+import { Plus, Radio, RadioTower, Route, Eye, EyeOff, Flame, Megaphone, Wrench } from "lucide-react";
 
 export default function MapToolbar({
   filterType, onFilterChange,
@@ -9,6 +9,7 @@ export default function MapToolbar({
   showFog, onToggleFog,
   showHeatmap, onToggleHeatmap,
   isAdmin, onBroadcast,
+  showCalibration, onToggleCalibration,
   pinTypes = [],
 }) {
   return (
@@ -47,6 +48,12 @@ export default function MapToolbar({
       {isAdmin && (
         <ActionBtn color="#ff00ff" onClick={onBroadcast} small>
           <Megaphone size={9} /> BROADCAST
+        </ActionBtn>
+      )}
+
+      {isAdmin && (
+        <ActionBtn color={showCalibration ? T.cyan : T.textDim} onClick={onToggleCalibration} small>
+          <Wrench size={9} /> CALIB
         </ActionBtn>
       )}
     </div>

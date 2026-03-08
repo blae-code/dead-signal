@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { T, Panel, PageHeader, StatusBadge, ActionBtn } from "@/components/ui/TerminalCard";
-import { Zap, Heart, Wrench, BookOpen } from "lucide-react";
+import { T, Panel, PageHeader, StatusBadge } from "@/components/ui/TerminalCard";
+import { Zap, Wrench, BookOpen } from "lucide-react";
 
 function GearDurabilityCard({ item }) {
   const damagePercentage = ((item.durability_before - item.durability_after) / item.durability_before) * 100;

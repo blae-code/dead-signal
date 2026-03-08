@@ -60,6 +60,7 @@ const AIAgent = lazyPage(() => import("./pages/AIAgent"));
 const Challenges = lazyPage(() => import("./pages/Challenges"));
 const ClanBoard = lazyPage(() => import("./pages/ClanBoard"));
 const ClanCalendar = lazyPage(() => import("./pages/ClanCalendar"));
+const ClanMap = lazyPage(() => import("./pages/ClanMap"));
 const ClanRoster = lazyPage(() => import("./pages/ClanRoster"));
 const ClanTreasury = lazyPage(() => import("./pages/ClanTreasury"));
 const ClanVoting = lazyPage(() => import("./pages/ClanVoting"));
@@ -67,6 +68,7 @@ const ClanWiki = lazyPage(() => import("./pages/ClanWiki"));
 const Dashboard = lazyPage(() => import("./pages/Dashboard"));
 const DeathMap = lazyPage(() => import("./pages/DeathMap"));
 const EngineeringOps = lazyPage(() => import("./pages/EngineeringOps"));
+const FunctionConsole = lazyPage(() => import("./pages/FunctionConsole"));
 const Intel = lazyPage(() => import("./pages/Intel"));
 const Inventory = lazyPage(() => import("./pages/Inventory"));
 const LoadoutPlanner = lazyPage(() => import("./pages/LoadoutPlanner"));
@@ -75,7 +77,12 @@ const LootTracker = lazyPage(() => import("./pages/LootTracker"));
 const Missions = lazyPage(() => import("./pages/Missions"));
 const MyStats = lazyPage(() => import("./pages/MyStats"));
 const PlayerProfile = lazyPage(() => import("./pages/PlayerProfile"));
+const PostMissionAnalysis = lazyPage(() => import("./pages/PostMissionAnalysis"));
+const ResourceTradingHub = lazyPage(() => import("./pages/ResourceTradingHub"));
 const ServerMonitor = lazyPage(() => import("./pages/ServerMonitor"));
+const SquadVitalsMonitor = lazyPage(() => import("./pages/SquadVitalsMonitor"));
+const SupplyChainManager = lazyPage(() => import("./pages/SupplyChainManager"));
+const SurvivalPlanner = lazyPage(() => import("./pages/SurvivalPlanner"));
 const TacticalMap = lazyPage(() => import("./pages/TacticalMap"));
 
 
@@ -84,6 +91,7 @@ export const PAGES = {
     "Challenges": Challenges,
     "ClanBoard": ClanBoard,
     "ClanCalendar": ClanCalendar,
+    "ClanMap": ClanMap,
     "ClanRoster": ClanRoster,
     "ClanTreasury": ClanTreasury,
     "ClanVoting": ClanVoting,
@@ -91,6 +99,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "DeathMap": DeathMap,
     "EngineeringOps": EngineeringOps,
+    "FunctionConsole": FunctionConsole,
     "Intel": Intel,
     "Inventory": Inventory,
     "LoadoutPlanner": LoadoutPlanner,
@@ -99,7 +108,12 @@ export const PAGES = {
     "Missions": Missions,
     "MyStats": MyStats,
     "PlayerProfile": PlayerProfile,
+    "PostMissionAnalysis": PostMissionAnalysis,
+    "ResourceTradingHub": ResourceTradingHub,
     "ServerMonitor": ServerMonitor,
+    "SquadVitalsMonitor": SquadVitalsMonitor,
+    "SupplyChainManager": SupplyChainManager,
+    "SurvivalPlanner": SurvivalPlanner,
     "TacticalMap": TacticalMap,
 }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Zap, AlertCircle, RotateCcw, BarChart3, Loader } from 'lucide-react';
+import { RotateCcw, BarChart3, Loader } from 'lucide-react';
 import { T, Panel, FormPanel, Field, ActionBtn, StatusBadge, SectionDivider } from '@/components/ui/TerminalCard';
 import { motion } from 'framer-motion';
 

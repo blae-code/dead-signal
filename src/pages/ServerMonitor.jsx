@@ -14,6 +14,7 @@ import ServerInsightsWidget from "../components/server/ServerInsightsWidget";
 import LiveHealthBar from "../components/server/LiveHealthBar";
 import { T, PageHeader } from "@/components/ui/TerminalCard";
 import { useLiveTelemetry } from "@/hooks/use-live-telemetry";
+import LiveStatusStrip from "@/components/live/LiveStatusStrip";
 
 function AnimatedValue({ value, color = T.green, format = (v) => v }) {
   return (
@@ -56,7 +57,7 @@ export default function ServerMonitor() {
   const prevOnlineRef = useRef(null);
   const alertBannerCounterRef = useRef(0);
 
-  const { data: status = null, isLoading: loadingStatus, isFetching: fetchingStatus, refetch: refetchStatus } = useQuery({
+  const { data: status = null, isLoading: loadingStatus, isFetching: fetchingStatus, refetch: refetchStatus, error: statusError } = useQuery({
     queryKey: ["server-monitor", "status"],
     queryFn: fetchStatus,
     refetchInterval: 10_000,
@@ -235,6 +236,21 @@ export default function ServerMonitor() {
           <RefreshCw size={11} style={{ color: T.textDim }} />
         </button>
       </PageHeader>
+
+      <LiveStatusStrip
+        label="SERVER SOURCE"
+        source={status?.data_source || "unavailable"}
+        retrievedAt={status?.retrieved_at || null}
+        loading={loadingStatus || fetchingStatus}
+        error={statusError?.message || null}
+        staleAfterMs={typeof status?.stale_after_ms === "number" ? status.stale_after_ms : 30_000}
+        staleOverride={typeof status?.stale === "boolean" ? status.stale : null}
+        onRetry={refetchStatus}
+        extraBadges={[
+          { label: status?.online ? "ONLINE" : "OFFLINE", color: status?.online ? T.green : T.red },
+          { label: `PLAYERS ${Number.isFinite(status?.playerCount) ? status.playerCount : "N/A"}`, color: T.cyan },
+        ]}
+      />
 
       <LiveHealthBar
         status={status}

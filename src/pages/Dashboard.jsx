@@ -274,6 +274,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-px" style={{ background: T.border }}>
               {[
                 { label: "TACTICAL MAP", page: "TacticalMap", icon: Activity, color: T.cyan },
+                { label: "FUNCTION MATRIX", page: "FunctionConsole", icon: Terminal, color: T.red },
                 { label: "INVENTORY", page: "Inventory", icon: Package, color: T.green },
                 { label: "ENGINEERING", page: "EngineeringOps", icon: Wrench, color: T.cyan },
                 { label: "SERVER", page: "ServerMonitor", icon: Zap, color: T.cyan },

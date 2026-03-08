@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { T, Panel, ActionBtn, StatusBadge } from "@/components/ui/TerminalCard";
 import { motion } from "framer-motion";
-import { Users, Package, Target } from "lucide-react";
 
 export default function LoadoutOptimizer({ loadoutProfiles, missions }) {
   const [selectedMission, setSelectedMission] = useState(null);
