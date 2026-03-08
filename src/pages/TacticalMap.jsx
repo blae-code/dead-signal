@@ -3,7 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { Map } from "lucide-react";
 import { T, PageHeader } from "@/components/ui/TerminalCard";
 
-import MapCanvas, { PIN_COLORS, PIN_ICONS } from "@/components/map/MapCanvas";
+// Removed MapCanvas import—using Point Atlas iframe instead
+const PIN_COLORS = { "Loot Cache": "#d4a800", "Safe House": "#00b896", "Danger Zone": "#ff2020", "Resource Node": "#a8c820", "Enemy Sighting": "#ff6a00", "Clan Base": "#00e8ff", "Vehicle Spawn": "#ffaa00", "Objective": "#39ff14", "Other": "#7a6a52", "Rally Point": "#00d4e8", "Route Waypoint": "#a8c820", "Horde Sighting": "#ff2020" };
+const PIN_ICONS = { "Loot Cache": "📦", "Safe House": "🏠", "Danger Zone": "☠️", "Resource Node": "⛏️", "Enemy Sighting": "👁️", "Clan Base": "🏰", "Vehicle Spawn": "🚙", "Objective": "🎯", "Other": "📍", "Rally Point": "🚩", "Route Waypoint": "◆", "Horde Sighting": "🧟" };
 import MapToolbar from "@/components/map/MapToolbar";
 import PinForm from "@/components/map/PinForm";
 import PinDetail from "@/components/map/PinDetail";
@@ -241,26 +243,15 @@ export default function TacticalMap() {
       {showFog && isAdmin && <div className="text-xs px-3 py-2 border" style={{ borderColor: T.textDim + "44", color: T.textDim, background: "rgba(0,0,0,0.3)" }}>FOG ACTIVE — CLICK DARK SECTORS TO CLEAR THEM</div>}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Map */}
+        {/* Point Atlas Map Iframe */}
         <div className="lg:col-span-2 space-y-2">
-          <MapCanvas
-            canvasRef={canvasRef}
-            pins={filteredPins}
-            playerLocs={playerLocs}
-            playerTrails={playerTrails}
-            myCallsign={myCallsign}
-            pendingCoords={pendingCoords}
-            routePoints={routePoints}
-            broadcasts={broadcasts}
-            showFog={showFog}
-            fogSectors={fogSectors}
-            fogClearable={isAdmin ? handleFogClear : null}
-            showHeatmap={showHeatmap}
-            heatmapPoints={heatmapPoints}
-            placingMode={placing || routeMode}
-            onClick={handleMapClick}
-            onPinClick={pin => { setSelectedPin(pin === selectedPin ? null : pin); setShowForm(false); }}
-          />
+          <div style={{ border: `1px solid ${T.border}`, background: T.bg1, overflow: "hidden", height: "600px" }}>
+            <iframe
+              src="https://point-atlas.io/map/1/Humanitz"
+              style={{ width: "100%", height: "100%", border: "none" }}
+              allow="fullscreen"
+            />
+          </div>
 
           {/* Legend */}
           <div className="flex flex-wrap gap-x-4 gap-y-1">
