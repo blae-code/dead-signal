@@ -8,12 +8,24 @@ const C = {
   border: "#3a2a1a",
 };
 
-export default function WorldStatus({ inGameTime, weather }) {
-  const [tick, setTick] = useState(0);
+const getInGameTime = () => {
+  const now = new Date();
+  const totalMinutes = now.getHours() * 60 + now.getMinutes();
+  const gameMinutesInDay = totalMinutes * 12;
+  const gameHour = Math.floor((gameMinutesInDay / 60) % 24);
+  const gameMin = Math.floor(gameMinutesInDay % 60);
+  return {
+    hour: String(gameHour).padStart(2, '0'),
+    min: String(gameMin).padStart(2, '0'),
+    isDaytime: gameHour >= 6 && gameHour < 18,
+  };
+};
 
-  // Re-derive every second so all values stay live
+export default function WorldStatus({ weather }) {
+  const [inGameTime, setInGameTime] = useState(getInGameTime());
+
   useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 1000);
+    const id = setInterval(() => setInGameTime(getInGameTime()), 1000);
     return () => clearInterval(id);
   }, []);
 
