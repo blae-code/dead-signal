@@ -10,10 +10,12 @@ const C = {
 
 const getInGameTime = () => {
    const now = new Date();
-   const totalMinutes = now.getHours() * 60 + now.getMinutes();
-   const gameMinutesInDay = totalMinutes * 12;
-   const gameHour = Math.floor((gameMinutesInDay / 60) % 24);
-   const gameMin = Math.floor(gameMinutesInDay % 60);
+   // 60-min cycle: 40 mins day (6:00-17:59), 20 mins night (18:00-5:59)
+   const totalSecs = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+   const cyclePosSecs = totalSecs % 3600; // 0-3599 within 60-min cycle
+   const gameMinuteInCycle = (cyclePosSecs / 3600) * 1440; // 0-1439 in 24-hour scale
+   const gameHour = Math.floor(gameMinuteInCycle / 60);
+   const gameMin = Math.floor(gameMinuteInCycle % 60);
    const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
    const gameDay = (dayOfYear * 12) % 120 + 1;
    return {
