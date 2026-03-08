@@ -107,6 +107,12 @@ const AuthRequiredFallback = ({ onLogin }) => (
   </div>
 );
 
+const PreviewModeBanner = () => (
+  <div className="border-b px-3 py-2 text-xs" style={{ borderColor: "#4a5568", color: "#f6ad55", background: "rgba(0,0,0,0.45)" }}>
+    PREVIEW MODE: running in embedded Base44 context without auth token. Live data may be limited until sign-in.
+  </div>
+);
+
 const RoutePreloader = () => {
   const location = useLocation();
 
@@ -163,9 +169,39 @@ const AuthenticatedApp = () => {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
       if (isEmbeddedPreview) {
-        return <AuthRequiredFallback onLogin={navigateToLogin} />;
+        return (
+          <>
+            <PreviewModeBanner />
+            <Suspense fallback={<RouteSkeleton />}>
+              <RoutePreloader />
+              <Routes>
+                <Route path="/" element={
+                  <LayoutWrapper currentPageName={mainPageKey}>
+                    <RouteErrorBoundary resetKey={`${mainPageKey}:${location.pathname}`}>
+                      <MainPage />
+                    </RouteErrorBoundary>
+                  </LayoutWrapper>
+                } />
+                {Object.entries(Pages).map(([path, Page]) => (
+                  <Route
+                    key={path}
+                    path={`/${path}`}
+                    element={
+                      <LayoutWrapper currentPageName={path}>
+                        <RouteErrorBoundary resetKey={`${path}:${location.pathname}`}>
+                          <Page />
+                        </RouteErrorBoundary>
+                      </LayoutWrapper>
+                    }
+                  />
+                ))}
+                <Route path="*" element={<PageNotFound />} />
+              </Routes>
+            </Suspense>
+          </>
+        );
       }
-      return <RouteSkeleton />;
+      return <AuthRequiredFallback onLogin={navigateToLogin} />;
     }
   }
 
