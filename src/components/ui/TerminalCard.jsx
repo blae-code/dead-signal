@@ -10,9 +10,9 @@ export const T = {
   bg2:      "linear-gradient(135deg, rgba(40, 30, 20, 0.9) 0%, rgba(45, 32, 18, 0.9) 100%)",
   border:   "#3a2a1a",   // dark rust border
   borderHi: "#4a3a2a",   // medium rust border
-  text:     "#b8a890",   // primary text—faded tan
-  textDim:  "#8a7a6a",   // secondary—muted brown
-  textFaint:"#5a4a3a",   // faint—deep rust
+  text:     "#e0d4c0",   // primary text—bright tan
+  textDim:  "#b8a890",   // secondary—muted tan
+  textFaint:"#8a7a6a",   // faint—deep rust
   // status – strictly reserved
   green:    "#39ff14",
   amber:    "#ffb000",

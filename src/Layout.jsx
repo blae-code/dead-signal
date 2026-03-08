@@ -44,9 +44,9 @@ const THREAT_LEVELS = [
 
 // Rust-core palette—brown/orange/gray base with status colors reserved
 const C = {
-  text: "#b8a890", // primary text—faded beige
-  textDim: "#8a7a6a", // secondary—muted brown
-  textFaint: "#5a4a3a", // faint labels—deep rust
+  text: "#e0d4c0", // primary text—bright beige
+  textDim: "#b8a890", // secondary—muted brown
+  textFaint: "#8a7a6a", // faint labels—muted rust
   border: "#3a2a1a", // default border—dark rust
   borderMid: "#4a3a2a", // slightly brighter border
   active: "#d4b8a0", // active nav item—light tan
