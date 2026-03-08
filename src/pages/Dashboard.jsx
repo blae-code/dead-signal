@@ -296,7 +296,7 @@ export default function Dashboard() {
             </div>
           </Panel>
 
-          <Panel title="INVENTORY SNAPSHOT" titleColor={T.amber}>
+          <Panel title="INVENTORY SNAPSHOT" titleColor={ENTITY_COLORS.InventoryItem}>
             <div className="p-3 space-y-2">
               {trackedInventoryCategories.length === 0 ? (
                 <div className="text-xs text-center" style={{ color: T.textFaint }}>
