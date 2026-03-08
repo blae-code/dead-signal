@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import {
   Radio, Map, Users, Package, Cpu, Crosshair,
   AlertTriangle, Terminal, Menu, X, Wifi, WifiOff, ChevronRight,
-  Shield, Activity, Skull, Bot, Zap, Database, Cloud, CloudRain, Sun,
+  Activity, Skull, Bot, Zap, Database, Cloud, CloudRain, Sun,
   BarChart2, Target, PackageOpen, MessageSquare, Calendar, Vote, BookOpen, Star } from
 "lucide-react";
 import WorldStatus from "@/components/WorldStatus";
