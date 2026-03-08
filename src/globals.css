@@ -146,7 +146,7 @@ input:focus, textarea:focus {
 }
 
 input::placeholder, textarea::placeholder {
-  color: rgba(184, 168, 144, 0.3) !important;
+  color: rgba(224, 212, 192, 0.35) !important;
 }
 
 /* Button overrides */
