@@ -37,6 +37,9 @@ export const useRealtimeEntityList = ({
   queryFn,
   enabled = true,
   staleTime = 15_000,
+  refetchInterval = false,
+  refetchIntervalInBackground = false,
+  refetchOnWindowFocus = true,
   patchStrategy = "invalidate",
 }) => {
   const queryClient = useQueryClient();
@@ -45,6 +48,9 @@ export const useRealtimeEntityList = ({
     queryFn,
     enabled,
     staleTime,
+    refetchInterval,
+    refetchIntervalInBackground,
+    refetchOnWindowFocus,
     retry: 1,
   });
 

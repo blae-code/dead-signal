@@ -20,6 +20,9 @@ Any change pushed to the repo will also be reflected in the Base44 Builder.
 ```
 VITE_BASE44_APP_ID=your_app_id
 VITE_BASE44_APP_BASE_URL=your_backend_url
+VITE_LIVEKIT_URL=wss://your-livekit-host
+VITE_LIVEKIT_API_KEY=optional_client_override_only
+VITE_LIVEKIT_SECRET=optional_client_override_only
 
 # Optional header DEPLOY launch fallbacks (used if runtime app.launch URLs are empty)
 VITE_DEAD_SIGNAL_GAME_URL=
@@ -36,6 +39,9 @@ For backend server-control functions, configure these function environment varia
 BISECT_API=your_panel_api_token
 BISECT_PANEL_URL=https://your-panel-host
 BISECT_SERVER_ID=your_server_id
+LIVEKIT_API_KEY=your_livekit_api_key
+LIVEKIT_SECRET=your_livekit_api_secret
+LIVEKIT_URL=wss://your-livekit-host
 ```
 
 Optional advanced backend config (multi-targets, resiliency, live external sources, command governance):
@@ -102,6 +108,50 @@ Optional entity note:
 - If those entities are not defined yet, the backend falls back gracefully without failing core control operations.
 
 Run the app: `npm run dev`
+
+## Map-centric routing structure (v0.1)
+
+The app now renders in a persistent map workspace shell (`layouts/MapLayout.jsx`) and all major views are route-driven overlays:
+
+- Operations: `/ops`, `/ops/missions`, `/ops/missions/:id`
+- Roster: `/roster`, `/roster/player/:id`
+- Logistics: `/logistics`, `/logistics/inventory`, `/logistics/engineering`
+- Systems: `/systems`, `/systems/server`, `/systems/alerts`, `/systems/automation`
+- Community/Comms: `/community`, `/community/announcements`, `/community/intel`, `/community/vouches`
+
+Legacy page paths such as `/Dashboard`, `/Missions`, `/ClanRoster`, and `/ServerMonitor` are preserved via redirects to the new category routes.
+
+Map layers are normalized in `hooks/map/*` and feed the Leaflet map in `components/map/GlobalOperationsMap.jsx`:
+
+- missions layer
+- players layer
+- resources layer
+- systems/alerts layer
+
+Coordinate parsing supports `Grid A-J + row` mission coordinates; unparseable missions are surfaced in the Operations drawer as **Unplaced Missions** with quick-edit links.
+
+## LiveKit voice integration (v0.1)
+
+Implemented voice stack:
+
+- `functions/livekitToken.ts`: LiveKit JWT minting with room-level access checks and token issuance audit events.
+- `hooks/use-livekit.jsx`: app-wide provider + room lifecycle management (`Room({ adaptiveStream: true, dynacast: true })`, connect/disconnect, whisper room helper).
+- `components/voice/VoiceChannelPanel.jsx`: reusable in-app voice UI using LiveKit React components (`ControlBar`, `RoomAudioRenderer`, `ParticipantTile`, participant hooks).
+
+Current UI scaffolding locations:
+
+- Dashboard voice panel.
+- Mission Board voice panel.
+- Clan Roster voice panel and admin clan call broadcast action.
+- Server Monitor operations voice panel.
+- Community and Systems map-drawer overlays.
+
+Token contract:
+
+- Function: `livekitToken`
+- Input: `{ roomName: string, userId?: string }`
+- Access: authenticated users, with room-level role checks (mission/clan/operations policies).
+- Token TTL: 2 hours.
 
 **Publish your changes**
 

@@ -1,26 +1,30 @@
 import { Component, Suspense, useEffect, useMemo, useRef } from "react";
-import { Toaster } from "@/components/ui/toaster"
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClientInstance } from '@/lib/query-client'
-import * as pagesModule from './pages.config'
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-
-const pagesConfig = pagesModule.pagesConfig || { Pages: {}, mainPage: "" };
-const preloadPage = typeof pagesModule.preloadPage === "function"
-  ? pagesModule.preloadPage
-  : () => Promise.resolve(null);
-
-const { Pages, Layout, mainPage } = pagesConfig;
-const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
-const pageKeys = Object.keys(Pages);
-
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import UserNotRegisteredError from "@/components/UserNotRegisteredError";
+import { AuthProvider, useAuth } from "@/lib/AuthContext";
+import { queryClientInstance } from "@/lib/query-client";
+import PageNotFound from "@/lib/PageNotFound";
+import { LiveKitProvider } from "@/hooks/use-livekit";
+import MapLayout from "@/layouts/MapLayout";
+import { LEGACY_ROUTE_REDIRECTS } from "@/utils";
+import OperationsHome from "@/pages/operations/OperationsHome";
+import MissionsPanel from "@/pages/operations/MissionsPanel";
+import MissionDetailPanel from "@/pages/operations/MissionDetailPanel";
+import RosterHome from "@/pages/roster/RosterHome";
+import PlayerDrawer from "@/pages/roster/PlayerDrawer";
+import LogisticsHome from "@/pages/logistics/LogisticsHome";
+import InventoryPanel from "@/pages/logistics/InventoryPanel";
+import EngineeringPanel from "@/pages/logistics/EngineeringPanel";
+import SystemsHome from "@/pages/systems/SystemsHome";
+import ServerPanel from "@/pages/systems/ServerPanel";
+import AlertsPanel from "@/pages/systems/AlertsPanel";
+import AutomationPanel from "@/pages/systems/AutomationPanel";
+import CommunityHome from "@/pages/community/CommunityHome";
+import AnnouncementsPanel from "@/pages/community/AnnouncementsPanel";
+import IntelPanel from "@/pages/community/IntelPanel";
+import VouchesPanel from "@/pages/community/VouchesPanel";
 
 const RouteSkeleton = () => (
   <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#27272a" }}>
@@ -31,9 +35,11 @@ const RouteSkeleton = () => (
 const RouteLoadError = ({ error, onRetry }) => (
   <div className="fixed inset-0 flex items-center justify-center p-6" style={{ background: "#27272a", color: "#eee5d6" }}>
     <div className="w-full max-w-xl border p-6 space-y-4 terminal-card" style={{ borderColor: "#2a1e10", background: "#1c1c20" }}>
-      <h1 className="text-lg font-semibold" style={{ fontFamily: "'Orbitron', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffaa00" }}>Page Module Failed To Load</h1>
+      <h1 className="text-lg font-semibold" style={{ fontFamily: "'Orbitron', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffaa00" }}>
+        Route Module Failed To Load
+      </h1>
       <p className="text-sm" style={{ color: "#d0bfa6" }}>
-        The selected page failed to load in preview. Try again or open another route.
+        The selected route failed to load in preview. Retry or return to operations.
       </p>
       {error?.message && (
         <pre className="text-xs whitespace-pre-wrap border p-3" style={{ borderColor: "#2a1e10", background: "#18181c", color: "#d0bfa6" }}>
@@ -50,11 +56,11 @@ const RouteLoadError = ({ error, onRetry }) => (
           Retry
         </button>
         <a
-          href="/Dashboard"
+          href="/ops"
           className="inline-flex items-center border px-3 py-2 text-sm transition-colors"
           style={{ borderColor: "#3e2c18", color: "#00e8ff", background: "transparent" }}
         >
-          Open Dashboard
+          Open Ops Workspace
         </a>
       </div>
     </div>
@@ -86,9 +92,7 @@ class RouteErrorBoundary extends Component {
 }
 
 const isEmbeddedContext = () => {
-  if (typeof window === "undefined") {
-    return false;
-  }
+  if (typeof window === "undefined") return false;
   try {
     return window.self !== window.top;
   } catch {
@@ -99,7 +103,9 @@ const isEmbeddedContext = () => {
 const AuthRequiredFallback = ({ onLogin }) => (
   <div className="fixed inset-0 flex items-center justify-center p-6" style={{ background: "#27272a", color: "#eee5d6" }}>
     <div className="w-full max-w-md border p-6 space-y-4 terminal-card" style={{ borderColor: "#2a1e10", background: "#1c1c20" }}>
-      <h1 className="text-lg font-semibold" style={{ fontFamily: "'Orbitron', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffaa00" }}>Authentication Required</h1>
+      <h1 className="text-lg font-semibold" style={{ fontFamily: "'Orbitron', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "#ffaa00" }}>
+        Authentication Required
+      </h1>
       <p className="text-sm" style={{ color: "#d0bfa6" }}>
         This preview is embedded. Use login to continue, then reopen preview if needed.
       </p>
@@ -121,32 +127,59 @@ const PreviewModeBanner = () => (
   </div>
 );
 
-const RoutePreloader = () => {
+const LegacyPlayerProfileRedirect = () => {
+  const location = useLocation();
+  const id = new URLSearchParams(location.search).get("id");
+  return <Navigate to={id ? `/roster/player/${encodeURIComponent(id)}` : "/roster"} replace />;
+};
+
+const AppRoutes = () => {
   const location = useLocation();
 
-  useEffect(() => {
-    const path = location.pathname === "/"
-      ? mainPageKey
-      : location.pathname.replace(/^\/+/, "");
-    const currentIndex = pageKeys.indexOf(path);
-    const candidates = [
-      path,
-      mainPageKey,
-      currentIndex > 0 ? pageKeys[currentIndex - 1] : null,
-      currentIndex >= 0 && currentIndex < pageKeys.length - 1 ? pageKeys[currentIndex + 1] : null,
-    ].filter(Boolean);
+  return (
+    <RouteErrorBoundary resetKey={`${location.pathname}:${location.search}`}>
+      <Suspense fallback={<RouteSkeleton />}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/ops" replace />} />
 
-    candidates.forEach((key) => {
-      Promise.resolve(preloadPage(key)).catch(() => {});
-    });
-  }, [location.pathname]);
+          <Route element={<MapLayout />}>
+            <Route path="/ops" element={<OperationsHome />} />
+            <Route path="/ops/missions" element={<MissionsPanel />} />
+            <Route path="/ops/missions/:id" element={<MissionDetailPanel />} />
 
-  return null;
+            <Route path="/roster" element={<RosterHome />} />
+            <Route path="/roster/player/:id" element={<PlayerDrawer />} />
+
+            <Route path="/logistics" element={<LogisticsHome />} />
+            <Route path="/logistics/inventory" element={<InventoryPanel />} />
+            <Route path="/logistics/engineering" element={<EngineeringPanel />} />
+
+            <Route path="/systems" element={<SystemsHome />} />
+            <Route path="/systems/server" element={<ServerPanel />} />
+            <Route path="/systems/alerts" element={<AlertsPanel />} />
+            <Route path="/systems/automation" element={<AutomationPanel />} />
+
+            <Route path="/community" element={<CommunityHome />} />
+            <Route path="/community/announcements" element={<AnnouncementsPanel />} />
+            <Route path="/community/intel" element={<IntelPanel />} />
+            <Route path="/community/vouches" element={<VouchesPanel />} />
+          </Route>
+
+          <Route path="/PlayerProfile" element={<LegacyPlayerProfileRedirect />} />
+
+          {LEGACY_ROUTE_REDIRECTS.filter((entry) => entry.from !== "/PlayerProfile").map((entry) => (
+            <Route key={entry.from} path={entry.from} element={<Navigate to={entry.to} replace />} />
+          ))}
+
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      </Suspense>
+    </RouteErrorBoundary>
+  );
 };
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-  const location = useLocation();
   const isEmbeddedPreview = useMemo(() => isEmbeddedContext(), []);
   const loginRedirectTriggeredRef = useRef(false);
 
@@ -162,50 +195,20 @@ const AuthenticatedApp = () => {
     navigateToLogin();
   }, [authError, isEmbeddedPreview, navigateToLogin]);
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#27272a" }}>
-        <div className="w-8 h-8 border-4 border-solid rounded-full animate-spin" style={{ borderColor: "#3e2c18", borderTopColor: "#39ff14" }}></div>
-      </div>
-    );
+    return <RouteSkeleton />;
   }
 
-  // Handle authentication errors
   if (authError) {
-    if (authError.type === 'user_not_registered') {
+    if (authError.type === "user_not_registered") {
       return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
+    }
+    if (authError.type === "auth_required") {
       if (isEmbeddedPreview) {
         return (
           <>
             <PreviewModeBanner />
-            <Suspense fallback={<RouteSkeleton />}>
-              <RoutePreloader />
-              <Routes>
-                <Route path="/" element={
-                  <LayoutWrapper currentPageName={mainPageKey}>
-                    <RouteErrorBoundary resetKey={`${mainPageKey}:${location.pathname}`}>
-                      <MainPage />
-                    </RouteErrorBoundary>
-                  </LayoutWrapper>
-                } />
-                {Object.entries(Pages).map(([path, Page]) => (
-                  <Route
-                    key={path}
-                    path={`/${path}`}
-                    element={
-                      <LayoutWrapper currentPageName={path}>
-                        <RouteErrorBoundary resetKey={`${path}:${location.pathname}`}>
-                          <Page />
-                        </RouteErrorBoundary>
-                      </LayoutWrapper>
-                    }
-                  />
-                ))}
-                <Route path="*" element={<PageNotFound />} />
-              </Routes>
-            </Suspense>
+            <AppRoutes />
           </>
         );
       }
@@ -213,51 +216,22 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // Render the main app
-  return (
-    <Suspense fallback={<RouteSkeleton />}>
-      <RoutePreloader />
-      <Routes>
-        <Route path="/" element={
-          <LayoutWrapper currentPageName={mainPageKey}>
-            <RouteErrorBoundary resetKey={`${mainPageKey}:${location.pathname}`}>
-              <MainPage />
-            </RouteErrorBoundary>
-          </LayoutWrapper>
-        } />
-        {Object.entries(Pages).map(([path, Page]) => (
-          <Route
-            key={path}
-            path={`/${path}`}
-            element={
-              <LayoutWrapper currentPageName={path}>
-                <RouteErrorBoundary resetKey={`${path}:${location.pathname}`}>
-                  <Page />
-                </RouteErrorBoundary>
-              </LayoutWrapper>
-            }
-          />
-        ))}
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
-    </Suspense>
-  );
+  return <AppRoutes />;
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <AuthenticatedApp />
-        </Router>
+        <LiveKitProvider>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <AuthenticatedApp />
+          </Router>
+        </LiveKitProvider>
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>
-  )
+  );
 }
 
-export default App
-
+export default App;

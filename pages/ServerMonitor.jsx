@@ -12,6 +12,7 @@ import LiveUptime from "../components/server/LiveUptime";
 import ServerMetricsWidget from "../components/server/ServerMetricsWidget";
 import ServerInsightsWidget from "../components/server/ServerInsightsWidget";
 import LiveHealthBar from "../components/server/LiveHealthBar";
+import VoiceChannelPanel from "@/components/voice/VoiceChannelPanel";
 import { T, PageHeader } from "@/components/ui/TerminalCard";
 import { useLiveTelemetry } from "@/hooks/use-live-telemetry";
 import { invokeFunctionOrFallback } from "@/api/function-invoke";
@@ -349,6 +350,14 @@ export default function ServerMonitor() {
         <AlertRulesPanel onTriggered={handleTriggered} />
         <AlertHistoryPanel refreshTick={alertRefreshTick} />
       </motion.div>
+
+      <VoiceChannelPanel
+        title="OPERATIONS VOICE"
+        titleColor={T.cyan}
+        includeMissionRooms={false}
+        includeClanRoom={false}
+        includeOpsRoom={true}
+      />
 
       <BottomConsoleDrawer
         consoleLines={consoleLines}

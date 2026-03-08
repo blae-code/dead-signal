@@ -3,6 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { Crosshair, Plus, Save, ChevronDown, ChevronUp } from "lucide-react";
 import { T, PageHeader, FormPanel, Field, ActionBtn, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
+import VoiceChannelPanel from "@/components/voice/VoiceChannelPanel";
+import { buildMissionRoomName } from "@/lib/livekit-room-utils";
+import { useLiveKit } from "@/hooks/use-livekit";
 
 const STATUS_COLORS   = { Pending: T.amber, Active: T.green, Complete: T.cyan, Failed: T.red, Aborted: T.textDim };
 const PRIORITY_COLORS = { Critical: T.red, High: T.orange, Medium: T.amber, Low: T.green };
@@ -21,6 +24,7 @@ const buildEmpty = (statuses, priorities) => ({
 });
 
 export default function Missions() {
+  const { connectedRooms } = useLiveKit();
   const runtimeConfig = useRuntimeConfig();
   const STATUSES = runtimeConfig.getArray(["taxonomy", "mission_statuses"]);
   const PRIORITIES = runtimeConfig.getArray(["taxonomy", "mission_priorities"]);
@@ -47,12 +51,34 @@ export default function Missions() {
 
   const handleSave = async () => {
     if (!form.title.trim()) return;
+    const buildPayload = (missionId) => ({
+      ...form,
+      voice_room_name: form.voice_room_name || buildMissionRoomName(missionId || editing || "pending"),
+    });
+
+    const persistWithFallback = async (saveFn, idHint) => {
+      const payload = buildPayload(idHint);
+      try {
+        return await saveFn(payload);
+      } catch (error) {
+        // Entity schema may not include voice_room_name in every environment.
+        const fallbackPayload = { ...form };
+        return await saveFn(fallbackPayload);
+      }
+    };
+
     if (editing) {
-      const u = await base44.entities.Mission.update(editing, form);
+      const u = await persistWithFallback((payload) => base44.entities.Mission.update(editing, payload), editing);
       setMissions(m => m.map(x => x.id === editing ? u : x));
     } else {
-      const c = await base44.entities.Mission.create(form);
-      setMissions(m => [c, ...m]);
+      const c = await persistWithFallback((payload) => base44.entities.Mission.create(payload), null);
+      const roomName = c?.voice_room_name || buildMissionRoomName(c?.id);
+      if (c?.id && !c?.voice_room_name) {
+        const patched = await base44.entities.Mission.update(c.id, { voice_room_name: roomName }).catch(() => c);
+        setMissions(m => [patched, ...m]);
+      } else {
+        setMissions(m => [c, ...m]);
+      }
     }
     setForm(buildEmpty(STATUSES, PRIORITIES)); setEditing(null); setShowForm(false);
   };
@@ -160,6 +186,9 @@ export default function Missions() {
                 <span className="text-xs flex items-center gap-1 flex-shrink-0" style={{ color: STATUS_COLORS[m.status] }}>
                   <span style={{ fontSize: "7px" }}>●</span>{m.status}
                 </span>
+                <span style={{ color: connectedRooms.includes(m.voice_room_name || buildMissionRoomName(m.id)) ? T.green : T.textFaint, fontSize: "8px", letterSpacing: "0.08em" }}>
+                  {connectedRooms.includes(m.voice_room_name || buildMissionRoomName(m.id)) ? "VOICE" : "IDLE"}
+                </span>
                 {expanded === m.id
                   ? <ChevronUp size={11} style={{ color: T.textFaint, flexShrink: 0 }} />
                   : <ChevronDown size={11} style={{ color: T.textFaint, flexShrink: 0 }} />
@@ -199,6 +228,14 @@ export default function Missions() {
           ))
         }
       </div>
+
+      <VoiceChannelPanel
+        title="MISSION VOICE CHANNELS"
+        titleColor={T.cyan}
+        includeMissionRooms={true}
+        includeClanRoom={true}
+        includeOpsRoom={false}
+      />
     </div>
   );
 }

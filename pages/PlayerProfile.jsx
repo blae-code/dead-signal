@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Shield, ArrowLeft, ThumbsUp } from "lucide-react";
 import { T, PageHeader, Panel, StatGrid, EmptyState, ActionBtn } from "@/components/ui/TerminalCard";
 import { createPageUrl } from "@/utils";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
@@ -43,6 +43,7 @@ function computeAchievements(member, missions, activityLogs, statuses) {
 }
 
 export default function PlayerProfile() {
+  const params = useParams();
   const runtimeConfig = useRuntimeConfig();
   const missionStatuses = runtimeConfig.getArray(["taxonomy", "mission_statuses"]);
   const clanStatuses = runtimeConfig.getArray(["taxonomy", "clan_statuses"]);
@@ -51,8 +52,8 @@ export default function PlayerProfile() {
   const pendingMissionStatus = pickByToken(missionStatuses, "pending");
   const activeClanStatus = pickByToken(clanStatuses, "active");
 
-  const params   = new URLSearchParams(window.location.search);
-  const memberId = params.get("id");
+  const searchParams = new URLSearchParams(window.location.search);
+  const memberId = params.id || searchParams.get("id");
 
   const [member,   setMember]   = useState(null);
   const [missions, setMissions] = useState([]);

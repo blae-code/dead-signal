@@ -45,6 +45,9 @@ const getAppParams = () => {
 		fromUrl: getAppParamValue("from_url", { defaultValue: window.location.href }),
 		functionsVersion: getAppParamValue("functions_version", { defaultValue: import.meta.env.VITE_BASE44_FUNCTIONS_VERSION }),
 		appBaseUrl: getAppParamValue("app_base_url", { defaultValue: import.meta.env.VITE_BASE44_APP_BASE_URL }),
+		livekitUrl: getAppParamValue("livekit_url", { defaultValue: import.meta.env.VITE_LIVEKIT_URL }),
+		livekitApiKey: getAppParamValue("livekit_api_key", { defaultValue: import.meta.env.VITE_LIVEKIT_API_KEY }),
+		livekitSecret: getAppParamValue("livekit_secret", { defaultValue: import.meta.env.VITE_LIVEKIT_SECRET }),
 	}
 }
 

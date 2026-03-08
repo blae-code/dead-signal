@@ -21,6 +21,15 @@ export const DEFAULT_RUNTIME_CONFIG: Record<string, unknown> = {
       open_server_delay_ms: 2500,
       tooltip: "Set app.launch.game_url/server_url (or gameUrl/serverUrl). Optional env fallback: VITE_DEAD_SIGNAL_GAME_URL / VITE_DEAD_SIGNAL_SERVER_URL.",
     },
+    voice: {
+      enabled: true,
+      token_function: "livekitToken",
+      default_ops_room: "operations-oncall",
+      default_clan_room: "clan-primary",
+      mission_room_prefix: "mission-",
+      whisper_suffix: "-whisper-",
+      tooltip: "Voice uses VITE_LIVEKIT_URL client config and server-side LIVEKIT_API_KEY/LIVEKIT_SECRET signing.",
+    },
   },
   world: {
     server_timezone: "America/Vancouver",

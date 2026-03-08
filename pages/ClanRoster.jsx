@@ -4,9 +4,12 @@ import { Users, Plus, Edit2, Trash2, Save, Shield, ExternalLink } from "lucide-r
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { T, PageHeader, StatGrid, Panel, FormPanel, Field, ActionBtn, TableHeader, TableRow, EmptyState, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
+import VoiceChannelPanel from "@/components/voice/VoiceChannelPanel";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { buildClanRoomName, sanitizeRoomToken } from "@/lib/livekit-room-utils";
+import { useLiveKit } from "@/hooks/use-livekit";
 
 const ROLE_COLORS   = { Commander: T.orange, Lieutenant: T.amber, Scout: T.cyan, Engineer: T.green, Medic: "#ff5555", Grunt: T.textDim };
 const STATUS_COLORS = { Active: T.green, Inactive: T.textDim, MIA: T.amber, KIA: T.red };
@@ -25,6 +28,7 @@ const buildEmpty = (roles, statuses) => ({
 });
 
 export default function ClanRoster() {
+  const { connectedRooms } = useLiveKit();
   const runtimeConfig = useRuntimeConfig();
   const queryClient = useQueryClient();
   const ROLES = runtimeConfig.getArray(["taxonomy", "clan_roles"]);
@@ -46,6 +50,9 @@ export default function ClanRoster() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(() => buildEmpty(ROLES, STATUSES));
   const isAdmin = user?.role === "admin";
+  const userClanMembership = members.find((entry) => entry.user_email && user?.email && entry.user_email === user.email) || null;
+  const clanRoomName = buildClanRoomName(sanitizeRoomToken(userClanMembership?.clan_id || "primary"));
+  const clanRoomConnected = connectedRooms.includes(clanRoomName);
 
   useEffect(() => {
     if (form.role && form.status) return;
@@ -66,6 +73,17 @@ export default function ClanRoster() {
   const handleEdit = (m) => { setForm({ ...m }); setEditing(m.id); setShowForm(true); setSelected(null); };
   const handleDelete = async (id) => { await base44.entities.ClanMember.delete(id); queryClient.invalidateQueries({ queryKey: ["clan-roster", "members"] }); setSelected(null); };
 
+  const handleStartClanCall = async (roomName) => {
+    const targetRoom = roomName || clanRoomName;
+    await base44.entities.Announcement.create({
+      title: "CLAN VOICE CHANNEL ONLINE",
+      body: `Join voice room: ${targetRoom}`,
+      type: "Ops",
+      pinned: true,
+      posted_by: user?.full_name || user?.email || "System",
+    }).catch(() => null);
+  };
+
   const activeCount = activeStatus ? members.filter((member) => member.status === activeStatus).length : 0;
   const kdrAvg = members.length > 0
     ? (members.reduce((a, m) => a + (m.deaths > 0 ? m.kills / m.deaths : m.kills), 0) / members.length).toFixed(2)
@@ -74,6 +92,14 @@ export default function ClanRoster() {
   return (
     <div className="p-4 space-y-4 max-w-7xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Users} title="CLAN ROSTER" color={T.amber}>
+        <span style={{ color: clanRoomConnected ? T.green : T.textFaint, fontSize: "9px", letterSpacing: "0.08em" }}>
+          CLAN VOICE {clanRoomConnected ? "ONLINE" : "STANDBY"}
+        </span>
+        {isAdmin && (
+          <ActionBtn color={T.cyan} onClick={() => handleStartClanCall(clanRoomName)}>
+            <ExternalLink size={10} /> START CLAN CALL
+          </ActionBtn>
+        )}
         {isAdmin && (
           <ActionBtn color={T.green} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(buildEmpty(ROLES, STATUSES)); }}>
             <Plus size={10} /> ENLIST
@@ -135,6 +161,15 @@ export default function ClanRoster() {
           </ActionBtn>
         </FormPanel>
       )}
+
+      <VoiceChannelPanel
+        title="CLAN VOICE CHANNELS"
+        titleColor={T.cyan}
+        includeMissionRooms={false}
+        includeClanRoom={true}
+        includeOpsRoom={true}
+        onClanCallBroadcast={handleStartClanCall}
+      />
 
       <Panel>
         <TableHeader columns={["CALLSIGN", "ROLE", "STATUS", "K/D", "HRS", ""]}
