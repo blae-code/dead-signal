@@ -48,10 +48,25 @@ export default function LiveUptime({ initialUptime, statusLoading }) {
     }
   }, [initialUptime, statusLoading]);
 
+  const getUptimeColor = () => {
+    const seconds = parseUptimeToSeconds(uptime);
+    const hours = Math.floor(seconds / 3600);
+    if (hours >= 24) return T.green;
+    if (hours >= 12) return T.cyan;
+    if (hours >= 4) return T.amber;
+    return T.red;
+  };
+
   return (
     <div
-      className="font-bold text-base"
-      style={{ color: T.amber, fontFamily: "'Orbitron', monospace" }}
+      style={{
+        color: getUptimeColor(),
+        fontFamily: "'Orbitron', monospace",
+        fontSize: "13px",
+        fontWeight: "bold",
+        minWidth: "48px",
+        textAlign: "right",
+      }}
     >
       {uptime}
     </div>
