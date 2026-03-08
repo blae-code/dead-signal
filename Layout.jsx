@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
@@ -16,10 +16,11 @@ import {
   Skull,
   Bot,
   Wrench,
+  Rocket,
 } from "lucide-react";
-import WorldStatus from "@/components/WorldStatus";
 import InAppNotifications from "@/components/features/InAppNotifications";
 import HeaderCommandPrompt from "@/components/HeaderCommandPrompt";
+import HeaderChronometer from "@/components/HeaderChronometer";
 import { useAnimationEnabled } from "@/hooks/use-animation-enabled";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
@@ -44,21 +45,6 @@ const C = {
   border: "#2a1e10",
   accent: "#ffaa00",
   scan: "rgba(255, 170, 0, 0.05)",
-};
-
-const weatherCodeToLabel = (code) => {
-  const normalized = Number(code);
-  if (!Number.isFinite(normalized)) return "Unknown";
-  if (normalized === 0) return "Clear";
-  if ([1, 2, 3].includes(normalized)) return "Cloudy";
-  if ([45, 48].includes(normalized)) return "Fog";
-  if ([51, 53, 55, 56, 57].includes(normalized)) return "Drizzle";
-  if ([61, 63, 65, 66, 67].includes(normalized)) return "Rain";
-  if ([71, 73, 75, 77].includes(normalized)) return "Snow";
-  if ([80, 81, 82].includes(normalized)) return "Showers";
-  if ([85, 86].includes(normalized)) return "Snow Showers";
-  if ([95, 96, 99].includes(normalized)) return "Storm";
-  return "Unknown";
 };
 
 const FALLBACK_NAV_SECTIONS = [
@@ -88,41 +74,6 @@ const FALLBACK_NAV_SECTIONS = [
   },
 ];
 
-const HeaderClock = memo(function HeaderClock({ animationEnabled, timezoneLabel = "America/Vancouver" }) {
-  const [time, setTime] = useState(() => new Date());
-  const timeStr = time.toLocaleTimeString("en-US", { hour12: false });
-  const dateStr = time.toLocaleDateString("en-US", { year: "2-digit", month: "2-digit", day: "2-digit" });
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="hidden sm:flex items-center gap-1 text-xs relative flex-1">
-      <motion.div
-        animate={animationEnabled ? { opacity: [1, 0, 1] } : { opacity: 1 }}
-        transition={animationEnabled ? { duration: 1, repeat: Infinity } : undefined}
-        style={{ width: "5px", height: "5px", borderRadius: "50%", background: C.accent, flexShrink: 0 }}
-      />
-      <div className="flex flex-col" style={{ lineHeight: 1.3 }}>
-        <motion.span
-          key={timeStr}
-          initial={animationEnabled ? { opacity: 0.4 } : false}
-          animate={{ opacity: 1 }}
-          transition={animationEnabled ? { duration: 0.2 } : undefined}
-          style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "12px", letterSpacing: "0.12em" }}
-        >
-          {timeStr}
-        </motion.span>
-        <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.15em" }}>
-          {dateStr} · {timezoneLabel.toUpperCase()}
-        </span>
-      </div>
-    </div>
-  );
-});
-
 const normalizeNavSections = (sections) => (
   Array.isArray(sections)
     ? sections
@@ -146,10 +97,29 @@ const normalizeNavSections = (sections) => (
     : []
 );
 
+const asObject = (value) => (value && typeof value === "object" ? value : {});
+const asString = (value) => (typeof value === "string" ? value.trim() : "");
+const asNumber = (value, fallback) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const openExternalUri = (uri) => {
+  if (!uri) return;
+  const anchor = document.createElement("a");
+  anchor.href = uri;
+  anchor.target = "_self";
+  anchor.rel = "noopener noreferrer";
+  anchor.style.display = "none";
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+};
+
 export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [online, setOnline] = useState(() => (typeof navigator !== "undefined" ? navigator.onLine : true));
-  const [weather, setWeather] = useState(null);
+  const [launching, setLaunching] = useState(false);
   const animationEnabled = useAnimationEnabled();
   const runtimeConfig = useRuntimeConfig();
 
@@ -169,6 +139,17 @@ export default function Layout({ children, currentPageName }) {
   const appBuild = typeof appConfig.build === "string" ? appConfig.build : "UNAVAILABLE";
   const appVersion = typeof appConfig.version === "string" ? appConfig.version : "UNAVAILABLE";
   const timezone = typeof appConfig.timezone === "string" ? appConfig.timezone : "America/Vancouver";
+  const launchConfig = asObject(appConfig.launch);
+  const launchLabel = asString(launchConfig.label) || "DEPLOY";
+  const launchGameUrl = asString(launchConfig.game_url);
+  const launchServerUrl = asString(launchConfig.server_url);
+  const launchDelayMs = Math.max(0, asNumber(launchConfig.open_server_delay_ms, 2500));
+  const launchEnabled = launchConfig.enabled !== false && Boolean(launchGameUrl || launchServerUrl);
+  const launchTooltip = asString(launchConfig.tooltip) || (
+    launchEnabled
+      ? `Launch game and connect (${launchDelayMs}ms relay)`
+      : "Configure app.launch.game_url and/or app.launch.server_url in RuntimeConfig to enable one-click deploy."
+  );
 
   useEffect(() => {
     const onOnline = () => setOnline(true);
@@ -181,38 +162,33 @@ export default function Layout({ children, currentPageName }) {
     };
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    const fetchWeather = async () => {
-      try {
-        const response = await fetch("https://api.open-meteo.com/v1/forecast?latitude=49.2827&longitude=-123.1207&current=temperature_2m,is_day,weather_code&temperature_unit=fahrenheit");
-        if (!response.ok) return;
-        const data = await response.json();
-        const current = data?.current;
-        if (!current || cancelled) return;
-        setWeather({
-          temp: Math.round(Number(current.temperature_2m)),
-          shortForecast: weatherCodeToLabel(current.weather_code),
-          isDaytime: current.is_day === 1,
-        });
-      } catch {
-        // Intentionally silent for ambient weather display.
+  const handleLaunch = () => {
+    if (launching) return;
+    if (!launchEnabled) return;
+
+    setLaunching(true);
+    if (launchGameUrl) {
+      openExternalUri(launchGameUrl);
+    }
+
+    if (launchServerUrl) {
+      const openServer = () => openExternalUri(launchServerUrl);
+      if (launchGameUrl) {
+        window.setTimeout(openServer, launchDelayMs);
+      } else {
+        openServer();
       }
-    };
-    fetchWeather();
-    const weatherInterval = setInterval(fetchWeather, 600_000);
-    return () => {
-      cancelled = true;
-      clearInterval(weatherInterval);
-    };
-  }, []);
+    }
+
+    window.setTimeout(() => setLaunching(false), Math.max(launchDelayMs + 1500, 2000));
+  };
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#27272a", fontFamily: "'Share Tech Mono', monospace" }}>
-      <header className="border-b flex items-center justify-between px-4 py-2 z-50 relative overflow-hidden" style={{ borderColor: C.border, background: "rgba(31, 31, 35, 0.96)" }}>
+      <header className="ds-header-shell border-b flex items-center justify-between px-4 py-2 z-50 relative overflow-hidden" style={{ borderColor: C.border }}>
         <div className={animationEnabled ? "layout-header-scan" : undefined} style={{ position: "absolute", inset: 0, pointerEvents: "none", background: `linear-gradient(90deg, transparent 0%, ${C.scan} 50%, transparent 100%)`, backgroundSize: "200% 100%" }} />
 
-        <div className="flex items-center gap-3 relative">
+        <div className="ds-header-segment flex items-center gap-3 relative px-2 py-1">
           <button className="md:hidden" style={{ color: C.text }} onClick={() => setMobileOpen((value) => !value)}>
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -230,13 +206,30 @@ export default function Layout({ children, currentPageName }) {
           <HeaderCommandPrompt currentPageName={currentPageName} />
         </div>
 
-        <HeaderClock animationEnabled={animationEnabled} timezoneLabel={timezone} />
-
-        <div className="hidden xl:flex flex-1 justify-center">
-          <div style={{ width: "460px" }}>
-            <WorldStatus weather={weather} />
-          </div>
+        <div className="ml-auto flex items-center mr-2 ds-header-segment p-1">
+          <button
+            type="button"
+            onClick={handleLaunch}
+            disabled={!launchEnabled || launching}
+            title={launchTooltip}
+            className="flex items-center gap-1.5 border px-2 py-1 transition-opacity"
+            style={{
+              borderColor: launchEnabled ? `${C.cyan}88` : C.border,
+              background: launchEnabled ? "rgba(0, 232, 255, 0.14)" : "rgba(24, 24, 28, 0.8)",
+              color: launchEnabled ? C.cyan : C.textFaint,
+              opacity: launchEnabled ? 1 : 0.65,
+              fontSize: "9px",
+              letterSpacing: "0.14em",
+              fontFamily: "'Orbitron', monospace",
+              boxShadow: launchEnabled ? "0 0 10px rgba(0, 232, 255, 0.22)" : "none",
+            }}
+          >
+            <Rocket size={11} />
+            <span>{launching ? "DEPLOYING..." : launchLabel}</span>
+          </button>
         </div>
+
+        <HeaderChronometer animationEnabled={animationEnabled} runtimeConfig={runtimeConfig} appTimezone={timezone} />
       </header>
 
       <div className="flex flex-1 overflow-hidden">

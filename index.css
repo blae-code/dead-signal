@@ -347,6 +347,59 @@
   opacity: 1 !important;
 }
 
+.ds-header-shell {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ds-bg-primary) 94%, #000) 0%,
+    var(--ds-bg-primary) 58%,
+    var(--ds-bg-secondary) 100%
+  ) !important;
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.62),
+    inset 0 1px 0 color-mix(in srgb, var(--ds-amber) 16%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--ds-border-accent) 78%, transparent);
+  backdrop-filter: blur(4px);
+}
+
+.ds-header-shell::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ds-amber) 65%, transparent) 35%,
+    color-mix(in srgb, var(--ds-cyan) 65%, transparent) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.ds-header-shell::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ds-border-accent) 65%, transparent) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.ds-header-segment {
+  border: 1px solid color-mix(in srgb, var(--ds-border-base) 92%, transparent);
+  background: linear-gradient(135deg, rgba(24, 24, 28, 0.92), rgba(31, 31, 35, 0.92));
+  box-shadow: inset 0 1px 0 rgba(78, 58, 34, 0.2), 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
 .ds-glow-green {
   text-shadow: 0 0 10px var(--ds-green), 0 0 20px color-mix(in srgb, var(--ds-green) 30%, transparent);
 }

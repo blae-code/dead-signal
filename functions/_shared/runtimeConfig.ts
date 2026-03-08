@@ -13,6 +13,71 @@ export const DEFAULT_RUNTIME_CONFIG: Record<string, unknown> = {
     build: "DS-ALPHA",
     version: "v1.0.0",
     timezone: "America/Vancouver",
+    launch: {
+      enabled: true,
+      label: "DEPLOY",
+      game_url: "",
+      server_url: "",
+      open_server_delay_ms: 2500,
+      tooltip: "Set game_url/server_url for one-click launch and server connect.",
+    },
+  },
+  world: {
+    server_timezone: "America/Vancouver",
+    time_scale: 6,
+    anchor_real_iso: "2026-01-01T00:00:00Z",
+    anchor_game_iso: "2234-03-01T06:00:00Z",
+    day_zero_game_iso: "2234-01-01T00:00:00Z",
+    conditions_location: {
+      latitude: 49.2827,
+      longitude: -123.1207,
+    },
+    seasons: [
+      {
+        name: "Winter",
+        start_month: 12,
+        end_month: 2,
+        color: "#00e8ff",
+        impacts: [
+          "Body temperature drain +24%",
+          "Hydration loss -10%",
+          "Night visibility +8% on clear skies",
+        ],
+      },
+      {
+        name: "Spring",
+        start_month: 3,
+        end_month: 5,
+        color: "#39ff14",
+        impacts: [
+          "Crop yield +18%",
+          "Ambient infection spread +7%",
+          "Road traction baseline",
+        ],
+      },
+      {
+        name: "Summer",
+        start_month: 6,
+        end_month: 8,
+        color: "#ffaa00",
+        impacts: [
+          "Hydration drain +26%",
+          "Heat fatigue threshold -14%",
+          "Solar array output +22%",
+        ],
+      },
+      {
+        name: "Autumn",
+        start_month: 9,
+        end_month: 11,
+        color: "#ff6a00",
+        impacts: [
+          "Foraging yield +12%",
+          "Fog event probability +18%",
+          "Daylight window -21 minutes/day",
+        ],
+      },
+    ],
   },
   navigation: {
     sections: [
