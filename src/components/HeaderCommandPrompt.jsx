@@ -254,23 +254,27 @@ export default function HeaderCommandPrompt({ currentPageName, inGameTime }) {
 
   return (
     <>
-      {/* Trigger button in header */}
+      {/* Trigger button — sits inside the palette container, no border needed */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="hidden md:flex items-center gap-2 px-3 py-1 border transition-all"
+        className="flex items-center gap-2 w-full px-3 h-full transition-all"
         style={{
-          borderColor: open ? C.accent + "88" : C.border,
-          background: open ? "rgba(184,134,11,0.08)" : "transparent",
+          background: open ? `${C.accent}0d` : "transparent",
           color: open ? C.accent : C.textDim,
           fontFamily: "'Share Tech Mono', monospace",
           fontSize: "10px",
           letterSpacing: "0.12em",
+          border: "none",
+          outline: "none",
+          cursor: "text",
         }}
         title="Open command terminal (` key)"
       >
-        <span style={{ color: open ? C.green : C.textFaint }}>█</span>
-        <span>TERMINAL</span>
-        <span style={{ color: C.textFaint, fontSize: "8px" }}>[ ` ]</span>
+        <span style={{ color: open ? C.green : C.textFaint, fontSize: "9px" }}>▶</span>
+        <span style={{ color: open ? C.text : C.textFaint, flex: 1, textAlign: "left" }}>
+          {open ? "type command..." : "command terminal..."}
+        </span>
+        <span style={{ color: C.textFaint, fontSize: "7px" }}>ENTER ↵</span>
       </button>
 
       {/* Dropdown terminal */}
