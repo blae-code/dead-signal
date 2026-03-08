@@ -30,9 +30,10 @@ export default function WorldStatus({ weather }) {
   const [inGameTime, setInGameTime] = useState(getInGameTime());
 
   useEffect(() => {
-    const id = setInterval(() => setInGameTime(getInGameTime()), 1000);
-    return () => clearInterval(id);
-  }, []);
+     setInGameTime(getInGameTime());
+     const id = setInterval(() => setInGameTime(getInGameTime()), 100);
+     return () => clearInterval(id);
+   }, []);
 
   const getGameSeason = () => {
     const now = new Date();
