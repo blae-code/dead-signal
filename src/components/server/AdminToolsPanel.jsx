@@ -323,6 +323,14 @@ export default function AdminToolsPanel({ status, events = [] }) {
         </div>
       </ToolSection>
 
+      {/* RCON Command Presets */}
+      <RconPresetsPanel
+        status={status}
+        events={events}
+        onCommandSend={handlePresetCommand}
+        cmdLoading={customLoading}
+      />
+
       {/* Custom RCON */}
       <ToolSection title="CUSTOM RCON" color={T.green} icon={Terminal}>
         <div className="space-y-1.5">
