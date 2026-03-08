@@ -49,15 +49,11 @@ export default function LiveUptime({ initialUptime, statusLoading }) {
   }, [initialUptime, statusLoading]);
 
   return (
-    <motion.div
-      key={key}
-      initial={{ opacity: 0.6, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+    <div
       className="font-bold text-base"
       style={{ color: T.amber, fontFamily: "'Orbitron', monospace" }}
     >
       {uptime}
-    </motion.div>
+    </div>
   );
 }
