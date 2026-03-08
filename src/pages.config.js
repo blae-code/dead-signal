@@ -63,6 +63,7 @@ import Challenges from './pages/Challenges';
 import LoadoutPlanner from './pages/LoadoutPlanner';
 import ClanBoard from './pages/ClanBoard';
 import LootSharing from './pages/LootSharing';
+import ClanCalendar from './pages/ClanCalendar';
 import __Layout from './Layout.jsx';
 
 
@@ -83,6 +84,7 @@ export const PAGES = {
     "LoadoutPlanner": LoadoutPlanner,
     "ClanBoard": ClanBoard,
     "LootSharing": LootSharing,
+    "ClanCalendar": ClanCalendar,
 }
 
 export const pagesConfig = {
