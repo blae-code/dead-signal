@@ -188,6 +188,39 @@ export default function TacticalMap() {
               </button>
             ))}
 
+            {/* Player locations — only show if updated within last 5 minutes */}
+            {playerLocs
+              .filter(loc => {
+                const age = Date.now() - new Date(loc.timestamp).getTime();
+                return age < 5 * 60 * 1000;
+              })
+              .map(loc => {
+                const isMe = loc.player_callsign === myCallsign;
+                return (
+                  <div key={loc.id}
+                    className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ left: `${loc.x}%`, top: `${loc.y}%` }}
+                    title={loc.player_callsign}>
+                    <div style={{
+                      width: "10px", height: "10px", borderRadius: "50%",
+                      background: isMe ? T.green : T.cyan,
+                      border: `2px solid ${isMe ? T.green : T.cyan}`,
+                      boxShadow: `0 0 8px ${isMe ? T.green : T.cyan}`,
+                      animation: "nav-dot-pulse 1.5s infinite"
+                    }} />
+                    <div style={{
+                      position: "absolute", top: "12px", left: "50%", transform: "translateX(-50%)",
+                      color: isMe ? T.green : T.cyan, fontSize: "7px", whiteSpace: "nowrap",
+                      textShadow: `0 0 4px ${isMe ? T.green : T.cyan}`,
+                      fontFamily: "'Share Tech Mono', monospace"
+                    }}>
+                      {loc.player_callsign}{loc.in_vehicle ? " 🚗" : ""}
+                    </div>
+                  </div>
+                );
+              })
+            }
+
             {pendingCoords && (
               <div className="absolute w-3 h-3 border-2 border-white transform -translate-x-1/2 -translate-y-1/2 animate-pulse"
                 style={{ left: `${pendingCoords.x}%`, top: `${pendingCoords.y}%` }} />
