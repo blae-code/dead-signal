@@ -410,6 +410,16 @@ const CAPABILITIES: CapabilitySeed[] = [
     observable_only: false,
   },
   {
+    function_id: "mutateMapDomain",
+    title: "Mutate Map Domain",
+    description: "Execute tactical map domain mutations with role checks, dry-run support, and idempotent writes.",
+    ui_surface: "field_ops",
+    required_role: "admin",
+    risk_level: "high",
+    confirmation_required: true,
+    observable_only: false,
+  },
+  {
     function_id: "getFunctionCapabilities",
     title: "Get Function Capabilities",
     description: "Return executable capability matrix for current user role and UI surfaces.",
@@ -831,6 +841,7 @@ const CAPABILITY_SCHEMAS: Record<string, CapabilitySchemas> = {
     input_schema: [],
     output_schema: [
       schemaField("source", "string", true, "Map config source state."),
+      schemaField("version", "number", false, "Map runtime config version."),
       schemaField("config", "object", false, "Map runtime configuration."),
       ...DEFAULT_OUTPUT_SCHEMA,
     ],
@@ -842,6 +853,23 @@ const CAPABILITY_SCHEMAS: Record<string, CapabilitySchemas> = {
     output_schema: [
       schemaField("config", "object", true, "Saved map runtime config."),
       schemaField("updated_at", "string", true, "Config updated timestamp."),
+      schemaField("version", "number", true, "Incremented config version."),
+      ...DEFAULT_OUTPUT_SCHEMA,
+    ],
+  },
+  mutateMapDomain: {
+    input_schema: [
+      schemaField("action", "string", true, "Mutation action id."),
+      schemaField("payload", "object", false, "Action-specific payload."),
+      schemaField("dry_run", "boolean", false, "Validate mutation without persisting side effects."),
+      schemaField("confirm_token", "string", false, "Explicit confirmation token for critical reset actions."),
+      schemaField("idempotency_key", "string", false, "Replay-safe idempotency key."),
+    ],
+    output_schema: [
+      schemaField("action", "string", true, "Resolved mutation action id."),
+      schemaField("dry_run", "boolean", true, "Dry-run mode status."),
+      schemaField("result", "object", true, "Action execution result payload."),
+      schemaField("executed_at", "string", true, "Execution timestamp."),
       ...DEFAULT_OUTPUT_SCHEMA,
     ],
   },
@@ -874,10 +902,16 @@ export const getFunctionCapability = (functionId: string): FunctionCapability | 
   return capability ? { ...capability } : null;
 };
 
-export const listResolvedCapabilities = (role: string | null | undefined): ResolvedFunctionCapability[] => {
+export const listResolvedCapabilities = (
+  role: string | null | undefined,
+  options: { tactical_writer?: boolean } = {},
+): ResolvedFunctionCapability[] => {
   const isAdmin = role === "admin";
+  const isTacticalWriter = options.tactical_writer === true;
   return CAPABILITIES_WITH_SCHEMAS.map((capability) => ({
     ...capability,
-    executable: capability.required_role === "authenticated" || isAdmin,
+    executable: capability.required_role === "authenticated"
+      || isAdmin
+      || (capability.function_id === "mutateMapDomain" && isTacticalWriter),
   }));
 };

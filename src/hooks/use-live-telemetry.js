@@ -45,10 +45,16 @@ export const useLiveTelemetry = ({
   const current = query.data?.current ?? null;
   const ageMs = typeof current?.age_ms === "number" ? current.age_ms : null;
   const stale = typeof current?.stale === "boolean" ? current.stale : true;
+  const source = query.data?.source || "unavailable";
+  const freshness = source === "unavailable"
+    ? "unavailable"
+    : (stale ? "stale" : "fresh");
 
   return {
     ...query,
     targetId: query.data?.target_id ?? targetId ?? null,
+    source,
+    freshness,
     retrievedAt: query.data?.retrieved_at ?? null,
     current,
     samples: query.data?.samples ?? [],

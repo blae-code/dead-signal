@@ -1233,6 +1233,12 @@
           "description": "Map config source state."
         },
         {
+          "field": "version",
+          "type": "number",
+          "required": false,
+          "description": "Map runtime config version."
+        },
+        {
           "field": "config",
           "type": "object",
           "required": false,
@@ -1242,6 +1248,7 @@
       "input_fields": [],
       "output_fields": [
         "source",
+        "version",
         "config"
       ],
       "required_input_fields": []
@@ -1696,6 +1703,117 @@
         "metric_source"
       ],
       "required_input_fields": []
+    },
+    "checks": {
+      "hasDenoServe": true,
+      "hasRequireMethod": true,
+      "hasRequireAdmin": true,
+      "hasRequireAuthenticated": false,
+      "hasErrorResponse": true,
+      "hasTryCatch": true
+    },
+    "status": "pass",
+    "issues": []
+  },
+  {
+    "function_id": "mutateMapDomain",
+    "title": "Mutate Map Domain",
+    "ui_surface": "field_ops",
+    "required_role": "admin",
+    "risk_level": "high",
+    "confirmation_required": true,
+    "observable_only": false,
+    "ui_location": [
+      "FunctionConsole > Field Ops",
+      "src/pages/TacticalMap.jsx"
+    ],
+    "execution_mode": "dry-run",
+    "expected_result": "Dry-run output is structured and does not mutate live state.",
+    "evidence": [
+      "functions/_shared/functionCapabilities.ts",
+      "functions/mutateMapDomain.ts",
+      "src/lib/function-payload-templates.js",
+      "src/pages/FunctionConsole.jsx",
+      "src/pages/TacticalMap.jsx"
+    ],
+    "direct_invocations": [
+      "src/pages/TacticalMap.jsx"
+    ],
+    "schema": {
+      "input_schema": [
+        {
+          "field": "action",
+          "type": "string",
+          "required": true,
+          "description": "Mutation action id."
+        },
+        {
+          "field": "payload",
+          "type": "object",
+          "required": false,
+          "description": "Action-specific payload."
+        },
+        {
+          "field": "dry_run",
+          "type": "boolean",
+          "required": false,
+          "description": "Validate mutation without persisting side effects."
+        },
+        {
+          "field": "confirm_token",
+          "type": "string",
+          "required": false,
+          "description": "Explicit confirmation token for critical reset actions."
+        },
+        {
+          "field": "idempotency_key",
+          "type": "string",
+          "required": false,
+          "description": "Replay-safe idempotency key."
+        }
+      ],
+      "output_schema": [
+        {
+          "field": "action",
+          "type": "string",
+          "required": true,
+          "description": "Resolved mutation action id."
+        },
+        {
+          "field": "dry_run",
+          "type": "boolean",
+          "required": true,
+          "description": "Dry-run mode status."
+        },
+        {
+          "field": "result",
+          "type": "object",
+          "required": true,
+          "description": "Action execution result payload."
+        },
+        {
+          "field": "executed_at",
+          "type": "string",
+          "required": true,
+          "description": "Execution timestamp."
+        }
+      ],
+      "input_fields": [
+        "action",
+        "payload",
+        "dry_run",
+        "confirm_token",
+        "idempotency_key"
+      ],
+      "output_fields": [
+        "action",
+        "dry_run",
+        "result",
+        "executed_at"
+      ],
+      "required_input_fields": [
+        "action"
+      ]
     },
     "checks": {
       "hasDenoServe": true,
@@ -2421,6 +2539,12 @@
           "type": "string",
           "required": true,
           "description": "Config updated timestamp."
+        },
+        {
+          "field": "version",
+          "type": "number",
+          "required": true,
+          "description": "Incremented config version."
         }
       ],
       "input_fields": [
@@ -2428,7 +2552,8 @@
       ],
       "output_fields": [
         "config",
-        "updated_at"
+        "updated_at",
+        "version"
       ],
       "required_input_fields": [
         "config"

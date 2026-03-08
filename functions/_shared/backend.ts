@@ -114,6 +114,45 @@ export const requireAdmin = (user: { role?: string } | null | undefined): void =
   }
 };
 
+const normalizeRoleValue = (value: unknown): string =>
+  typeof value === "string" ? value.trim().toLowerCase() : "";
+
+export const resolveClanMemberRole = async (
+  base44: any,
+  user: { email?: string; id?: string } | null | undefined,
+): Promise<string | null> => {
+  const email = typeof user?.email === "string" ? user.email.trim().toLowerCase() : "";
+  if (!email) return null;
+  const entity = base44?.asServiceRole?.entities?.ClanMember || base44?.entities?.ClanMember;
+  if (!entity?.filter) return null;
+  const rows = await entity.filter({ user_email: email }, "-updated_date", 1).catch(() => []);
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  const role = normalizeRoleValue(rows[0]?.role);
+  return role || null;
+};
+
+export const hasTacticalWriteAccess = async (
+  base44: any,
+  user: { role?: string; email?: string; id?: string } | null | undefined,
+): Promise<boolean> => {
+  requireAuthenticated(user);
+  if (normalizeRoleValue(user?.role) === "admin") {
+    return true;
+  }
+  const clanRole = await resolveClanMemberRole(base44, user);
+  return clanRole === "commander" || clanRole === "lieutenant" || clanRole === "officer";
+};
+
+export const requireTacticalWriter = async (
+  base44: any,
+  user: { role?: string; email?: string; id?: string } | null | undefined,
+): Promise<void> => {
+  const allowed = await hasTacticalWriteAccess(base44, user);
+  if (!allowed) {
+    throw new AppError(403, "forbidden", "Officer or admin access required.");
+  }
+};
+
 export const parseJsonBody = async <T extends JsonBody>(req: Request): Promise<T> => {
   try {
     const body = await req.json();

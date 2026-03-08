@@ -44,6 +44,7 @@ export const useRuntimeConfig = () => {
     version: query.data?.version ?? null,
     updatedAt: query.data?.updated_at ?? null,
     retrievedAt: query.data?.retrieved_at ?? null,
+    freshness: query.data?.source === "live" ? "fresh" : "unavailable",
     config: query.data?.config ?? null,
     getArray: (path) => getArray(query.data?.config, path),
   };

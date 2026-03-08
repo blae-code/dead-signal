@@ -37,6 +37,19 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --tt-bg-0: #0a0806;
+    --tt-bg-1: #1a1410;
+    --tt-bg-2: #2d1f0f;
+    --tt-text: #e8dcc8;
+    --tt-text-dim: #c0aa88;
+    --tt-border: #3a2a1a;
+    --tt-green: #39ff14;
+    --tt-cyan: #00d4e8;
+    --tt-amber: #ffaa00;
+    --tt-red: #ff2020;
+    --tt-orange: #ff6600;
+    --tt-font-ui: "Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --tt-font-head: "Orbitron", "Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
   .dark {
@@ -84,7 +97,21 @@
 
   body {
     @apply bg-background text-foreground;
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(1100px 420px at 20% -10%, rgba(255, 170, 0, 0.08), transparent 60%),
+      radial-gradient(900px 360px at 90% 0%, rgba(0, 212, 232, 0.08), transparent 60%),
+      linear-gradient(135deg, var(--tt-bg-0) 0%, var(--tt-bg-1) 45%, var(--tt-bg-2) 100%);
+    color: var(--tt-text);
+    font-family: var(--tt-font-ui);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
+}
+
+#root {
+  min-height: 100vh;
 }
 
 @keyframes threat-blink {
@@ -132,6 +159,21 @@
 
 .layout-nav-item-hover:hover .nav-icon {
   opacity: 1 !important;
+}
+
+.maplibregl-map {
+  font-family: var(--tt-font-ui);
+  background: #050504;
+}
+
+.maplibregl-ctrl-group {
+  background: rgba(10, 8, 6, 0.88) !important;
+  border: 1px solid rgba(58, 42, 26, 0.9) !important;
+  box-shadow: 0 0 0 1px rgba(255, 170, 0, 0.14), 0 6px 20px rgba(0, 0, 0, 0.6) !important;
+}
+
+.maplibregl-ctrl-group button {
+  color: var(--tt-text-dim) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

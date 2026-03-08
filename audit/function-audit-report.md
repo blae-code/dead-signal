@@ -1,13 +1,13 @@
 # Function Wiring Audit Report
 
-Generated: 2026-03-08T16:32:53.737Z
+Generated: 2026-03-08T17:08:14.760Z
 
 ## Summary
 
-- Functions: 38
-- Capabilities: 38
-- Payload templates: 38
-- Passed: 38
+- Functions: 39
+- Capabilities: 39
+- Payload templates: 39
+- Passed: 39
 - Failed: 0
 - FunctionConsole route: present
 - FunctionConsole dynamic coverage: present
@@ -40,6 +40,7 @@ Generated: 2026-03-08T16:32:53.737Z
 | ingestLiveTelemetry | telemetry_pipeline_lab | admin | elevated | controlled-write | FunctionConsole > Telemetry Pipeline Lab | Write path executes with role gate, policy checks, and observable result. | functions/_shared/functionCapabilities.ts; functions/ingestLiveTelemetry.ts; src/lib/function-payload-templates.js; src/pages/FunctionConsole.jsx | pass |  |
 | ingestPlayerTelemetry | field_ops | admin | elevated | controlled-write | FunctionConsole > Field Ops | Write path executes with role gate, policy checks, and observable result. | functions/_shared/functionCapabilities.ts; functions/ingestPlayerTelemetry.ts; src/lib/function-payload-templates.js; src/pages/FunctionConsole.jsx | pass |  |
 | logServerPerformance | telemetry_pipeline_lab | admin | safe | controlled-write | FunctionConsole > Telemetry Pipeline Lab | Write path executes with role gate, policy checks, and observable result. | functions/_shared/functionCapabilities.ts; functions/logServerPerformance.ts; src/lib/function-payload-templates.js; src/pages/FunctionConsole.jsx | pass |  |
+| mutateMapDomain | field_ops | admin | high | dry-run | FunctionConsole > Field Ops; src/pages/TacticalMap.jsx | Dry-run output is structured and does not mutate live state. | functions/_shared/functionCapabilities.ts; functions/mutateMapDomain.ts; src/lib/function-payload-templates.js; src/pages/FunctionConsole.jsx; src/pages/TacticalMap.jsx | pass |  |
 | optimizeTacticalPlan | ai_intel_studio | authenticated | safe | controlled-write | FunctionConsole > AI/Intel Studio | Write path executes with role gate, policy checks, and observable result. | functions/_shared/functionCapabilities.ts; functions/optimizeTacticalPlan.ts; src/lib/function-payload-templates.js; src/pages/FunctionConsole.jsx | pass |  |
 | personalizedActivitySummary | ai_intel_studio | authenticated | safe | controlled-write | FunctionConsole > AI/Intel Studio | Write path executes with role gate, policy checks, and observable result. | functions/_shared/functionCapabilities.ts; functions/personalizedActivitySummary.ts; src/lib/function-payload-templates.js; src/pages/FunctionConsole.jsx | pass |  |
 | playerBehaviorAnalysis | security_diagnostics | admin | elevated | controlled-write | FunctionConsole > Security/Diagnostics | Write path executes with role gate, policy checks, and observable result. | functions/_shared/functionCapabilities.ts; functions/playerBehaviorAnalysis.ts; src/lib/function-payload-templates.js; src/pages/FunctionConsole.jsx | pass |  |

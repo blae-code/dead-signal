@@ -55,6 +55,8 @@ export default function TacticalMap() {
   const [pins, setPins] = useState([]);
   const [playerLocs, setPlayerLocs] = useState([]);
   const [broadcasts, setBroadcasts] = useState([]);
+  const [routes, setRoutes] = useState([]);
+  const [overlays, setOverlays] = useState([]);
   const [fogSectors, setFogSectors] = useState(new Set());
 
   const [user, setUser] = useState(null);
@@ -146,16 +148,22 @@ export default function TacticalMap() {
     setSyncingMapData(true);
     setMapSyncError(null);
     try {
-      const [pinsRows, locRows, broadcastRows] = await Promise.all([
+      const [pinsRows, locRows, broadcastRows, routeRows, overlayRows] = await Promise.all([
         base44.entities.MapPin.list("-created_date", 200),
         base44.entities.PlayerLocation.list("-timestamp", 300),
         base44.entities.MapBroadcast.list("-created_date", 80),
+        base44.entities.MapRoute?.list ? base44.entities.MapRoute.list("-updated_date", 80).catch(() => []) : [],
+        base44.entities.MapOverlay?.list ? base44.entities.MapOverlay.list("-updated_date", 80).catch(() => []) : [],
       ]);
       const safePins = Array.isArray(pinsRows) ? pinsRows : [];
       const safeLocs = Array.isArray(locRows) ? locRows : [];
       const safeBroadcasts = Array.isArray(broadcastRows) ? broadcastRows : [];
+      const safeRoutes = Array.isArray(routeRows) ? routeRows : [];
+      const safeOverlays = Array.isArray(overlayRows) ? overlayRows : [];
       setPins(safePins);
       setPlayerLocs(safeLocs);
+      setRoutes(safeRoutes);
+      setOverlays(safeOverlays);
       setPlayerTrails(buildTrails(safeLocs));
       const active = safeBroadcasts.filter((entry) => new Date(entry.expires_at).getTime() > Date.now());
       setBroadcasts(active);
@@ -222,11 +230,39 @@ export default function TacticalMap() {
         setBroadcasts((prev) => prev.filter((entry) => entry.id !== event.id));
       }
     });
+    const unsubRoutes = base44.entities.MapRoute?.subscribe
+      ? base44.entities.MapRoute.subscribe((event) => {
+        if (event.type === "create") {
+          setRoutes((prev) => [event.data, ...prev.filter((entry) => entry.id !== event.data.id)]);
+        }
+        if (event.type === "update") {
+          setRoutes((prev) => prev.map((entry) => (entry.id === event.id ? event.data : entry)));
+        }
+        if (event.type === "delete") {
+          setRoutes((prev) => prev.filter((entry) => entry.id !== event.id));
+        }
+      })
+      : () => {};
+    const unsubOverlays = base44.entities.MapOverlay?.subscribe
+      ? base44.entities.MapOverlay.subscribe((event) => {
+        if (event.type === "create") {
+          setOverlays((prev) => [event.data, ...prev.filter((entry) => entry.id !== event.data.id)]);
+        }
+        if (event.type === "update") {
+          setOverlays((prev) => prev.map((entry) => (entry.id === event.id ? event.data : entry)));
+        }
+        if (event.type === "delete") {
+          setOverlays((prev) => prev.filter((entry) => entry.id !== event.id));
+        }
+      })
+      : () => {};
     return () => {
       window.removeEventListener("online", onOnline);
       unsubPins();
       unsubLocs();
       unsubBroadcast();
+      unsubRoutes();
+      unsubOverlays();
       broadcastTimeoutsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
       broadcastTimeoutsRef.current.clear();
     };
@@ -249,6 +285,21 @@ export default function TacticalMap() {
   );
 
   const activePlayerLocs = useMemo(() => playerLocs, [playerLocs]);
+
+  const mutateMapDomain = useCallback(async (action, payload, options = {}) => {
+    const idempotency = `${action}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const response = await base44.functions.invoke("mutateMapDomain", {
+      action,
+      payload,
+      dry_run: options.dryRun === true,
+      confirm_token: options.confirmToken || undefined,
+      idempotency_key: idempotency,
+    });
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.error || "Map mutation failed.");
+    }
+    return response.data.result || {};
+  }, []);
 
   const toWorldCoords = useCallback((normalized) => normalizedToWorld(normalized, mapConfig), [mapConfig]);
 
@@ -313,10 +364,17 @@ export default function TacticalMap() {
   }, [activePlayerLocs, lastSharedPoint, myCallsign, pushMyLocation, sharing]);
 
   const handleMapClick = (event) => {
-    if (!canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const normalizedX = Number((((event.clientX - rect.left) / rect.width) * 100).toFixed(3));
-    const normalizedY = Number((((event.clientY - rect.top) / rect.height) * 100).toFixed(3));
+    let normalizedX = Number(event?.normalizedX);
+    let normalizedY = Number(event?.normalizedY);
+
+    if (!Number.isFinite(normalizedX) || !Number.isFinite(normalizedY)) {
+      const raw = event?.originalEvent || event;
+      if (!canvasRef.current || typeof raw?.clientX !== "number" || typeof raw?.clientY !== "number") return;
+      const rect = canvasRef.current.getBoundingClientRect();
+      normalizedX = Number((((raw.clientX - rect.left) / rect.width) * 100).toFixed(3));
+      normalizedY = Number((((raw.clientY - rect.top) / rect.height) * 100).toFixed(3));
+    }
+
     const world = toWorldCoords({ x: normalizedX, y: normalizedY });
     const point = {
       x: normalizedX,
@@ -361,7 +419,8 @@ export default function TacticalMap() {
     const optimistic = { ...pinData, id: tempId };
     setPins((prev) => [optimistic, ...prev]);
     try {
-      const saved = await base44.entities.MapPin.create(pinData);
+      const result = await mutateMapDomain("create_pin", pinData);
+      const saved = result?.pin || optimistic;
       setPins((prev) => [saved, ...prev.filter((entry) => entry.id !== tempId && entry.id !== saved.id)]);
       setMapSyncError(null);
       setNewPin(buildEmptyPin(pinTypes, pinStatuses, hordeDirections));
@@ -382,7 +441,11 @@ export default function TacticalMap() {
     setPins((prev) => prev.map((entry) => (entry.id === pin.id ? optimistic : entry)));
     setSelectedPin(optimistic);
     try {
-      const updated = await base44.entities.MapPin.update(pin.id, { status: next });
+      const result = await mutateMapDomain("update_pin", {
+        pin_id: pin.id,
+        patch: { status: next },
+      });
+      const updated = result?.pin || optimistic;
       setPins((prev) => prev.map((entry) => (entry.id === pin.id ? updated : entry)));
       setSelectedPin(updated);
       setMapSyncError(null);
@@ -399,7 +462,7 @@ export default function TacticalMap() {
     setPins((prev) => prev.filter((entry) => entry.id !== id));
     setSelectedPin(null);
     try {
-      await base44.entities.MapPin.delete(id);
+      await mutateMapDomain("delete_pin", { pin_id: id });
       setMapSyncError(null);
     } catch (error) {
       if (snapshot) {
@@ -412,6 +475,21 @@ export default function TacticalMap() {
   const handleSaveRoute = async () => {
     if (routePoints.length < 2 || !canManageTactical) return;
     const routeId = `route-${Date.now()}`;
+    const optimisticRoute = {
+      id: `optimistic-${routeId}`,
+      map_id: mapConfig?.map_id || "global-map",
+      title: `Route ${new Date().toLocaleTimeString("en-US", { hour12: false })}`,
+      points: routePoints.map((point, index) => ({
+        order: index,
+        x: point.x,
+        y: point.y,
+        normalized_x: point.normalized_x,
+        normalized_y: point.normalized_y,
+        world_x: point.world_x,
+        world_y: point.world_y,
+      })),
+      created_by: myCallsign,
+    };
     const optimisticRows = routePoints.map((point, index) => {
       const entry = {
         id: `optimistic-route-${routeId}-${index}`,
@@ -431,21 +509,27 @@ export default function TacticalMap() {
       if (activePinStatus) entry.status = activePinStatus;
       return entry;
     });
+    setRoutes((prev) => [optimisticRoute, ...prev]);
     setPins((prev) => [...optimisticRows, ...prev]);
     try {
-      const created = await Promise.all(optimisticRows.map((entry) => {
-        const payload = { ...entry };
-        delete payload.id;
-        return base44.entities.MapPin.create(payload);
-      }));
+      const result = await mutateMapDomain("create_route", {
+        map_id: mapConfig?.map_id || "global-map",
+        title: optimisticRoute.title,
+        points: routePoints,
+        persist_waypoints: true,
+      });
+      const route = result?.route || optimisticRoute;
+      const created = Array.isArray(result?.waypoints) ? result.waypoints : [];
       const optimisticIds = new Set(optimisticRows.map((entry) => entry.id));
       setPins((prev) => [...created, ...prev.filter((entry) => !optimisticIds.has(entry.id))]);
+      setRoutes((prev) => [route, ...prev.filter((entry) => entry.id !== optimisticRoute.id && entry.id !== route.id)]);
       setRoutePoints([]);
       setRouteMode(false);
       setMapSyncError(null);
     } catch (error) {
       const optimisticIds = new Set(optimisticRows.map((entry) => entry.id));
       setPins((prev) => prev.filter((entry) => !optimisticIds.has(entry.id)));
+      setRoutes((prev) => prev.filter((entry) => entry.id !== optimisticRoute.id));
       setMapSyncError(error instanceof Error ? error.message : "Failed to persist route waypoints.");
     }
   };
@@ -476,18 +560,19 @@ export default function TacticalMap() {
     setBroadcasts((prev) => [optimistic, ...prev.filter((entry) => entry.id !== tempId)]);
     scheduleBroadcastExpiry(tempId);
     try {
-      const created = await base44.entities.MapBroadcast.create({
-      message,
-      x: normalizedX,
-      y: normalizedY,
-      normalized_x: normalizedX,
-      normalized_y: normalizedY,
-      world_x: world?.x ?? null,
-      world_y: world?.y ?? null,
-      map_id: mapConfig?.map_id || "global-map",
-      sent_by: myCallsign,
-      expires_at: expiresAt,
-    });
+      const result = await mutateMapDomain("create_broadcast", {
+        message,
+        x: normalizedX,
+        y: normalizedY,
+        normalized_x: normalizedX,
+        normalized_y: normalizedY,
+        world_x: world?.x ?? null,
+        world_y: world?.y ?? null,
+        map_id: mapConfig?.map_id || "global-map",
+        sent_by: myCallsign,
+        expires_at: expiresAt,
+      });
+      const created = result?.broadcast || optimistic;
       setBroadcasts((prev) => [created, ...prev.filter((entry) => entry.id !== tempId && entry.id !== created.id)]);
       scheduleBroadcastExpiry(created.id);
       setShowBroadcastModal(false);
@@ -551,6 +636,8 @@ export default function TacticalMap() {
         extraBadges={[
           { label: `PINS ${pins.length}`, color: T.amber },
           { label: `PLAYERS ${playerLocs.length}`, color: T.cyan },
+          { label: `ROUTES ${routes.length}`, color: T.green },
+          { label: `OVERLAYS ${overlays.length}`, color: T.orange },
           { label: `BROADCASTS ${broadcasts.length}`, color: "#ff00ff" },
         ]}
       />
@@ -588,6 +675,8 @@ export default function TacticalMap() {
             myCallsign={myCallsign}
             pendingCoords={pendingCoords}
             routePoints={routePoints}
+            routes={routes}
+            overlays={overlays}
             broadcasts={broadcasts}
             showFog={showFog}
             fogSectors={fogSectors}

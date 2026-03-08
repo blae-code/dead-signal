@@ -40,6 +40,7 @@ Deno.serve(async (req) => {
       success: true,
       source: "live",
       config: record.config || null,
+      version: Number.isFinite(Number(record.config_version)) ? Number(record.config_version) : 1,
       updated_at: typeof record.updated_at === "string" ? record.updated_at : record.updated_date || null,
       retrieved_at: new Date().toISOString(),
     });

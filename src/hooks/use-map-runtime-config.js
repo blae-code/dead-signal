@@ -31,10 +31,14 @@ export const useMapRuntimeConfig = () => {
   }, [queryClient]);
 
   const config = query.data?.config || null;
+  const source = query.data?.source || "unavailable";
+  const freshness = source === "live" ? "fresh" : "unavailable";
   return {
     ...query,
-    source: query.data?.source || "unavailable",
+    source,
+    freshness,
     config,
+    version: query.data?.version ?? null,
     updatedAt: query.data?.updated_at || null,
     retrievedAt: query.data?.retrieved_at || null,
     hasConfig: hasUsableMapConfig(config),

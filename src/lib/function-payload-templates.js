@@ -101,6 +101,19 @@ const TEMPLATES = {
       ],
     },
   },
+  mutateMapDomain: {
+    action: "create_pin",
+    payload: {
+      title: "Sample Pin",
+      type: "Objective",
+      status: "Active",
+      map_id: "global-map",
+      x: 50,
+      y: 50,
+    },
+    dry_run: true,
+    idempotency_key: "",
+  },
   getFunctionCapabilities: {},
 };
 

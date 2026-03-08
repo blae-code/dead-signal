@@ -3,6 +3,7 @@ import {
   errorResponse,
   requireAuthenticated,
   requireMethod,
+  resolveClanMemberRole,
 } from "./_shared/backend.ts";
 import { listResolvedCapabilities } from "./_shared/functionCapabilities.ts";
 
@@ -16,6 +17,11 @@ Deno.serve(async (req) => {
       full_name?: string;
       id?: string;
     };
+    const clanRole = await resolveClanMemberRole(base44, user);
+    const tacticalWriter = user.role === "admin"
+      || clanRole === "commander"
+      || clanRole === "lieutenant"
+      || clanRole === "officer";
 
     return Response.json({
       success: true,
@@ -24,8 +30,10 @@ Deno.serve(async (req) => {
         email: user.email || null,
         full_name: user.full_name || null,
         role: user.role || "user",
+        clan_role: clanRole || null,
+        tactical_writer: tacticalWriter,
       },
-      capabilities: listResolvedCapabilities(user.role || null),
+      capabilities: listResolvedCapabilities(user.role || null, { tactical_writer: tacticalWriter }),
       retrieved_at: new Date().toISOString(),
     });
   } catch (error) {

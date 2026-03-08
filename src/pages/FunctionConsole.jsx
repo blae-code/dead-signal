@@ -23,7 +23,11 @@ const RISK_COLORS = {
   critical: T.red,
 };
 
-const roleMessage = (requiredRole) => {
+const roleMessage = (capability, user) => {
+  if (capability?.function_id === "mutateMapDomain") {
+    return "Officer/lieutenant/commander or admin required for tactical map domain writes.";
+  }
+  const requiredRole = capability?.required_role;
   if (requiredRole === "admin") {
     return "Admin role required. Action remains visible for audit and operational awareness.";
   }
@@ -199,10 +203,13 @@ export default function FunctionConsole() {
   return (
     <div className="p-4 space-y-4 max-w-7xl mx-auto">
       <PageHeader icon={RadioTower} title="FUNCTION CONTROL MATRIX" color={T.cyan}>
-        <StatusBadge
-          label={`ROLE: ${(capabilitiesQuery.user?.role || "unknown").toUpperCase()}`}
-          color={capabilitiesQuery.user?.role === "admin" ? T.red : T.green}
-        />
+        <StatusBadge label={`ROLE: ${(capabilitiesQuery.user?.role || "unknown").toUpperCase()}`} color={capabilitiesQuery.user?.role === "admin" ? T.red : T.green} />
+        {capabilitiesQuery.user?.clan_role && (
+          <StatusBadge label={`CLAN: ${String(capabilitiesQuery.user.clan_role).toUpperCase()}`} color={T.cyan} />
+        )}
+        {capabilitiesQuery.user?.tactical_writer && (
+          <StatusBadge label="TACTICAL-WRITER" color={T.amber} />
+        )}
       </PageHeader>
 
       <LiveStatusStrip
@@ -277,7 +284,7 @@ export default function FunctionConsole() {
 
                   <div style={{ color: T.textDim, fontSize: "10px" }}>{capability.description}</div>
 
-                  <PermissionGate allowed={capability.executable} message={roleMessage(capability.required_role)}>
+                  <PermissionGate allowed={capability.executable} message={roleMessage(capability, capabilitiesQuery.user)}>
                     <div className="space-y-2">
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                         <div>
