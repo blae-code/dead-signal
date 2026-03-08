@@ -34,6 +34,18 @@ Role policy:
 
 All writes support `dry_run` and idempotency keys.
 
+## Tactical map UI coverage
+
+`TacticalMap` now includes first-class workflows for all map-domain tactical actions:
+
+- pin placement/update/delete
+- route drafting and save
+- broadcast creation
+- overlay create/delete
+
+All tactical mutation controls are visible in context and locked for non-permitted roles.
+Map sync state is surfaced with shared live-state semantics (`source`, `retrieved_at`, stale age badges, retrying).
+
 ## Canonical reset
 
 Use `mutateMapDomain` with:

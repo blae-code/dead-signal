@@ -10,6 +10,7 @@ import PinForm from "@/components/map/PinForm";
 import PinDetail from "@/components/map/PinDetail";
 import MapSidebar from "@/components/map/MapSidebar";
 import BroadcastModal from "@/components/map/BroadcastModal";
+import OverlayForm from "@/components/map/OverlayForm";
 import MapCalibrationPanel from "@/components/map/MapCalibrationPanel";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useMapRuntimeConfig } from "@/hooks/use-map-runtime-config";
@@ -35,6 +36,15 @@ const canManageTacticalByRole = (userRole, clanRole) => {
   const globalRole = normalizeRole(userRole);
   const memberRole = normalizeRole(clanRole);
   return globalRole === "admin" || memberRole === "commander" || memberRole === "lieutenant" || memberRole === "officer";
+};
+
+const telemetryBucket = (timestamp, nowMs) => {
+  const parsed = typeof timestamp === "string" ? Date.parse(timestamp) : NaN;
+  if (!Number.isFinite(parsed)) return "stale";
+  const ageMs = Math.max(0, nowMs - parsed);
+  if (ageMs <= 5_000) return "fresh";
+  if (ageMs <= 30_000) return "delayed";
+  return "stale";
 };
 
 export default function TacticalMap() {
@@ -68,6 +78,7 @@ export default function TacticalMap() {
   const [placing, setPlacing] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [routeMode, setRouteMode] = useState(false);
+  const [overlayMode, setOverlayMode] = useState(false);
   const [showFog, setShowFog] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
@@ -76,12 +87,17 @@ export default function TacticalMap() {
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [syncingMapData, setSyncingMapData] = useState(false);
   const [mapSyncError, setMapSyncError] = useState(null);
+  const [mapFeedSource, setMapFeedSource] = useState("unavailable");
+  const [mapFeedRetrievedAt, setMapFeedRetrievedAt] = useState(null);
+  const [mapFeedRetrying, setMapFeedRetrying] = useState(false);
   const [lastSharedPoint, setLastSharedPoint] = useState(null);
 
   const [newPin, setNewPin] = useState(() => buildEmptyPin(pinTypes, pinStatuses, hordeDirections));
   const [expiryHours, setExpiryHours] = useState("0");
   const [pendingCoords, setPendingCoords] = useState(null);
+  const [pendingOverlayCoords, setPendingOverlayCoords] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [showOverlayForm, setShowOverlayForm] = useState(false);
   const [selectedPin, setSelectedPin] = useState(null);
 
   const [routePoints, setRoutePoints] = useState([]);
@@ -144,6 +160,12 @@ export default function TacticalMap() {
     broadcastTimeoutsRef.current.set(broadcastId, timeoutId);
   }, []);
 
+  const markMapFeedLive = useCallback(() => {
+    setMapFeedSource("live");
+    setMapFeedRetrievedAt(new Date().toISOString());
+    setMapFeedRetrying(false);
+  }, []);
+
   const hydrateMapData = useCallback(async () => {
     setSyncingMapData(true);
     setMapSyncError(null);
@@ -171,12 +193,14 @@ export default function TacticalMap() {
         const remaining = Math.max(0, new Date(entry.expires_at).getTime() - Date.now());
         scheduleBroadcastExpiry(entry.id, remaining);
       });
+      markMapFeedLive();
     } catch (error) {
       setMapSyncError(error instanceof Error ? error.message : "Map sync failed.");
+      setMapFeedSource("unavailable");
     } finally {
       setSyncingMapData(false);
     }
-  }, [buildTrails, scheduleBroadcastExpiry]);
+  }, [buildTrails, markMapFeedLive, scheduleBroadcastExpiry]);
 
   useEffect(() => {
     base44.auth.me().then(async (resolvedUser) => {
@@ -193,15 +217,22 @@ export default function TacticalMap() {
     }).catch(() => {});
 
     hydrateMapData();
-    const onOnline = () => hydrateMapData();
+    const onOnline = () => {
+      setMapFeedRetrying(true);
+      hydrateMapData().finally(() => {
+        setMapFeedRetrying(false);
+      });
+    };
     window.addEventListener("online", onOnline);
 
     const unsubPins = base44.entities.MapPin.subscribe((event) => {
+      markMapFeedLive();
       if (event.type === "create") setPins((prev) => [event.data, ...prev.filter((entry) => entry.id !== event.data.id)]);
       if (event.type === "update") setPins((prev) => prev.map((entry) => (entry.id === event.id ? event.data : entry)));
       if (event.type === "delete") setPins((prev) => prev.filter((entry) => entry.id !== event.id));
     });
     const unsubLocs = base44.entities.PlayerLocation.subscribe((event) => {
+      markMapFeedLive();
       if (event.type === "create" || event.type === "update") {
         setPlayerTrails((prev) => appendTrailPoint(prev, event.data));
         setPlayerLocs((prev) => {
@@ -218,6 +249,7 @@ export default function TacticalMap() {
       }
     });
     const unsubBroadcast = base44.entities.MapBroadcast.subscribe((event) => {
+      markMapFeedLive();
       if (event.type === "create" || event.type === "update") {
         const row = event.data;
         if (new Date(row.expires_at).getTime() > Date.now()) {
@@ -232,6 +264,7 @@ export default function TacticalMap() {
     });
     const unsubRoutes = base44.entities.MapRoute?.subscribe
       ? base44.entities.MapRoute.subscribe((event) => {
+        markMapFeedLive();
         if (event.type === "create") {
           setRoutes((prev) => [event.data, ...prev.filter((entry) => entry.id !== event.data.id)]);
         }
@@ -245,6 +278,7 @@ export default function TacticalMap() {
       : () => {};
     const unsubOverlays = base44.entities.MapOverlay?.subscribe
       ? base44.entities.MapOverlay.subscribe((event) => {
+        markMapFeedLive();
         if (event.type === "create") {
           setOverlays((prev) => [event.data, ...prev.filter((entry) => entry.id !== event.data.id)]);
         }
@@ -266,7 +300,7 @@ export default function TacticalMap() {
       broadcastTimeoutsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
       broadcastTimeoutsRef.current.clear();
     };
-  }, [appendTrailPoint, buildTrails, hydrateMapData, scheduleBroadcastExpiry]);
+  }, [appendTrailPoint, buildTrails, hydrateMapData, markMapFeedLive, scheduleBroadcastExpiry]);
 
   const heatmapPoints = useMemo(() => {
     const points = [];
@@ -285,6 +319,18 @@ export default function TacticalMap() {
   );
 
   const activePlayerLocs = useMemo(() => playerLocs, [playerLocs]);
+  const telemetryFreshness = useMemo(() => {
+    const summary = { fresh: 0, delayed: 0, stale: 0 };
+    activePlayerLocs.forEach((row) => {
+      const bucket = telemetryBucket(row?.timestamp, nowMs);
+      summary[bucket] += 1;
+    });
+    return summary;
+  }, [activePlayerLocs, nowMs]);
+  const mapDataSource = mapFeedSource === "unavailable"
+    ? (mapRuntime.source || "unavailable")
+    : mapFeedSource;
+  const mapDataRetrievedAt = mapFeedRetrievedAt || mapRuntime.updatedAt || mapRuntime.retrievedAt;
 
   const mutateMapDomain = useCallback(async (action, payload, options = {}) => {
     const idempotency = `${action}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -345,10 +391,11 @@ export default function TacticalMap() {
       setPlayerLocs((prev) => [location, ...prev.filter((entry) => entry.player_callsign !== myCallsign)]);
       setPlayerTrails((prev) => appendTrailPoint(prev, location));
       setMapSyncError(null);
+      markMapFeedLive();
     } catch (error) {
       setMapSyncError(error instanceof Error ? error.message : "Failed to sync player location.");
     }
-  }, [appendTrailPoint, mapConfig?.map_id, myCallsign, toWorldCoords]);
+  }, [appendTrailPoint, mapConfig?.map_id, markMapFeedLive, myCallsign, toWorldCoords]);
 
   useEffect(() => {
     if (!sharing || !myCallsign) return undefined;
@@ -389,6 +436,13 @@ export default function TacticalMap() {
       pushMyLocation(normalizedX, normalizedY);
       return;
     }
+    if (overlayMode && canManageTactical) {
+      setPendingOverlayCoords(point);
+      setShowOverlayForm(true);
+      setOverlayMode(false);
+      setShowForm(false);
+      return;
+    }
     if (routeMode && canManageTactical) {
       setRoutePoints((prev) => [...prev, point]);
       return;
@@ -397,6 +451,7 @@ export default function TacticalMap() {
       setPendingCoords(point);
       setShowForm(true);
       setPlacing(false);
+      setShowOverlayForm(false);
     }
   };
 
@@ -423,6 +478,7 @@ export default function TacticalMap() {
       const saved = result?.pin || optimistic;
       setPins((prev) => [saved, ...prev.filter((entry) => entry.id !== tempId && entry.id !== saved.id)]);
       setMapSyncError(null);
+      markMapFeedLive();
       setNewPin(buildEmptyPin(pinTypes, pinStatuses, hordeDirections));
       setExpiryHours("0");
       setPendingCoords(null);
@@ -449,6 +505,7 @@ export default function TacticalMap() {
       setPins((prev) => prev.map((entry) => (entry.id === pin.id ? updated : entry)));
       setSelectedPin(updated);
       setMapSyncError(null);
+      markMapFeedLive();
     } catch (error) {
       setPins((prev) => prev.map((entry) => (entry.id === pin.id ? pin : entry)));
       setSelectedPin(pin);
@@ -464,6 +521,7 @@ export default function TacticalMap() {
     try {
       await mutateMapDomain("delete_pin", { pin_id: id });
       setMapSyncError(null);
+      markMapFeedLive();
     } catch (error) {
       if (snapshot) {
         setPins((prev) => [snapshot, ...prev.filter((entry) => entry.id !== snapshot.id)]);
@@ -526,6 +584,7 @@ export default function TacticalMap() {
       setRoutePoints([]);
       setRouteMode(false);
       setMapSyncError(null);
+      markMapFeedLive();
     } catch (error) {
       const optimisticIds = new Set(optimisticRows.map((entry) => entry.id));
       setPins((prev) => prev.filter((entry) => !optimisticIds.has(entry.id)));
@@ -577,9 +636,73 @@ export default function TacticalMap() {
       scheduleBroadcastExpiry(created.id);
       setShowBroadcastModal(false);
       setMapSyncError(null);
+      markMapFeedLive();
     } catch (error) {
       setBroadcasts((prev) => prev.filter((entry) => entry.id !== tempId));
       setMapSyncError(error instanceof Error ? error.message : "Failed to send broadcast.");
+    }
+  };
+
+  const handleSaveOverlay = async (overlayInput) => {
+    if (!canManageTactical) return;
+    const center = overlayInput?.center || pendingOverlayCoords;
+    if (!center) return;
+    const normalizedX = Number(center.normalized_x ?? center.x);
+    const normalizedY = Number(center.normalized_y ?? center.y);
+    if (!Number.isFinite(normalizedX) || !Number.isFinite(normalizedY)) return;
+    const optimisticId = `optimistic-overlay-${Date.now()}`;
+    const optimistic = {
+      id: optimisticId,
+      map_id: mapConfig?.map_id || "global-map",
+      title: overlayInput?.title || "Overlay",
+      geometry: "circle",
+      color: overlayInput?.color || "#ff2020",
+      opacity: Number.isFinite(Number(overlayInput?.opacity)) ? Number(overlayInput.opacity) : 0.3,
+      radius: Number.isFinite(Number(overlayInput?.radius)) ? Number(overlayInput.radius) : 12,
+      center_x: normalizedX,
+      center_y: normalizedY,
+      updated_by: myCallsign,
+      updated_at: new Date().toISOString(),
+    };
+    setOverlays((prev) => [optimistic, ...prev]);
+    try {
+      const result = await mutateMapDomain("upsert_overlay", {
+        map_id: mapConfig?.map_id || "global-map",
+        title: optimistic.title,
+        geometry: "circle",
+        color: optimistic.color,
+        opacity: optimistic.opacity,
+        radius: optimistic.radius,
+        center: {
+          normalized_x: normalizedX,
+          normalized_y: normalizedY,
+        },
+      });
+      const saved = result?.overlay || optimistic;
+      setOverlays((prev) => [saved, ...prev.filter((entry) => entry.id !== optimisticId && entry.id !== saved.id)]);
+      setShowOverlayForm(false);
+      setPendingOverlayCoords(null);
+      setMapSyncError(null);
+      markMapFeedLive();
+    } catch (error) {
+      setOverlays((prev) => prev.filter((entry) => entry.id !== optimisticId));
+      setMapSyncError(error instanceof Error ? error.message : "Failed to save tactical overlay.");
+    }
+  };
+
+  const handleDeleteOverlay = async (overlayId) => {
+    if (!canManageTactical || !overlayId) return;
+    const snapshot = overlays.find((entry) => entry.id === overlayId) || null;
+    setOverlays((prev) => prev.filter((entry) => entry.id !== overlayId));
+    try {
+      await mutateMapDomain("delete_overlay", { overlay_id: overlayId });
+      setMapSyncError(null);
+      markMapFeedLive();
+    } catch (error) {
+      if (snapshot) {
+        setOverlays((prev) => [snapshot, ...prev.filter((entry) => entry.id !== snapshot.id)]);
+      }
+      setMapSyncError(error instanceof Error ? error.message : "Failed to delete tactical overlay.");
     }
   };
 
@@ -599,8 +722,30 @@ export default function TacticalMap() {
         <MapToolbar
           filterType={filterType} onFilterChange={setFilterType}
           sharing={sharing} onToggleSharing={() => setSharing((value) => !value)}
-          placing={placing} onTogglePlacing={() => { if (!canManageTactical) return; setPlacing((value) => !value); setShowForm(false); }}
-          routeMode={routeMode} onToggleRoute={() => { if (!canManageTactical) return; setRouteMode((value) => !value); if (routeMode) setRoutePoints([]); }}
+          placing={placing} onTogglePlacing={() => {
+            if (!canManageTactical) return;
+            setPlacing((value) => !value);
+            setShowForm(false);
+            setOverlayMode(false);
+            setShowOverlayForm(false);
+            if (routeMode) setRouteMode(false);
+          }}
+          routeMode={routeMode} onToggleRoute={() => {
+            if (!canManageTactical) return;
+            setRouteMode((value) => !value);
+            if (routeMode) setRoutePoints([]);
+            setPlacing(false);
+            setOverlayMode(false);
+            setShowOverlayForm(false);
+          }}
+          overlayMode={overlayMode} onToggleOverlay={() => {
+            if (!canManageTactical) return;
+            setOverlayMode((value) => !value);
+            setPlacing(false);
+            setShowForm(false);
+            setRouteMode(false);
+            setRoutePoints([]);
+          }}
           showFog={showFog} onToggleFog={() => { if (!canManageTactical) return; setShowFog((value) => !value); }}
           showHeatmap={showHeatmap} onToggleHeatmap={() => setShowHeatmap((value) => !value)}
           isAdmin={canManageTactical}
@@ -623,19 +768,24 @@ export default function TacticalMap() {
       )}
       <LiveStatusStrip
         label="CLAN MAP SYNC"
-        source={mapRuntime.source || "unavailable"}
-        retrievedAt={mapRuntime.updatedAt || mapRuntime.retrievedAt}
-        loading={syncingMapData || mapRuntime.isFetching}
+        source={mapDataSource}
+        retrievedAt={mapDataRetrievedAt}
+        loading={syncingMapData || mapRuntime.isFetching || mapFeedRetrying}
         error={mapSyncError || mapRuntime.error?.message || null}
         staleAfterMs={30_000}
         onRetry={() => {
           setMapSyncError(null);
-          hydrateMapData();
-          mapRuntime.refetch();
+          setMapFeedRetrying(true);
+          Promise.all([hydrateMapData(), mapRuntime.refetch()]).finally(() => {
+            setMapFeedRetrying(false);
+          });
         }}
         extraBadges={[
           { label: `PINS ${pins.length}`, color: T.amber },
           { label: `PLAYERS ${playerLocs.length}`, color: T.cyan },
+          { label: `<=5S ${telemetryFreshness.fresh}`, color: T.green },
+          { label: `5-30S ${telemetryFreshness.delayed}`, color: T.amber },
+          { label: `>30S ${telemetryFreshness.stale}`, color: T.red },
           { label: `ROUTES ${routes.length}`, color: T.green },
           { label: `OVERLAYS ${overlays.length}`, color: T.orange },
           { label: `BROADCASTS ${broadcasts.length}`, color: "#ff00ff" },
@@ -645,6 +795,7 @@ export default function TacticalMap() {
       {placing && <div className="text-xs px-3 py-2 border" style={{ borderColor: T.amber + "88", color: T.amber, background: T.amber + "0d" }}>⚠ CLICK MAP TO PLACE PIN</div>}
       {sharing && <div className="text-xs px-3 py-2 border" style={{ borderColor: T.green + "88", color: T.green, background: T.green + "0d" }}>● LOCATION SHARING ACTIVE — CLICK MAP TO UPDATE YOUR POSITION</div>}
       {routeMode && <div className="text-xs px-3 py-2 border" style={{ borderColor: T.cyan + "88", color: T.cyan, background: T.cyan + "0d" }}>◈ ROUTE MODE — CLICK MAP TO ADD WAYPOINTS, THEN SAVE ROUTE</div>}
+      {overlayMode && <div className="text-xs px-3 py-2 border" style={{ borderColor: T.orange + "88", color: T.orange, background: T.orange + "0d" }}>◎ OVERLAY MODE — CLICK MAP TO PLACE OVERLAY CENTER</div>}
       {showFog && canManageTactical && <div className="text-xs px-3 py-2 border" style={{ borderColor: T.textDim + "44", color: T.textDim, background: "rgba(0,0,0,0.3)" }}>FOG ACTIVE — CLICK DARK SECTORS TO CLEAR THEM</div>}
 
       {showCalibration && (
@@ -684,9 +835,13 @@ export default function TacticalMap() {
             showHeatmap={showHeatmap}
             heatmapPoints={heatmapPoints}
             nowMs={nowMs}
-            placingMode={placing || routeMode}
+            placingMode={placing || routeMode || overlayMode}
             onClick={handleMapClick}
-            onPinClick={(pin) => { setSelectedPin(pin === selectedPin ? null : pin); setShowForm(false); }}
+            onPinClick={(pin) => {
+              setSelectedPin(pin === selectedPin ? null : pin);
+              setShowForm(false);
+              setShowOverlayForm(false);
+            }}
             hordeSightingType={hordeSightingType}
             rallyPointType={rallyPointType}
           />
@@ -704,6 +859,17 @@ export default function TacticalMap() {
         <div className="space-y-3">
           {showBroadcastModal && (
             <BroadcastModal onSend={handleBroadcast} onClose={() => setShowBroadcastModal(false)} />
+          )}
+
+          {showOverlayForm && pendingOverlayCoords && (
+            <OverlayForm
+              point={pendingOverlayCoords}
+              onSave={handleSaveOverlay}
+              onClose={() => {
+                setShowOverlayForm(false);
+                setPendingOverlayCoords(null);
+              }}
+            />
           )}
 
           {showForm && (
@@ -737,11 +903,18 @@ export default function TacticalMap() {
           <MapSidebar
             pins={filteredPins}
             playerLocs={activePlayerLocs}
+            overlays={overlays}
+            canManageTactical={canManageTactical}
             mapConfig={mapConfig}
             myCallsign={myCallsign}
             routePoints={routePoints}
             nowMs={nowMs}
-            onPinClick={(pin) => { setSelectedPin(pin); setShowForm(false); }}
+            onPinClick={(pin) => {
+              setSelectedPin(pin);
+              setShowForm(false);
+              setShowOverlayForm(false);
+            }}
+            onDeleteOverlay={handleDeleteOverlay}
             onClearRoute={() => { setRoutePoints([]); setRouteMode(false); }}
             onSaveRoute={handleSaveRoute}
           />

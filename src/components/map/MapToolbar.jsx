@@ -1,11 +1,12 @@
 import { T, ActionBtn } from "@/components/ui/TerminalCard";
-import { Plus, Radio, RadioTower, Route, Eye, EyeOff, Flame, Megaphone, Wrench } from "lucide-react";
+import { Plus, Radio, RadioTower, Route, Eye, EyeOff, Flame, Megaphone, Wrench, Layers } from "lucide-react";
 
 export default function MapToolbar({
   filterType, onFilterChange,
   sharing, onToggleSharing,
   placing, onTogglePlacing,
   routeMode, onToggleRoute,
+  overlayMode, onToggleOverlay,
   showFog, onToggleFog,
   showHeatmap, onToggleHeatmap,
   isAdmin, onBroadcast,
@@ -34,6 +35,12 @@ export default function MapToolbar({
       <ActionBtn color={routeMode ? T.cyan : T.textDim} onClick={onToggleRoute} small>
         <Route size={9} /> {routeMode ? "ROUTING…" : "ROUTE"}
       </ActionBtn>
+
+      {isAdmin && (
+        <ActionBtn color={overlayMode ? T.orange : T.textDim} onClick={onToggleOverlay} small>
+          <Layers size={9} /> {overlayMode ? "OVRLY…" : "OVERLAY"}
+        </ActionBtn>
+      )}
 
       <ActionBtn color={showHeatmap ? T.red : T.textDim} onClick={onToggleHeatmap} small>
         <Flame size={9} /> HEAT

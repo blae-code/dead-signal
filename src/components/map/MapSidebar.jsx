@@ -27,9 +27,12 @@ const getTelemetryState = (timestamp, now) => {
 export default function MapSidebar({
   pins,
   playerLocs,
+  overlays = [],
+  canManageTactical = false,
   myCallsign,
   routePoints,
   onPinClick,
+  onDeleteOverlay,
   onClearRoute,
   onSaveRoute,
   nowMs,
@@ -103,6 +106,39 @@ export default function MapSidebar({
                 );
               })
           }
+        </div>
+      </Panel>
+
+      <Panel title={`OVERLAYS (${overlays.length})`} titleColor={T.orange}>
+        <div className="overflow-y-auto" style={{ maxHeight: "180px" }}>
+          {overlays.length === 0
+            ? <EmptyState message="NO OVERLAYS" />
+            : overlays.map((overlay) => {
+                const x = Number(overlay?.center_x);
+                const y = Number(overlay?.center_y);
+                const hasCenter = Number.isFinite(x) && Number.isFinite(y);
+                const color = typeof overlay?.color === "string" ? overlay.color : T.orange;
+                return (
+                  <div key={overlay.id} className="px-3 py-2 border-b flex items-center gap-2" style={{ borderColor: T.border + "55" }}>
+                    <span style={{ color, fontSize: "10px" }}>◉</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs truncate" style={{ color: T.text }}>{overlay.title || "Overlay"}</div>
+                      <div style={{ color: T.textFaint, fontSize: "8px" }}>
+                        {hasCenter ? `X${x.toFixed(1)} Y${y.toFixed(1)}` : "CENTER N/A"} · R{Number.isFinite(Number(overlay?.radius)) ? Number(overlay.radius).toFixed(1) : "?"}
+                      </div>
+                    </div>
+                    {canManageTactical && (
+                      <ActionBtn
+                        color={T.red}
+                        small
+                        onClick={() => onDeleteOverlay?.(overlay.id)}
+                      >
+                        DEL
+                      </ActionBtn>
+                    )}
+                  </div>
+                );
+              })}
         </div>
       </Panel>
     </div>

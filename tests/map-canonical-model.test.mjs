@@ -48,8 +48,13 @@ test("map canvas uses maplibre-gl and tactical writes flow through mutateMapDoma
   assert.ok(canvas.includes('import maplibregl from "maplibre-gl";'));
 
   assert.ok(tacticalMap.includes('base44.functions.invoke("mutateMapDomain"'));
+  assert.ok(tacticalMap.includes('mutateMapDomain("upsert_overlay"'));
+  assert.ok(tacticalMap.includes('mutateMapDomain("delete_overlay"'));
   assert.equal(tacticalMap.includes("base44.entities.MapPin.create("), false);
   assert.equal(tacticalMap.includes("base44.entities.MapPin.update("), false);
   assert.equal(tacticalMap.includes("base44.entities.MapPin.delete("), false);
   assert.equal(tacticalMap.includes("base44.entities.MapBroadcast.create("), false);
+  assert.equal(tacticalMap.includes("base44.entities.MapOverlay.create("), false);
+  assert.equal(tacticalMap.includes("base44.entities.MapOverlay.update("), false);
+  assert.equal(tacticalMap.includes("base44.entities.MapOverlay.delete("), false);
 });
