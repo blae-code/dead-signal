@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, Plus, Edit2, Trash2, Save, Shield } from "lucide-react";
+import { Users, Plus, Edit2, Trash2, Save, Shield, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { T, PageHeader, StatGrid, Panel, FormPanel, Field, FilterPill, ActionBtn, TableHeader, TableRow, EmptyState, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
 
 const ROLES    = ["Commander", "Lieutenant", "Scout", "Engineer", "Medic", "Grunt"];
