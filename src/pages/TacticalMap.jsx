@@ -331,6 +331,13 @@ export default function TacticalMap() {
     ? (mapRuntime.source || "unavailable")
     : mapFeedSource;
   const mapDataRetrievedAt = mapFeedRetrievedAt || mapRuntime.updatedAt || mapRuntime.retrievedAt;
+  const getRevision = useCallback((row) => {
+    if (!row || typeof row !== "object") return null;
+    if (typeof row.updated_at === "string" && row.updated_at) return row.updated_at;
+    if (typeof row.updated_date === "string" && row.updated_date) return row.updated_date;
+    if (typeof row.created_date === "string" && row.created_date) return row.created_date;
+    return null;
+  }, []);
 
   const mutateMapDomain = useCallback(async (action, payload, options = {}) => {
     const idempotency = `${action}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -385,6 +392,10 @@ export default function TacticalMap() {
         callsign: myCallsign,
         x: normalizedX,
         y: normalizedY,
+        world_x: world?.x ?? null,
+        world_y: world?.y ?? null,
+        map_id: mapConfig?.map_id || "global-map",
+        telemetry_source: "client_heartbeat",
         in_vehicle: false,
       });
       const location = response?.data?.location || optimistic;
@@ -499,6 +510,7 @@ export default function TacticalMap() {
     try {
       const result = await mutateMapDomain("update_pin", {
         pin_id: pin.id,
+        expected_updated_at: getRevision(pin),
         patch: { status: next },
       });
       const updated = result?.pin || optimistic;
@@ -510,6 +522,9 @@ export default function TacticalMap() {
       setPins((prev) => prev.map((entry) => (entry.id === pin.id ? pin : entry)));
       setSelectedPin(pin);
       setMapSyncError(error instanceof Error ? error.message : "Failed to update pin status.");
+      if (error instanceof Error && /conflict|changed|stale/i.test(error.message)) {
+        hydrateMapData();
+      }
     }
   };
 
@@ -519,7 +534,10 @@ export default function TacticalMap() {
     setPins((prev) => prev.filter((entry) => entry.id !== id));
     setSelectedPin(null);
     try {
-      await mutateMapDomain("delete_pin", { pin_id: id });
+      await mutateMapDomain("delete_pin", {
+        pin_id: id,
+        expected_updated_at: getRevision(snapshot),
+      });
       setMapSyncError(null);
       markMapFeedLive();
     } catch (error) {
@@ -527,6 +545,9 @@ export default function TacticalMap() {
         setPins((prev) => [snapshot, ...prev.filter((entry) => entry.id !== snapshot.id)]);
       }
       setMapSyncError(error instanceof Error ? error.message : "Failed to delete pin.");
+      if (error instanceof Error && /conflict|changed|stale/i.test(error.message)) {
+        hydrateMapData();
+      }
     }
   };
 
@@ -695,7 +716,10 @@ export default function TacticalMap() {
     const snapshot = overlays.find((entry) => entry.id === overlayId) || null;
     setOverlays((prev) => prev.filter((entry) => entry.id !== overlayId));
     try {
-      await mutateMapDomain("delete_overlay", { overlay_id: overlayId });
+      await mutateMapDomain("delete_overlay", {
+        overlay_id: overlayId,
+        expected_updated_at: getRevision(snapshot),
+      });
       setMapSyncError(null);
       markMapFeedLive();
     } catch (error) {
@@ -703,6 +727,9 @@ export default function TacticalMap() {
         setOverlays((prev) => [snapshot, ...prev.filter((entry) => entry.id !== snapshot.id)]);
       }
       setMapSyncError(error instanceof Error ? error.message : "Failed to delete tactical overlay.");
+      if (error instanceof Error && /conflict|changed|stale/i.test(error.message)) {
+        hydrateMapData();
+      }
     }
   };
 

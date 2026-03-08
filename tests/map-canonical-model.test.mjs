@@ -45,11 +45,14 @@ test("legacy split map entities are not referenced in frontend runtime code", ()
 test("map canvas uses maplibre-gl and tactical writes flow through mutateMapDomain", () => {
   const canvas = read("src/components/map/MapCanvas.jsx");
   const tacticalMap = read("src/pages/TacticalMap.jsx");
+  const mutateMapDomainFn = read("functions/mutateMapDomain.ts");
   assert.ok(canvas.includes('import maplibregl from "maplibre-gl";'));
 
   assert.ok(tacticalMap.includes('base44.functions.invoke("mutateMapDomain"'));
   assert.ok(tacticalMap.includes('mutateMapDomain("upsert_overlay"'));
   assert.ok(tacticalMap.includes('mutateMapDomain("delete_overlay"'));
+  assert.ok(tacticalMap.includes("expected_updated_at"));
+  assert.ok(mutateMapDomainFn.includes('"conflict"'));
   assert.equal(tacticalMap.includes("base44.entities.MapPin.create("), false);
   assert.equal(tacticalMap.includes("base44.entities.MapPin.update("), false);
   assert.equal(tacticalMap.includes("base44.entities.MapPin.delete("), false);

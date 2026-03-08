@@ -33,6 +33,8 @@ Role policy:
 - all others: forbidden
 
 All writes support `dry_run` and idempotency keys.
+Update/delete map object actions also support optimistic concurrency with `payload.expected_updated_at`.
+When the server detects a stale client revision, it returns `409 conflict` with current/expected revision metadata.
 
 ## Tactical map UI coverage
 

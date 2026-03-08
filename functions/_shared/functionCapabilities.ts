@@ -817,6 +817,10 @@ const CAPABILITY_SCHEMAS: Record<string, CapabilitySchemas> = {
       schemaField("y", "number", true, "Normalized Y coordinate (0-100)."),
       schemaField("callsign", "string", false, "Admin-only callsign override."),
       schemaField("in_vehicle", "boolean", false, "Vehicle status for marker."),
+      schemaField("world_x", "number", false, "Optional world-space X coordinate."),
+      schemaField("world_y", "number", false, "Optional world-space Y coordinate."),
+      schemaField("map_id", "string", false, "Target map id for location heartbeat."),
+      schemaField("telemetry_source", "string", false, "Telemetry source label for write provenance."),
     ],
     output_schema: [
       schemaField("location", "object", true, "Created/updated location record."),
@@ -861,6 +865,7 @@ const CAPABILITY_SCHEMAS: Record<string, CapabilitySchemas> = {
     input_schema: [
       schemaField("action", "string", true, "Mutation action id."),
       schemaField("payload", "object", false, "Action-specific payload."),
+      schemaField("payload.expected_updated_at", "string", false, "Optional optimistic concurrency revision for update/delete actions."),
       schemaField("dry_run", "boolean", false, "Validate mutation without persisting side effects."),
       schemaField("confirm_token", "string", false, "Explicit confirmation token for critical reset actions."),
       schemaField("idempotency_key", "string", false, "Replay-safe idempotency key."),

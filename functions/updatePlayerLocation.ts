@@ -23,6 +23,10 @@ Deno.serve(async (req) => {
       y?: unknown;
       callsign?: unknown;
       in_vehicle?: unknown;
+      world_x?: unknown;
+      world_y?: unknown;
+      map_id?: unknown;
+      telemetry_source?: unknown;
     }>(req);
 
     if (typeof body.x !== 'number' || !Number.isFinite(body.x) || typeof body.y !== 'number' || !Number.isFinite(body.y)) {
@@ -44,6 +48,14 @@ Deno.serve(async (req) => {
       player_callsign: resolvedCallsign,
       x: cx,
       y: cy,
+      normalized_x: cx,
+      normalized_y: cy,
+      world_x: typeof body.world_x === 'number' && Number.isFinite(body.world_x) ? body.world_x : null,
+      world_y: typeof body.world_y === 'number' && Number.isFinite(body.world_y) ? body.world_y : null,
+      map_id: typeof body.map_id === 'string' && body.map_id.trim() ? body.map_id.trim() : 'global-map',
+      telemetry_source: typeof body.telemetry_source === 'string' && body.telemetry_source.trim()
+        ? body.telemetry_source.trim()
+        : 'client_heartbeat',
       in_vehicle: !!body.in_vehicle,
       timestamp: new Date().toISOString(),
     };

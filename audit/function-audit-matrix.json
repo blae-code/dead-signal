@@ -1778,6 +1778,12 @@
           "description": "Action-specific payload."
         },
         {
+          "field": "payload.expected_updated_at",
+          "type": "string",
+          "required": false,
+          "description": "Optional optimistic concurrency revision for update/delete actions."
+        },
+        {
           "field": "dry_run",
           "type": "boolean",
           "required": false,
@@ -1825,6 +1831,7 @@
       "input_fields": [
         "action",
         "payload",
+        "payload.expected_updated_at",
         "dry_run",
         "confirm_token",
         "idempotency_key"
@@ -2893,6 +2900,30 @@
           "type": "boolean",
           "required": false,
           "description": "Vehicle status for marker."
+        },
+        {
+          "field": "world_x",
+          "type": "number",
+          "required": false,
+          "description": "Optional world-space X coordinate."
+        },
+        {
+          "field": "world_y",
+          "type": "number",
+          "required": false,
+          "description": "Optional world-space Y coordinate."
+        },
+        {
+          "field": "map_id",
+          "type": "string",
+          "required": false,
+          "description": "Target map id for location heartbeat."
+        },
+        {
+          "field": "telemetry_source",
+          "type": "string",
+          "required": false,
+          "description": "Telemetry source label for write provenance."
         }
       ],
       "output_schema": [
@@ -2913,7 +2944,11 @@
         "x",
         "y",
         "callsign",
-        "in_vehicle"
+        "in_vehicle",
+        "world_x",
+        "world_y",
+        "map_id",
+        "telemetry_source"
       ],
       "output_fields": [
         "location",

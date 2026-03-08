@@ -159,6 +159,82 @@ const purgeCollection = async (
   return { found: safeRows.length, deleted };
 };
 
+const getEntityById = async (entity: any, id: string): Promise<JsonRecord | null> => {
+  if (!entity || !id) return null;
+  if (typeof entity.get === "function") {
+    const row = await entity.get(id).catch(() => null);
+    if (row && typeof row === "object") return row as JsonRecord;
+  }
+  if (typeof entity.filter === "function") {
+    const rows = await entity.filter({ id }, "-updated_date", 1).catch(() => []);
+    if (Array.isArray(rows) && rows.length > 0 && rows[0] && typeof rows[0] === "object") {
+      return rows[0] as JsonRecord;
+    }
+  }
+  return null;
+};
+
+const rowUpdatedAt = (row: JsonRecord | null): string | null => {
+  if (!row) return null;
+  return toOptionalString(row.updated_at)
+    || toOptionalString(row.updated_date)
+    || toOptionalString(row.created_date)
+    || null;
+};
+
+const enforceExpectedRevision = (
+  expectedUpdatedAt: string | null,
+  currentUpdatedAt: string | null,
+  resourceLabel: string,
+): void => {
+  if (!expectedUpdatedAt || !currentUpdatedAt) return;
+  if (expectedUpdatedAt !== currentUpdatedAt) {
+    throw new AppError(
+      409,
+      "conflict",
+      `${resourceLabel} changed since the client snapshot. Refresh and retry.`,
+      {
+        expected_updated_at: expectedUpdatedAt,
+        current_updated_at: currentUpdatedAt,
+      },
+    );
+  }
+};
+
+const toShortError = (error: unknown): string => {
+  if (error instanceof AppError) return `${error.code}:${error.message}`.slice(0, 400);
+  if (error instanceof Error) return error.message.slice(0, 400);
+  return String(error).slice(0, 400);
+};
+
+const auditMapMutation = async (
+  base44: any,
+  payload: {
+    actor_role: string;
+    action: string;
+    dry_run: boolean;
+    request_payload: JsonRecord;
+    result: JsonRecord | null;
+    error: string | null;
+  },
+): Promise<void> => {
+  const auditEntity = tryGetEntityCollection(base44, "FunctionExecutionAudit");
+  if (!auditEntity?.create) return;
+  await auditEntity.create({
+    function_id: "mutateMapDomain",
+    status: payload.error ? "failed" : "success",
+    actor_role: payload.actor_role,
+    payload: {
+      action: payload.action,
+      dry_run: payload.dry_run,
+      payload: payload.request_payload,
+    },
+    response: payload.result,
+    error: payload.error,
+    executed_at: new Date().toISOString(),
+  }).catch(() => null);
+};
+
 Deno.serve(async (req) => {
   try {
     requireMethod(req, "POST");
@@ -235,14 +311,20 @@ Deno.serve(async (req) => {
       if (action === "create_pin") {
         const entity = requireEntityCollection(base44, "MapPin");
         const pin = mapPinPayload(payload, actorCallsign);
+        const created = dryRun ? pin : await entity.create(pin);
         result = {
-          pin: dryRun ? pin : await entity.create(pin),
+          pin: created,
+          revision: rowUpdatedAt(created as JsonRecord) || null,
           dry_run: dryRun,
         };
       } else if (action === "update_pin") {
         const entity = requireEntityCollection(base44, "MapPin");
         const pinId = toOptionalString(payload.pin_id);
         if (!pinId) throw new AppError(400, "invalid_pin_payload", "pin_id is required for update_pin.");
+        const current = await getEntityById(entity, pinId);
+        if (!current) throw new AppError(404, "pin_not_found", "Pin not found.");
+        const expectedUpdatedAt = toOptionalString(payload.expected_updated_at);
+        enforceExpectedRevision(expectedUpdatedAt, rowUpdatedAt(current), "Pin");
         const patch = payload.patch && typeof payload.patch === "object" && !Array.isArray(payload.patch)
           ? payload.patch as JsonRecord
           : {};
@@ -264,29 +346,38 @@ Deno.serve(async (req) => {
           safePatch.world_x = point.world_x;
           safePatch.world_y = point.world_y;
         }
+        const updated = dryRun ? null : await entity.update(pinId, safePatch);
         result = {
           pin_id: pinId,
           patch: safePatch,
-          pin: dryRun ? null : await entity.update(pinId, safePatch),
+          pin: updated,
+          revision: rowUpdatedAt(updated as JsonRecord) || rowUpdatedAt(current),
           dry_run: dryRun,
         };
       } else if (action === "delete_pin") {
         const entity = requireEntityCollection(base44, "MapPin");
         const pinId = toOptionalString(payload.pin_id);
         if (!pinId) throw new AppError(400, "invalid_pin_payload", "pin_id is required for delete_pin.");
+        const current = await getEntityById(entity, pinId);
+        if (!current) throw new AppError(404, "pin_not_found", "Pin not found.");
+        const expectedUpdatedAt = toOptionalString(payload.expected_updated_at);
+        enforceExpectedRevision(expectedUpdatedAt, rowUpdatedAt(current), "Pin");
         if (!dryRun) {
           await entity.delete(pinId);
         }
         result = {
           pin_id: pinId,
           deleted: !dryRun,
+          revision: rowUpdatedAt(current),
           dry_run: dryRun,
         };
       } else if (action === "create_broadcast") {
         const entity = requireEntityCollection(base44, "MapBroadcast");
         const broadcast = mapBroadcastPayload(payload, actorCallsign);
+        const created = dryRun ? broadcast : await entity.create(broadcast);
         result = {
-          broadcast: dryRun ? broadcast : await entity.create(broadcast),
+          broadcast: created,
+          revision: rowUpdatedAt(created as JsonRecord) || null,
           dry_run: dryRun,
         };
       } else if (action === "create_route") {
@@ -333,18 +424,27 @@ Deno.serve(async (req) => {
           result = {
             route,
             waypoints,
+            revision: rowUpdatedAt(route as JsonRecord) || null,
             dry_run: dryRun,
           };
         } else {
           result = {
             route: routePayload,
             waypoints,
+            revision: null,
             dry_run: dryRun,
           };
         }
       } else if (action === "upsert_overlay") {
         const entity = requireEntityCollection(base44, "MapOverlay");
         const overlayId = toOptionalString(payload.overlay_id);
+        let currentOverlay: JsonRecord | null = null;
+        if (overlayId) {
+          currentOverlay = await getEntityById(entity, overlayId);
+          if (!currentOverlay) throw new AppError(404, "overlay_not_found", "Overlay not found.");
+          const expectedUpdatedAt = toOptionalString(payload.expected_updated_at);
+          enforceExpectedRevision(expectedUpdatedAt, rowUpdatedAt(currentOverlay), "Overlay");
+        }
         const geometry = toOptionalString(payload.geometry) || "circle";
         const overlayPayload: JsonRecord = {
           map_id: normalizeMapId(payload.map_id),
@@ -374,18 +474,24 @@ Deno.serve(async (req) => {
         result = {
           overlay,
           overlay_id: overlayId,
+          revision: rowUpdatedAt(overlay as JsonRecord) || rowUpdatedAt(currentOverlay),
           dry_run: dryRun,
         };
       } else if (action === "delete_overlay") {
         const entity = requireEntityCollection(base44, "MapOverlay");
         const overlayId = toOptionalString(payload.overlay_id);
         if (!overlayId) throw new AppError(400, "invalid_overlay_payload", "overlay_id is required for delete_overlay.");
+        const currentOverlay = await getEntityById(entity, overlayId);
+        if (!currentOverlay) throw new AppError(404, "overlay_not_found", "Overlay not found.");
+        const expectedUpdatedAt = toOptionalString(payload.expected_updated_at);
+        enforceExpectedRevision(expectedUpdatedAt, rowUpdatedAt(currentOverlay), "Overlay");
         if (!dryRun) {
           await entity.delete(overlayId);
         }
         result = {
           overlay_id: overlayId,
           deleted: !dryRun,
+          revision: rowUpdatedAt(currentOverlay),
           dry_run: dryRun,
         };
       }
@@ -399,12 +505,51 @@ Deno.serve(async (req) => {
       executed_at: new Date().toISOString(),
     };
 
+    let clanRole: string | null = null;
+    const userEmail = toOptionalString(user?.email);
+    const clanMemberEntity = tryGetEntityCollection(base44, "ClanMember");
+    if (clanMemberEntity?.filter && userEmail) {
+      const clanRows = await clanMemberEntity.filter({ user_email: userEmail }, "-updated_date", 1).catch(() => []);
+      if (Array.isArray(clanRows) && clanRows.length > 0) {
+        clanRole = toOptionalString((clanRows[0] as JsonRecord).role);
+      }
+    }
+    const actorRole = toOptionalString(user?.role)
+      || clanRole
+      || "authenticated";
+    await auditMapMutation(base44, {
+      actor_role: actorRole,
+      action,
+      dry_run: dryRun,
+      request_payload: payload,
+      result,
+      error: null,
+    });
+
     if (idempotencyKey) {
       storeIdempotentReplay(scope, idempotencyKey, responsePayload, 200, 120_000);
     }
 
     return Response.json(responsePayload);
   } catch (error) {
+    try {
+      const base44 = createClientFromRequest(req);
+      const body = await parseJsonBody<{ action?: unknown; payload?: unknown; dry_run?: unknown }>(req).catch(() => null);
+      const action = body?.action && typeof body.action === "string" ? body.action : "unknown";
+      const payload = body?.payload && typeof body.payload === "object" && !Array.isArray(body.payload)
+        ? body.payload as JsonRecord
+        : {};
+      await auditMapMutation(base44, {
+        actor_role: "unknown",
+        action,
+        dry_run: body?.dry_run === true,
+        request_payload: payload,
+        result: null,
+        error: toShortError(error),
+      });
+    } catch {
+      // Best-effort audit only.
+    }
     return errorResponse(error);
   }
 });
