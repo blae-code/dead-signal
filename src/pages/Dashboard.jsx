@@ -174,7 +174,7 @@ export default function Dashboard() {
 
           <Panel
             title="SERVER FEED"
-            titleColor={T.cyan}
+            titleColor={ENTITY_COLORS.ServerEvent}
             headerRight={
               <Link to={createPageUrl("ServerMonitor")} className="text-xs" style={{ color: T.textFaint, fontSize: "9px", textDecoration: "none" }}>
                 MONITOR →
