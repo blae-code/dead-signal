@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Shield, ArrowLeft, Crosshair, Activity, Clock, Skull, Target, Star, Zap } from "lucide-react";
-import { T, PageHeader, Panel, StatGrid, EmptyState } from "@/components/ui/TerminalCard";
+import { Shield, ArrowLeft, Crosshair, Activity, Clock, Skull, Target, Star, Zap, ThumbsUp } from "lucide-react";
+import { T, PageHeader, Panel, StatGrid, EmptyState, ActionBtn } from "@/components/ui/TerminalCard";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
