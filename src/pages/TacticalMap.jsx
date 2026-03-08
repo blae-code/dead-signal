@@ -77,11 +77,17 @@ export default function TacticalMap() {
   };
 
   const handleMapClick = (e) => {
-    if (!placing || !isAdmin) return;
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setPendingCoords({ x: parseFloat(x.toFixed(2)), y: parseFloat(y.toFixed(2)) });
+    const x = parseFloat(((e.clientX - rect.left) / rect.width * 100).toFixed(2));
+    const y = parseFloat(((e.clientY - rect.top) / rect.height * 100).toFixed(2));
+
+    if (sharing) {
+      // Update this player's location on click while sharing
+      pushMyLocation(x, y);
+      return;
+    }
+    if (!placing || !isAdmin) return;
+    setPendingCoords({ x, y });
     setShowForm(true);
     setPlacing(false);
   };
