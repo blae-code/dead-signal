@@ -42,6 +42,10 @@ export default function PlayerProfile() {
   const [member,   setMember]   = useState(null);
   const [missions, setMissions] = useState([]);
   const [activity, setActivity] = useState([]);
+  const [vouches,  setVouches]  = useState([]);
+  const [user,     setUser]     = useState(null);
+  const [vouchForm, setVouchForm] = useState({ comment: "", rating: 5 });
+  const [showVouchForm, setShowVouchForm] = useState(false);
   const [loading,  setLoading]  = useState(true);
 
   useEffect(() => {
@@ -50,17 +54,39 @@ export default function PlayerProfile() {
       base44.entities.ClanMember.list("-created_date"),
       base44.entities.Mission.list("-created_date"),
       base44.entities.ActivityLog.filter({ clan_member_id: memberId }, "-timestamp", 50),
-    ]).then(([members, allMissions, logs]) => {
+      base44.entities.PlayerVouch.filter({ target_email: "" }, "-created_date", 50),
+      base44.auth.me(),
+    ]).then(([members, allMissions, logs, allVouches, u]) => {
       const m = members.find(x => x.id === memberId);
       setMember(m || null);
-      // Filter missions that have this member's callsign in assigned_to
+      setUser(u);
       const m2 = m ? allMissions.filter(mis =>
         Array.isArray(mis.assigned_to) && mis.assigned_to.includes(m.callsign)
       ) : [];
       setMissions(m2);
       setActivity(logs);
+      // Load vouches for this member's email
+      if (m?.user_email) {
+        base44.entities.PlayerVouch.filter({ target_email: m.user_email }, "-created_date").then(setVouches);
+      }
     }).finally(() => setLoading(false));
   }, [memberId]);
+
+  const handleVouch = async () => {
+    const myMemberData = await base44.entities.ClanMember.filter({ user_email: user.email });
+    const myCallsign = myMemberData[0]?.callsign || user.full_name || user.email;
+    const created = await base44.entities.PlayerVouch.create({
+      voucher_email: user.email,
+      voucher_callsign: myCallsign,
+      target_email: member.user_email,
+      target_callsign: member.callsign,
+      comment: vouchForm.comment,
+      rating: Number(vouchForm.rating)
+    });
+    setVouches(prev => [created, ...prev]);
+    setShowVouchForm(false);
+    setVouchForm({ comment: "", rating: 5 });
+  };
 
   if (loading) {
     return (
