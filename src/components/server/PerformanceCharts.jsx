@@ -158,10 +158,10 @@ function ChartCard({ title, data, dataKey, color, unit, threshold, maxValue }) {
       </div>
 
       {/* Threshold marker */}
-      {threshold && (
+      {(threshold || maxValue) && (
         <div className="flex items-center justify-between px-3 py-1 border-t" style={{ borderColor: T.border + "55" }}>
-          <span style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.1em" }}>THRESHOLD</span>
-          <span style={{ color: T.amber + "99", fontSize: "7px", fontFamily: "'Orbitron', monospace" }}>{threshold}{unit}</span>
+          <span style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.1em" }}>MAX</span>
+          <span style={{ color: T.amber + "99", fontSize: "7px", fontFamily: "'Orbitron', monospace" }}>{(threshold || maxValue)}{unit}</span>
         </div>
       )}
     </div>
