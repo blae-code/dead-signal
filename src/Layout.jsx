@@ -39,10 +39,6 @@ const navSections = [
 }];
 
 
-const THREAT_LEVELS = [
-{ label: "SECURE", color: "#39ff14" },
-{ label: "ELEVATED", color: "#ffb000" },
-{ label: "CRITICAL", color: "#ff2020" }];
 
 
 // Rust-core palette—brown/orange/gray base with status colors reserved
