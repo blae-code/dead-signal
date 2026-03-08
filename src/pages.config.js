@@ -51,6 +51,7 @@ import AIAgent from './pages/AIAgent';
 import Challenges from './pages/Challenges';
 import ClanBoard from './pages/ClanBoard';
 import ClanCalendar from './pages/ClanCalendar';
+import ClanMap from './pages/ClanMap';
 import ClanRoster from './pages/ClanRoster';
 import ClanTreasury from './pages/ClanTreasury';
 import ClanVoting from './pages/ClanVoting';
@@ -65,12 +66,12 @@ import LootTracker from './pages/LootTracker';
 import Missions from './pages/Missions';
 import MyStats from './pages/MyStats';
 import PlayerProfile from './pages/PlayerProfile';
+import PostMissionAnalysis from './pages/PostMissionAnalysis';
 import ServerMonitor from './pages/ServerMonitor';
-import SurvivalPlanner from './pages/SurvivalPlanner';
 import SquadVitalsMonitor from './pages/SquadVitalsMonitor';
 import SupplyChainManager from './pages/SupplyChainManager';
-import PostMissionAnalysis from './pages/PostMissionAnalysis';
-import ClanMap from './pages/ClanMap';
+import SurvivalPlanner from './pages/SurvivalPlanner';
+import ResourceTradingHub from './pages/ResourceTradingHub';
 import __Layout from './Layout.jsx';
 
 
@@ -79,6 +80,7 @@ export const PAGES = {
     "Challenges": Challenges,
     "ClanBoard": ClanBoard,
     "ClanCalendar": ClanCalendar,
+    "ClanMap": ClanMap,
     "ClanRoster": ClanRoster,
     "ClanTreasury": ClanTreasury,
     "ClanVoting": ClanVoting,
@@ -93,12 +95,12 @@ export const PAGES = {
     "Missions": Missions,
     "MyStats": MyStats,
     "PlayerProfile": PlayerProfile,
+    "PostMissionAnalysis": PostMissionAnalysis,
     "ServerMonitor": ServerMonitor,
-    "SurvivalPlanner": SurvivalPlanner,
     "SquadVitalsMonitor": SquadVitalsMonitor,
     "SupplyChainManager": SupplyChainManager,
-    "PostMissionAnalysis": PostMissionAnalysis,
-    "ClanMap": ClanMap,
+    "SurvivalPlanner": SurvivalPlanner,
+    "ResourceTradingHub": ResourceTradingHub,
 }
 
 export const pagesConfig = {
