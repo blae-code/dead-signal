@@ -466,7 +466,7 @@ export default function ServerMonitor() {
           {/* Forecast collapsible */}
           <div
             className="relative overflow-hidden"
-            style={{ border: `1px solid ${T.border}`, background: "linear-gradient(160deg, #0d0a07 0%, #080602 100%)" }}
+            style={{ border: `1px solid ${T.border}`, background: "linear-gradient(160deg, #1c1e21 0%, #14161a 100%)" }}
           >
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.cyan}44, transparent)` }} />
             <button
