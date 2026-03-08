@@ -120,8 +120,6 @@ export default function Layout({ children, currentPageName }) {
 
   const timeStr = time.toLocaleTimeString("en-US", { hour12: false });
   const dateStr = time.toLocaleDateString("en-US", { year: "2-digit", month: "2-digit", day: "2-digit" });
-  const threat = THREAT_LEVELS[threatLevel];
-
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(135deg, #1a1410 0%, #2d1f0f 100%)", fontFamily: "'Share Tech Mono', monospace" }}>
       <style>{`
