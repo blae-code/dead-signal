@@ -505,7 +505,7 @@ export default function ServerMonitor() {
         {/* RIGHT: Admin Tools */}
         <div className="space-y-3">
           {isAdmin ? (
-            <AdminToolsPanel status={status} />
+            <AdminToolsPanel status={status} events={events} />
           ) : (
             <div
               className="relative flex flex-col items-center justify-center p-8 text-center overflow-hidden"
