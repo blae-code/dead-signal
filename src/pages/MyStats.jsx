@@ -60,7 +60,7 @@ export default function MyStats() {
   };
 
   return (
-    <div className="p-4 space-y-4 max-w-5xl mx-auto">
+    <div className="p-4 space-y-4 max-w-5xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={BarChart2} title="MY STATS" color={T.cyan} />
 
       {loading ? (

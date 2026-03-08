@@ -152,7 +152,7 @@ export default function PostMissionAnalysis() {
   const needsRepair = filteredGear.filter(g => g.needs_repair).length;
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-4 space-y-4 max-w-7xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Zap} title="POST-MISSION ANALYSIS" color={T.amber}>
         <span style={{ color: T.textFaint, fontSize: "8px" }}>
           {gearDurability.length} GEAR LOGS · {deathLessons.length} DEATH LESSONS · {needsRepair} REPAIRS NEEDED

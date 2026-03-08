@@ -76,7 +76,7 @@ export default function ClanBoard() {
   const regular = chanMsgs.filter(m => !m.pinned);
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100vh - 48px)" }}>
+    <div className="flex flex-col" style={{ minHeight: "calc(100vh - 48px)" }}>
       <div className="p-4 pb-2">
         <PageHeader icon={MessageSquare} title="CLAN BOARD" color={T.green} />
       </div>

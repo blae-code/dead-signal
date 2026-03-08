@@ -57,7 +57,7 @@ export default function DeathMap() {
   const toPixel = (val, max = 14500, size) => (val / max) * size;
 
   return (
-    <div className="p-4 space-y-4 max-w-5xl mx-auto">
+    <div className="p-4 space-y-4 max-w-5xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Skull} title="DEATH MAP" color={T.red}>
         <ActionBtn color={placing ? T.amber : T.red} onClick={() => { setPlacing(!placing); setShowForm(false); }}>
           <Plus size={10} /> {placing ? "CANCEL PLACEMENT" : "MARK DEATH"}
