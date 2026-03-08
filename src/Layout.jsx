@@ -192,8 +192,8 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(135deg, #1a1410 0%, #2d1f0f 100%)", fontFamily: "'Share Tech Mono', monospace" }}>
-      <header className="border-b flex items-center justify-between px-4 py-2 z-50 relative overflow-hidden" style={{ borderColor: C.border, background: "linear-gradient(135deg, rgba(20, 15, 10, 0.95) 0%, rgba(30, 20, 15, 0.95) 100%)" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#1a1410", fontFamily: "'Share Tech Mono', monospace" }}>
+      <header className="border-b flex items-center justify-between px-4 py-2 z-50 relative overflow-hidden" style={{ borderColor: C.border, background: "rgba(20, 15, 10, 0.95)" }}>
         <div className={animationEnabled ? "layout-header-scan" : undefined} style={{ position: "absolute", inset: 0, pointerEvents: "none", background: `linear-gradient(90deg, transparent 0%, ${C.scan} 50%, transparent 100%)`, backgroundSize: "200% 100%" }} />
 
         <div className="flex items-center gap-3 relative">
@@ -228,13 +228,13 @@ export default function Layout({ children, currentPageName }) {
           className={`fixed md:relative z-40 h-full flex flex-col transition-transform duration-200 ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
           style={{
             width: "210px",
-            background: "linear-gradient(135deg, #0f0a07 0%, #1a1410 100%)",
+            background: "#0f0a07",
             borderRight: `1px solid ${C.border}`,
             minHeight: "calc(100vh - 41px)",
             boxShadow: "inset 1px 0 2px rgba(139, 69, 19, 0.3)",
           }}
         >
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="px-3 py-2 border-b flex items-center justify-between" style={{ borderColor: C.border, background: "linear-gradient(135deg, rgba(20, 15, 10, 0.8) 0%, rgba(25, 18, 12, 0.8) 100%)" }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="px-3 py-2 border-b flex items-center justify-between" style={{ borderColor: C.border, background: "rgba(20, 15, 10, 0.8)" }}>
             <div className="flex items-center gap-2">
               <Activity size={9} className={animationEnabled ? "layout-nav-dot-pulse" : undefined} style={{ color: "#39ff14" }} />
               <span style={{ color: C.textDim, fontSize: "9px", letterSpacing: "0.2em", fontFamily: "'Orbitron', monospace" }}>SYS.NAV</span>
@@ -332,7 +332,7 @@ export default function Layout({ children, currentPageName }) {
 
         {mobileOpen && <div className="fixed inset-0 z-30 bg-black bg-opacity-80 md:hidden" onClick={() => setMobileOpen(false)} />}
 
-        <main className="flex-1 overflow-auto" style={{ background: "linear-gradient(135deg, #1a1410 0%, #2d1f0f 100%)" }}>
+        <main className="flex-1 overflow-auto" style={{ background: "#1a1410" }}>
           {children}
         </main>
       </div>

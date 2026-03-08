@@ -40,7 +40,7 @@
 }
 
 body {
-  background: linear-gradient(135deg, var(--rust-dark) 0%, var(--rust-brown) 100%);
+  background: #0d0a07;
   color: var(--scrap-text);
   font-family: 'Share Tech Mono', monospace;
   overflow-x: hidden;
@@ -134,7 +134,7 @@ body::after {
 
 /* Rust-core card styling */
 .terminal-card {
-  background: linear-gradient(135deg, var(--rust-surface) 0%, var(--rust-brown) 100%);
+  background: #120e09;
   border: 1px solid var(--rust-border);
   border-radius: 0px;
   position: relative;
