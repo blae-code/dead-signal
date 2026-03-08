@@ -96,6 +96,31 @@ body::after {
   50% { opacity: 0.65; }
 }
 
+@keyframes glowDotPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50%       { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes color-sweep {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.ds-glow-green  { text-shadow: 0 0 10px var(--ds-green),  0 0 20px var(--ds-green)44; }
+.ds-glow-amber  { text-shadow: 0 0 10px var(--ds-amber),  0 0 20px var(--ds-amber)44; }
+.ds-glow-cyan   { text-shadow: 0 0 10px var(--ds-cyan),   0 0 20px var(--ds-cyan)44; }
+.ds-glow-red    { text-shadow: 0 0 10px var(--ds-red),    0 0 20px var(--ds-red)44; }
+.ds-glow-purple { text-shadow: 0 0 10px var(--ds-purple), 0 0 20px var(--ds-purple)44; }
+.ds-glow-teal   { text-shadow: 0 0 10px var(--ds-teal),   0 0 20px var(--ds-teal)44; }
+.ds-glow-gold   { text-shadow: 0 0 10px var(--ds-gold),   0 0 20px var(--ds-gold)44; }
+
+.ds-border-green  { border-color: var(--ds-green)  !important; box-shadow: 0 0 8px var(--ds-green)44; }
+.ds-border-amber  { border-color: var(--ds-amber)  !important; box-shadow: 0 0 8px var(--ds-amber)44; }
+.ds-border-cyan   { border-color: var(--ds-cyan)   !important; box-shadow: 0 0 8px var(--ds-cyan)44; }
+.ds-border-red    { border-color: var(--ds-red)    !important; box-shadow: 0 0 8px var(--ds-red)44; }
+.ds-border-purple { border-color: var(--ds-purple) !important; box-shadow: 0 0 8px var(--ds-purple)44; }
+
 .terminal-flicker { animation: flicker 4s infinite; }
 .cursor-blink::after { content: '█'; animation: blink 1s infinite; }
 .rust-pulse { animation: rust-pulse 3s ease-in-out infinite; }
