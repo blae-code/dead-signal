@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Cpu, RefreshCw, AlertTriangle, Clock, Wifi, X, Activity, Users, Zap, Radio, Database, TrendingUp } from "lucide-react";
+import { Cpu, RefreshCw, AlertTriangle, Clock, Wifi, X, Activity, Users, Zap, Radio, Database, TrendingUp, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import PerformanceCharts from "../components/server/PerformanceCharts";
 import PerformanceForecast from "../components/server/PerformanceForecast";
