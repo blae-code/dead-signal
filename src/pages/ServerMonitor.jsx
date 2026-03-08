@@ -451,7 +451,7 @@ export default function ServerMonitor() {
             className="relative overflow-hidden"
             style={{
               border: `1px solid ${T.border}`,
-              background: "linear-gradient(160deg, #1c1e21 0%, #14161a 100%)",
+              background: "linear-gradient(180deg, rgba(20, 14, 8, 0.95) 0%, rgba(15, 10, 5, 0.98) 100%)",
             }}
           >
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.green}44, transparent)` }} />
