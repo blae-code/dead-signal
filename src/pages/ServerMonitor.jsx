@@ -9,6 +9,7 @@ import LiveUptime from "../components/server/LiveUptime";
 import AlertRulesPanel from "../components/server/AlertRulesPanel";
 import AlertHistoryPanel from "../components/server/AlertHistoryPanel";
 import AdminToolsPanel from "../components/server/AdminToolsPanel";
+import EventFeed from "../components/server/EventFeed";
 import { T } from "@/components/ui/TerminalCard";
 
 const pingColor  = (ms)  => ms === null ? T.textFaint : ms < 80 ? T.green : ms < 200 ? T.gold : T.red;
