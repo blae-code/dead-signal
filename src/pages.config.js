@@ -60,6 +60,7 @@ import MyStats from './pages/MyStats';
 import LootTracker from './pages/LootTracker';
 import DeathMap from './pages/DeathMap';
 import Challenges from './pages/Challenges';
+import LoadoutPlanner from './pages/LoadoutPlanner';
 import __Layout from './Layout.jsx';
 
 
@@ -77,6 +78,7 @@ export const PAGES = {
     "LootTracker": LootTracker,
     "DeathMap": DeathMap,
     "Challenges": Challenges,
+    "LoadoutPlanner": LoadoutPlanner,
 }
 
 export const pagesConfig = {
