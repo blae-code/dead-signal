@@ -230,7 +230,7 @@ export default function ServerMonitor() {
   const rx        = ((status?.networkRxKB ?? 0) / 1024).toFixed(2);
   const tx        = ((status?.networkTxKB ?? 0) / 1024).toFixed(2);
   const healthPct = online ? Math.max(0, 100 - loss - (ping > 200 ? 30 : ping > 80 ? 10 : 0)) : 0;
-  const healthColor = healthPct > 70 ? T.green : healthPct > 40 ? T.amber : T.red;
+  const healthColor = healthPct > 70 ? T.green : healthPct > 40 ? T.orange : T.red;
 
   return (
     <div
