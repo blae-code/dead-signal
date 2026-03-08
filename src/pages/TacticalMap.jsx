@@ -11,6 +11,7 @@ const STATUS_COLORS = { Fresh: T.green, Looted: T.textDim, Unknown: T.amber, Act
 export default function TacticalMap() {
   const canvasRef = useRef(null);
   const [pins, setPins]           = useState([]);
+  const [playerLocs, setPlayerLocs] = useState([]);
   const [placing, setPlacing]     = useState(false);
   const [selectedPin, setSelectedPin] = useState(null);
   const [filterType, setFilterType]   = useState("ALL");
@@ -18,18 +19,62 @@ export default function TacticalMap() {
   const [pendingCoords, setPendingCoords] = useState(null);
   const [showForm, setShowForm]   = useState(false);
   const [user, setUser] = useState(null);
+  const [sharing, setSharing]     = useState(false);
+  const [myCallsign, setMyCallsign] = useState("");
+  const sharingRef = useRef(false);
   const isAdmin = user?.role === "admin";
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(u => {
+      setUser(u);
+      // Try to find callsign from ClanMember
+      if (u) {
+        base44.entities.ClanMember.filter({ user_email: u.email }).then(members => {
+          setMyCallsign(members?.[0]?.callsign || u.full_name || u.email);
+        }).catch(() => setMyCallsign(u.full_name || u.email));
+      }
+    }).catch(() => {});
+
     base44.entities.MapPin.list("-created_date", 100).then(setPins).catch(() => {});
-    const unsub = base44.entities.MapPin.subscribe(ev => {
+    base44.entities.PlayerLocation.list("-timestamp", 50).then(setPlayerLocs).catch(() => {});
+
+    const unsubPins = base44.entities.MapPin.subscribe(ev => {
       if (ev.type === "create") setPins(p => [...p, ev.data]);
       if (ev.type === "update") setPins(p => p.map(x => x.id === ev.id ? ev.data : x));
       if (ev.type === "delete") setPins(p => p.filter(x => x.id !== ev.id));
     });
-    return unsub;
+    const unsubLocs = base44.entities.PlayerLocation.subscribe(ev => {
+      if (ev.type === "create") setPlayerLocs(p => [...p, ev.data]);
+      if (ev.type === "update") setPlayerLocs(p => p.map(x => x.id === ev.id ? ev.data : x));
+      if (ev.type === "delete") setPlayerLocs(p => p.filter(x => x.id !== ev.id));
+    });
+    return () => { unsubPins(); unsubLocs(); };
   }, []);
+
+  // Throttled location broadcast — every 10 seconds while sharing is on
+  useEffect(() => {
+    sharingRef.current = sharing;
+  }, [sharing]);
+
+  useEffect(() => {
+    if (!sharing || !myCallsign) return;
+    const broadcast = () => {
+      if (!sharingRef.current) return;
+      // Use a random position in map space as a placeholder — in a real game this would
+      // come from the game client. Here we store the last manually clicked position or center.
+      // Players can click the map to update their position while sharing is active.
+    };
+    broadcast();
+    const interval = setInterval(broadcast, 10000);
+    return () => clearInterval(interval);
+  }, [sharing, myCallsign]);
+
+  const pushMyLocation = async (x, y) => {
+    if (!myCallsign) return;
+    try {
+      await base44.functions.invoke("updatePlayerLocation", { x, y, callsign: myCallsign, in_vehicle: false });
+    } catch (e) { /* silent */ }
+  };
 
   const handleMapClick = (e) => {
     if (!placing || !isAdmin) return;
