@@ -52,7 +52,7 @@ export default function Dashboard() {
       <StatGrid stats={[
         { label: "ACTIVE OPS",       value: activeMissions, color: T.green,                                      sub: "missions running" },
         { label: "OPERATORS ONLINE", value: activeMembers,  color: T.teal,                                       sub: `of ${members.length} total` },
-        { label: "ALERTS",           value: criticalEvents, color: criticalEvents > 0 ? T.pink : T.textFaint,    sub: criticalEvents > 0 ? "ACTION REQUIRED" : "all clear" },
+        { label: "ALERTS",           value: criticalEvents, color: criticalEvents > 0 ? T.red : T.textFaint,    sub: criticalEvents > 0 ? "ACTION REQUIRED" : "all clear" },
         { label: "TOTAL INVENTORY",  value: totalItems,     color: T.gold,                                       sub: "items tracked" },
       ]} />
 
