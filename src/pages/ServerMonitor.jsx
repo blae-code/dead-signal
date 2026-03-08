@@ -111,7 +111,7 @@ function StatusBeacon({ online, loading }) {
 export default function ServerMonitor() {
   const [events, setEvents]               = useState([]);
   const [consoleLines, setConsoleLines]   = useState([
-    { text: "> DEAD SIGNAL TERMINAL v1.0", color: T.amber },
+    { text: "> DEAD SIGNAL TERMINAL v1.0", color: T.cyan },
     { text: "> Connected to HumanitZ ops center.", color: T.green },
     { text: "> Type HELP for available commands.", color: T.textFaint },
   ]);
