@@ -412,7 +412,7 @@ export default function ServerMonitor() {
             className="relative overflow-hidden"
             style={{
               border: `1px solid ${T.border}`,
-              background: "linear-gradient(160deg, #0d0a07 0%, #080602 100%)",
+              background: "linear-gradient(160deg, #080c10 0%, #060a0e 100%)",
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)",
             }}
           >
@@ -450,7 +450,7 @@ export default function ServerMonitor() {
             className="relative overflow-hidden"
             style={{
               border: `1px solid ${T.border}`,
-              background: "linear-gradient(160deg, #0d0a07 0%, #080602 100%)",
+              background: "linear-gradient(160deg, #080c10 0%, #060a0e 100%)",
             }}
           >
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.green}44, transparent)` }} />
@@ -509,7 +509,7 @@ export default function ServerMonitor() {
           ) : (
             <div
               className="relative flex flex-col items-center justify-center p-8 text-center overflow-hidden"
-              style={{ border: `1px solid ${T.border}`, background: "linear-gradient(160deg, #0d0a07 0%, #080602 100%)", minHeight: "200px" }}
+              style={{ border: `1px solid ${T.border}`, background: "linear-gradient(160deg, #080c10 0%, #060a0e 100%)", minHeight: "200px" }}
             >
               <div style={{ color: T.textFaint, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>// ADMIN ACCESS REQUIRED</div>
               <div style={{ color: T.textFaint, fontSize: "8px", marginTop: "10px", lineHeight: 1.6 }}>Admin tools are only visible to administrators.</div>
