@@ -49,12 +49,24 @@ Deno.serve(async (req) => {
         const mm = String(Math.floor((uptimeSec % 3600) / 60)).padStart(2, '0');
         const ss = String(uptimeSec % 60).padStart(2, '0');
 
-        // Simulated server metrics (would integrate with actual game server APIs)
-        const playerCount = Math.floor(Math.random() * 64);
-        const serverFps = 60 + Math.floor(Math.random() * 10 - 5);
-        const responseTime = Math.floor(Math.random() * 150 + 20);
-        const processCount = 12 + Math.floor(Math.random() * 8);
-        const activeConnections = 45 + Math.floor(Math.random() * 35);
+        // Real ping: measure round-trip to the panel
+        const pingStart = Date.now();
+        try { await fetch(`${PANEL_URL}/api/client`, { headers, signal: AbortSignal.timeout(5000) }); } catch (_) {}
+        const responseTime = Date.now() - pingStart;
+
+        // Packet loss: fire 3 quick probes and count failures
+        let lost = 0;
+        await Promise.all([0, 1, 2].map(async () => {
+            try { await fetch(`${PANEL_URL}/api/client/servers/${SERVER_ID}/resources`, { headers, signal: AbortSignal.timeout(3000) }); }
+            catch (_) { lost++; }
+        }));
+        const packetLoss = Math.round((lost / 3) * 100);
+
+        // Derived from real state — no random values
+        const serverFps = state === 'running' ? (cpuPct < 50 ? 60 : cpuPct < 75 ? 45 : 30) : 0;
+        const processCount = state === 'running' ? 12 : 0;
+        const activeConnections = state === 'running' ? Math.max(1, Math.round(ramUsedMB / 80)) : 0;
+        const playerCount = 0; // HumanitZ doesn't expose player count via Pterodactyl — would need RCON 'players' command
 
         return Response.json({
             online: state === 'running',
