@@ -58,6 +58,7 @@ import Dashboard from './pages/Dashboard';
 import PlayerProfile from './pages/PlayerProfile';
 import MyStats from './pages/MyStats';
 import LootTracker from './pages/LootTracker';
+import DeathMap from './pages/DeathMap';
 import __Layout from './Layout.jsx';
 
 
@@ -73,6 +74,7 @@ export const PAGES = {
     "PlayerProfile": PlayerProfile,
     "MyStats": MyStats,
     "LootTracker": LootTracker,
+    "DeathMap": DeathMap,
 }
 
 export const pagesConfig = {
