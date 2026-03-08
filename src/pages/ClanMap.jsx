@@ -11,6 +11,7 @@ export default function ClanMap() {
   const [broadcastMsg, setBroadcastMsg] = useState('');
   const [broadcastType, setBroadcastType] = useState('tactical');
   const [selectedSquad, setSelectedSquad] = useState(null);
+  const [mapImageUrl, setMapImageUrl] = useState(null);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -75,14 +76,31 @@ export default function ClanMap() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4" style={{ height: 'calc(100vh - 140px)' }}>
         {/* Map */}
-        <div className="lg:col-span-3" style={{ border: `1px solid ${T.border}`, background: T.bg1, overflow: 'hidden' }}>
-          <WebGLMapRenderer 
-            positions={positions}
-            overlays={overlays}
-            broadcasts={broadcasts}
-            mapWidth={100}
-            mapHeight={100}
-          />
+        <div className="lg:col-span-3 space-y-2" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ border: `1px solid ${T.border}`, background: T.bg1, overflow: 'hidden', flex: 1, minHeight: '400px' }}>
+            <WebGLMapRenderer 
+              positions={positions}
+              overlays={overlays}
+              broadcasts={broadcasts}
+              mapWidth={100}
+              mapHeight={100}
+              mapImageUrl={mapImageUrl}
+            />
+          </div>
+          <div style={{ border: `1px solid ${T.border}`, padding: '12px', background: T.bg1 }}>
+            <Field label="MAP IMAGE URL">
+              <input
+                type="text"
+                value={mapImageUrl || ''}
+                onChange={(e) => setMapImageUrl(e.target.value)}
+                placeholder="Paste your game map image URL here..."
+                style={{ ...inputStyle, width: '100%', fontSize: '11px' }}
+              />
+            </Field>
+            <div style={{ fontSize: '8px', color: T.textFaint, marginTop: '6px' }}>
+              Use a 1:1 aspect ratio image. Coordinates: (0,0) = bottom-left, ({`${100},${100}`}) = top-right
+            </div>
+          </div>
         </div>
 
         {/* Sidebar */}
