@@ -162,54 +162,95 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Top bar */}
       <header
-        className="border-b flex items-center justify-between px-4 py-2 z-50 relative overflow-hidden"
-        style={{ borderColor: C.border, background: "linear-gradient(135deg, rgba(20, 15, 10, 0.95) 0%, rgba(30, 20, 15, 0.95) 100%)" }}>
+        className="border-b z-50 relative overflow-hidden"
+        style={{ borderColor: C.border, background: "linear-gradient(135deg, rgba(15, 10, 6, 0.98) 0%, rgba(25, 17, 10, 0.98) 100%)" }}>
 
-        {/* Subtle scan line */}
+        {/* Scan line shimmer */}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
           background: `linear-gradient(90deg, transparent 0%, ${C.scan} 50%, transparent 100%)`,
           animation: "header-scan 8s linear infinite",
           backgroundSize: "200% 100%"
         }} />
+        {/* Bottom accent line */}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${C.accent}33, ${C.accent}66, ${C.accent}33, transparent)`, pointerEvents: "none" }} />
 
-        <div className="flex items-center gap-3 relative">
-          <button className="md:hidden" style={{ color: C.text }} onClick={() => setMobileOpen(!mobileOpen)}>
-            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
-          <div className="flex items-center gap-3">
-            <Skull size={14} style={{ color: C.accent }} />
-            <span className="font-bold tracking-widest" style={{ color: C.accent, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
-              DEAD SIGNAL
-            </span>
-            <span style={{ color: C.border }}>|</span>
-            <span className="hidden sm:block text-xs" style={{ color: C.textDim, letterSpacing: "0.15em" }}>HUMANITZ OPS CENTER</span>
+        {/* Main header row */}
+        <div className="flex items-center gap-0 relative" style={{ height: "44px" }}>
+
+          {/* ── LOGO BLOCK ── */}
+          <div className="flex items-center gap-3 px-4 h-full border-r flex-shrink-0" style={{ borderColor: C.border }}>
+            <button className="md:hidden" style={{ color: C.text }} onClick={() => setMobileOpen(!mobileOpen)}>
+              {mobileOpen ? <X size={16} /> : <Menu size={16} />}
+            </button>
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center justify-center" style={{ width: "22px", height: "22px", border: `1px solid ${C.accent}44`, background: `${C.accent}11` }}>
+                <Skull size={12} style={{ color: C.accent }} />
+              </div>
+              <div className="flex flex-col" style={{ lineHeight: 1.15 }}>
+                <span style={{ color: C.accent, fontFamily: "'Orbitron', monospace", fontSize: "10px", fontWeight: "bold", letterSpacing: "0.25em" }}>
+                  DEAD SIGNAL
+                </span>
+                <span className="hidden sm:block" style={{ color: C.textFaint, fontSize: "7px", letterSpacing: "0.2em" }}>HUMANITZ OPS CENTER</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Center: Command Prompt Terminal */}
-        <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-          <HeaderCommandPrompt currentPageName={currentPageName} inGameTime={inGameTime} />
-        </div>
-
-        <div className="hidden sm:flex items-center gap-1 text-xs relative flex-1">
-          {/* Live indicator dot */}
-          <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: C.accent, flexShrink: 0 }} />
-          <div className="flex flex-col" style={{ lineHeight: 1.3 }}>
-            <span style={{ color: C.active, fontFamily: "'Orbitron', monospace", fontSize: "12px", letterSpacing: "0.12em" }}>
+          {/* ── CLOCK BLOCK ── */}
+          <div className="hidden sm:flex flex-col justify-center px-4 h-full border-r flex-shrink-0" style={{ borderColor: C.border, minWidth: "130px" }}>
+            <span style={{ color: C.active, fontFamily: "'Orbitron', monospace", fontSize: "13px", letterSpacing: "0.1em", lineHeight: 1 }}>
               {timeStr}
             </span>
-            <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.15em" }}>
-              {dateStr} · AMERICA/VANCOUVER
+            <span style={{ color: C.textFaint, fontSize: "7px", letterSpacing: "0.15em", marginTop: "2px" }}>
+              {dateStr} · VANCOUVER
             </span>
           </div>
-        </div>
 
-        {/* World Status panel (expandable) */}
-        <div className="hidden xl:flex flex-1 justify-center">
-          <div style={{ width: "400px" }}>
-            <WorldStatus weather={weather} />
+          {/* ── COMMAND PALETTE CONTAINER ── */}
+          <div className="hidden md:flex items-center justify-center flex-1 px-4 h-full">
+            <div
+              className="flex items-center w-full"
+              style={{
+                maxWidth: "560px",
+                border: `1px solid ${C.border}`,
+                background: "rgba(10,7,4,0.7)",
+                boxShadow: `inset 0 1px 0 ${C.accent}11, 0 0 0 1px rgba(0,0,0,0.4)`,
+              }}
+            >
+              {/* Left label */}
+              <div className="flex items-center gap-1.5 px-2.5 border-r h-full flex-shrink-0" style={{ borderColor: C.border }}>
+                <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: C.green }} />
+                <span style={{ color: C.textFaint, fontSize: "7px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>OPS</span>
+              </div>
+              <div className="flex-1">
+                <HeaderCommandPrompt currentPageName={currentPageName} inGameTime={inGameTime} />
+              </div>
+              {/* Shortcut hint */}
+              <div className="hidden lg:flex items-center px-2.5 border-l h-full flex-shrink-0" style={{ borderColor: C.border }}>
+                <span style={{ color: C.textFaint, fontSize: "7px", fontFamily: "'Share Tech Mono', monospace", letterSpacing: "0.1em" }}>[`]</span>
+              </div>
+            </div>
           </div>
+
+          {/* ── RIGHT BLOCK: WorldStatus + net status ── */}
+          <div className="hidden lg:flex items-center h-full border-l flex-shrink-0" style={{ borderColor: C.border }}>
+            <div className="px-3">
+              <WorldStatus weather={weather} />
+            </div>
+          </div>
+
+          {/* ── NET STATUS DOT (always visible) ── */}
+          <div className="flex items-center gap-2 px-3 h-full border-l flex-shrink-0" style={{ borderColor: C.border }}>
+            <motion.div
+              animate={{ scale: online ? [1, 1.15, 1] : 1 }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+              style={{ width: "6px", height: "6px", borderRadius: "50%", background: online ? "#39ff14" : "#ff2020", boxShadow: `0 0 6px ${online ? "#39ff14" : "#ff2020"}` }}
+            />
+            <span className="hidden sm:block" style={{ color: online ? "#39ff14" : "#ff2020", fontSize: "7px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.15em" }}>
+              {online ? "LIVE" : "DISC"}
+            </span>
+          </div>
+
         </div>
       </header>
 
