@@ -119,6 +119,10 @@ export default function ClanRoster() {
               <span className="text-xs" style={{ color: T.textDim }}>{m.deaths > 0 ? (m.kills / m.deaths).toFixed(1) : m.kills}</span>
               <span className="text-xs" style={{ color: T.textFaint }}>{m.playtime_hours || 0}h</span>
               <div className="flex justify-end gap-1">
+                <Link to={createPageUrl(`PlayerProfile?id=${m.id}`)} onClick={e => e.stopPropagation()}
+                  className="p-1 hover:opacity-80" title="View Profile" style={{ textDecoration: "none" }}>
+                  <ExternalLink size={10} style={{ color: T.cyan }} />
+                </Link>
                 <button onClick={e => { e.stopPropagation(); handleEdit(m); }} className="p-1 hover:opacity-80">
                   <Edit2 size={10} style={{ color: T.textDim }} />
                 </button>
