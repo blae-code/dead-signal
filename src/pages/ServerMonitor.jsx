@@ -416,7 +416,7 @@ export default function ServerMonitor() {
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)",
             }}
           >
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.amber}44, transparent)` }} />
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.steel}44, transparent)` }} />
             <div className="px-4 py-2.5 border-b flex items-center gap-2" style={{ borderColor: T.border }}>
               <Database size={9} style={{ color: T.textFaint }} />
               <span style={{ color: T.textFaint, fontSize: "8.5px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>RESOURCE UTILIZATION</span>
@@ -424,7 +424,7 @@ export default function ServerMonitor() {
             <div className="p-4 space-y-4">
               <GaugeBar label="CPU" value={cpu} max={100} unit="%" color={cpuColor(cpu)} />
               <GaugeBar label="RAM" value={ram / 1024} max={32} unit=" GB" color={ramColor(ram)} />
-              <GaugeBar label="DISK" value={disk / 1024} max={1024} unit=" GB" color={T.amber} />
+              <GaugeBar label="DISK" value={disk / 1024} max={1024} unit=" GB" color={T.gold} />
 
               <div className="grid grid-cols-2 gap-4 pt-2 border-t" style={{ borderColor: T.border + "88" }}>
                 <div className="relative p-3" style={{ border: `1px solid ${T.cyan}22`, background: `${T.cyan}08` }}>
