@@ -23,7 +23,7 @@ function StatPill({ icon: Icon, label, value, sub, color }) {
       className="relative flex flex-col gap-1.5 p-3 overflow-hidden"
       style={{
         border: `1px solid ${T.border}`,
-        background: "linear-gradient(160deg, #0d0a07 0%, #0a0704 100%)",
+        background: "linear-gradient(160deg, #080c10 0%, #060a0e 100%)",
         boxShadow: `inset 0 1px 0 ${color}18`,
       }}
     >
