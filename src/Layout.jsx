@@ -218,7 +218,7 @@ export default function Layout({ children, currentPageName }) {
         {/* World Status panel (expandable) */}
         <div className="hidden xl:flex flex-1 justify-center">
           <div style={{ width: "400px" }}>
-            <WorldStatus inGameTime={inGameTime} weather={weather} />
+            <WorldStatus weather={weather} />
           </div>
         </div>
       </header>
