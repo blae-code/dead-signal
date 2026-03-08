@@ -17,9 +17,17 @@ export default function Dashboard() {
   const [events,        setEvents]        = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [user,          setUser]          = useState(null);
+  const [myMember,      setMyMember]      = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(u => {
+      setUser(u);
+      if (u?.email) {
+        base44.entities.ClanMember.filter({ user_email: u.email }, "-created_date", 1)
+          .then(res => setMyMember(res?.[0] || null))
+          .catch(() => {});
+      }
+    }).catch(() => {});
     base44.entities.ClanMember.list("-created_date", 20).then(setMembers).catch(() => {});
     base44.entities.Mission.list("-created_date", 20).then(setMissions).catch(() => {});
     base44.entities.InventoryItem.list("-created_date", 50).then(setItems).catch(() => {});
