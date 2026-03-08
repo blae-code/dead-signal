@@ -392,13 +392,13 @@ export default function ServerMonitor() {
       {/* ── STAT PILLS ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
         <StatPill icon={Users}    label="PLAYERS"     value={statusLoading ? "..." : `${players}/64`} sub={`${Math.round(players / 0.64)}% capacity`} color={T.cyan} />
-        <StatPill icon={Zap}      label="SERVER FPS"  value={statusLoading ? "..." : fps} sub={fps >= 59 ? "OPTIMAL" : fps > 0 ? "DEGRADED" : "N/A"} color={fps >= 59 ? T.green : T.amber} />
+        <StatPill icon={Zap}      label="SERVER FPS"  value={statusLoading ? "..." : fps} sub={fps >= 59 ? "OPTIMAL" : fps > 0 ? "DEGRADED" : "N/A"} color={fps >= 59 ? T.green : T.orange} />
         <StatPill icon={Wifi}     label="PING"        value={statusLoading ? "..." : ping === null ? "---" : `${ping}ms`} sub={ping === null ? "NO DATA" : ping < 80 ? "EXCELLENT" : "FAIR"} color={pingColor(ping)} />
         <StatPill icon={Radio}    label="PKT LOSS"    value={statusLoading ? "..." : `${loss}%`} sub={loss === 0 ? "CLEAN" : "DEGRADED"} color={lossColor(loss)} />
         <StatPill icon={Cpu}      label="CPU"         value={statusLoading ? "..." : `${cpu.toFixed(0)}%`} sub={cpu > 80 ? "CRITICAL" : cpu > 60 ? "ELEVATED" : "NORMAL"} color={cpuColor(cpu)} />
         <StatPill icon={Database} label="RAM"         value={statusLoading ? "..." : `${(ram / 1024).toFixed(1)}GB`} sub={`${(ram / 32768 * 100).toFixed(0)}% of 32GB`} color={ramColor(ram)} />
-        <StatPill icon={Database} label="DISK"        value={statusLoading ? "..." : `${(disk / 1024).toFixed(0)}GB`} sub="used" color={T.amber} />
-        <StatPill icon={Activity} label="NETWORK"     value={statusLoading ? "..." : `↓${rx}`} sub={`↑${tx} MB/s`} color={T.cyan} />
+        <StatPill icon={Database} label="DISK"        value={statusLoading ? "..." : `${(disk / 1024).toFixed(0)}GB`} sub="used" color={T.gold} />
+        <StatPill icon={Activity} label="NETWORK"     value={statusLoading ? "..." : `↓${rx}`} sub={`↑${tx} MB/s`} color={T.teal} />
       </div>
 
       {/* ── MAIN 3-COLUMN GRID ────────────────────────────────────────────── */}
