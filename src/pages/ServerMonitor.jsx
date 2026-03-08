@@ -46,6 +46,9 @@ export default function ServerMonitor() {
   const [alertRefreshTick, setAlertRefreshTick] = useState(0);
   const [showForecast, setShowForecast] = useState(false);
   const [rconHistory, setRconHistory] = useState([]);
+  const [lastPolled, setLastPolled] = useState(null);
+  const [downtimeAlert, setDowntimeAlert] = useState(false);
+  const prevOnlineRef = useRef(null);
   const logRef = useRef(null);
 
   const fetchStatus = async () => {
