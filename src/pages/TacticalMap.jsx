@@ -125,21 +125,7 @@ export default function TacticalMap() {
     } catch (_) {}
   };
 
-  // ── Map click ─────────────────────────────────────────────────────────────
-  const handleMapClick = (e) => {
-    if (!canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = parseFloat(((e.clientX - rect.left) / rect.width * 100).toFixed(2));
-    const y = parseFloat(((e.clientY - rect.top) / rect.height * 100).toFixed(2));
 
-    if (sharing) { pushMyLocation(x, y); return; }
-    if (routeMode) { setRoutePoints(p => [...p, { x, y }]); return; }
-    if (placing && isAdmin) {
-      setPendingCoords({ x, y });
-      setShowForm(true);
-      setPlacing(false);
-    }
-  };
 
   // ── Save pin ──────────────────────────────────────────────────────────────
   const handleSavePin = async () => {
@@ -235,11 +221,7 @@ export default function TacticalMap() {
         />
       </PageHeader>
 
-      {/* Status banners */}
-      {placing && <div className="text-xs px-3 py-2 border" style={{ borderColor: T.amber + "88", color: T.amber, background: T.amber + "0d" }}>⚠ CLICK MAP TO PLACE PIN</div>}
-      {sharing && <div className="text-xs px-3 py-2 border" style={{ borderColor: T.green + "88", color: T.green, background: T.green + "0d" }}>● LOCATION SHARING ACTIVE — CLICK MAP TO UPDATE YOUR POSITION</div>}
-      {routeMode && <div className="text-xs px-3 py-2 border" style={{ borderColor: T.cyan + "88", color: T.cyan, background: T.cyan + "0d" }}>◈ ROUTE MODE — CLICK MAP TO ADD WAYPOINTS, THEN SAVE ROUTE IN SIDEBAR</div>}
-      {showFog && isAdmin && <div className="text-xs px-3 py-2 border" style={{ borderColor: T.textDim + "44", color: T.textDim, background: "rgba(0,0,0,0.3)" }}>FOG ACTIVE — CLICK DARK SECTORS TO CLEAR THEM</div>}
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Point Atlas Map Iframe */}
