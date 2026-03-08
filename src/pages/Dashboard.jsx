@@ -62,7 +62,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2 space-y-4">
 
           {/* Active Missions */}
-          <Panel title="ACTIVE MISSIONS" titleColor={T.pink}
+          <Panel title="ACTIVE MISSIONS" titleColor={T.red}
             headerRight={
               <Link to={createPageUrl("Missions")} className="text-xs" style={{ color: T.textFaint, fontSize: "9px", letterSpacing: "0.1em", textDecoration: "none" }}>
                 VIEW ALL →
