@@ -58,9 +58,11 @@ export default function Missions() {
           <option value="ALL">ALL STATUS</option>
           {STATUSES.map(s => <option key={s}>{s}</option>)}
         </select>
-        <ActionBtn color={T.red} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
-          <Plus size={10} /> NEW MISSION
-        </ActionBtn>
+        {isAdmin && (
+          <ActionBtn color={T.red} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
+            <Plus size={10} /> NEW MISSION
+          </ActionBtn>
+        )}
       </PageHeader>
 
       <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
@@ -74,7 +76,7 @@ export default function Missions() {
         ))}
       </div>
 
-      {showForm && (
+      {showForm && isAdmin && (
         <FormPanel title={editing ? "EDIT MISSION" : "NEW MISSION BRIEFING"} titleColor={T.red} onClose={() => { setShowForm(false); setEditing(null); }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Field label="MISSION TITLE *">
@@ -146,6 +148,7 @@ export default function Missions() {
                     {m.reward          && <div><span style={{ color: T.textFaint }}>REWARD: </span><span style={{ color: T.amber }}>{m.reward}</span></div>}
                     {m.deadline        && <div><span style={{ color: T.textFaint }}>DEADLINE: </span><span style={{ color: T.red }}>{new Date(m.deadline).toLocaleDateString()}</span></div>}
                   </div>
+                  {isAdmin && (
                   <div className="flex flex-wrap gap-1 pt-2 border-t" style={{ borderColor: T.border }}>
                     {STATUSES.map(s => (
                       <button key={s} onClick={() => handleStatusChange(m.id, s)}
@@ -163,6 +166,7 @@ export default function Missions() {
                       DELETE
                     </button>
                   </div>
+                  )}
                 </div>
               )}
             </div>
