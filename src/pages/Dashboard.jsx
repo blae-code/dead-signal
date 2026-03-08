@@ -163,10 +163,10 @@ export default function Dashboard() {
           <Panel title="MODULES">
             <div className="grid grid-cols-2 gap-px" style={{ background: T.border }}>
               {[
-                { label: "TACTICAL MAP",  page: "TacticalMap",   icon: Activity, color: T.cyan },
-                { label: "INVENTORY",     page: "Inventory",      icon: Package,  color: T.green },
+                { label: "TACTICAL MAP",  page: "TacticalMap",   icon: Activity, color: T.gold },
+                { label: "INVENTORY",     page: "Inventory",      icon: Package,  color: T.orange },
                 { label: "SERVER",        page: "ServerMonitor",  icon: Zap,      color: T.cyan },
-                { label: "AI AGENT",      page: "AIAgent",        icon: Skull,    color: T.green },
+                { label: "AI AGENT",      page: "AIAgent",        icon: Skull,    color: T.purple },
               ].map(({ label, page, icon: Icon, color }) => (
                 <Link key={page} to={createPageUrl(page)}
                   className="flex flex-col items-center justify-center gap-2 py-4 transition-opacity hover:opacity-80"
