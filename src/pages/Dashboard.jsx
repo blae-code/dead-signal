@@ -116,10 +116,10 @@ export default function Dashboard() {
 
       <StatGrid
         stats={[
-          { label: "ACTIVE OPS", value: activeMissions, color: T.green },
-          { label: "OPERATORS ONLINE", value: activeMembers, color: T.cyan },
-          { label: "ALERTS", value: criticalEvents, color: criticalEvents > 0 ? T.red : T.textDim },
-          { label: "TOTAL INVENTORY", value: totalItems, color: T.amber },
+          { label: "ACTIVE OPS", value: activeMissions, color: PAGE.secondary },
+          { label: "OPERATORS ONLINE", value: activeMembers, color: PAGE.accent },
+          { label: "ALERTS", value: criticalEvents, color: criticalEvents > 0 ? CORE.critical : T.textDim },
+          { label: "TOTAL INVENTORY", value: totalItems, color: PAGE.info },
         ]}
       />
 
