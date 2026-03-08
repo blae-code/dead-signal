@@ -47,7 +47,7 @@ export default function ClanRoster() {
     : "—";
 
   return (
-    <div className="p-4 space-y-4 max-w-7xl mx-auto">
+    <div className="p-4 space-y-4 max-w-7xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Users} title="CLAN ROSTER" color={T.amber}>
         {isAdmin && (
           <ActionBtn color={T.green} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>

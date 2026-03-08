@@ -118,7 +118,7 @@ export default function SquadVitalsMonitor() {
   );
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-4 space-y-4 max-w-7xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Heart} title="SQUAD VITALS" color={T.green}>
         <span style={{ color: T.textFaint, fontSize: "8px" }}>
           {vitalsLog.reduce((sum, v) => sum + v.members.length, 0)} ACTIVE · {criticalMembers.length} CRITICAL

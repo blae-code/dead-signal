@@ -64,7 +64,7 @@ export default function AIAgent() {
   });
 
   return (
-    <div className="p-4 flex flex-col max-w-5xl mx-auto" style={{ minHeight: "calc(100vh - 80px)" }}>
+    <div className="p-4 flex flex-col max-w-5xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={AlertTriangle} title="AI AGENT" color={T.cyan}>
         <button onClick={() => setMessages([{ role: "assistant", content: "> TERMINAL CLEARED\n> READY FOR NEW QUERY." }])}
           className="flex items-center gap-1 text-xs px-2 py-1 border transition-opacity hover:opacity-70"

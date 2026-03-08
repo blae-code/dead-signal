@@ -220,7 +220,7 @@ export default function TacticalMap() {
   const filteredPins = filterType === "ALL" ? pins : pins.filter(p => p.type === filterType);
 
   return (
-    <div className="p-4 space-y-3 max-w-7xl mx-auto">
+    <div className="p-4 space-y-3 max-w-7xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Map} title="TACTICAL MAP" color={T.cyan}>
         <MapToolbar
           filterType={filterType} onFilterChange={setFilterType}

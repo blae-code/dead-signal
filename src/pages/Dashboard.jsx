@@ -41,7 +41,7 @@ export default function Dashboard() {
   const totalItems      = items.reduce((a, i) => a + (i.quantity || 1), 0);
 
   return (
-    <div className="p-4 space-y-4 max-w-7xl mx-auto">
+    <div className="p-4 space-y-4 max-w-7xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Terminal} title="COMMAND HQ" color={T.amber}>
         <span className="text-xs" style={{ color: T.textFaint, fontSize: "9px", letterSpacing: "0.15em" }}>
           {user ? `OPERATOR: ${myMember?.callsign || user.full_name || user.email}` : "AUTHENTICATING..."}

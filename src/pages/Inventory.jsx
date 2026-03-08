@@ -56,7 +56,7 @@ export default function Inventory() {
   const byCategory  = CATEGORIES.reduce((acc, c) => { acc[c] = items.filter(i => i.category === c).length; return acc; }, {});
 
   return (
-    <div className="p-4 space-y-4 max-w-6xl mx-auto">
+    <div className="p-4 space-y-4 max-w-6xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Package} title="INVENTORY" color={T.green}>
         {isAdmin && (
           <ActionBtn color={T.green} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>

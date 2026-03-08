@@ -51,7 +51,7 @@ export default function Missions() {
   const filtered = filterStatus === "ALL" ? missions : missions.filter(m => m.status === filterStatus);
 
   return (
-    <div className="p-4 space-y-4 max-w-5xl mx-auto">
+    <div className="p-4 space-y-4 max-w-5xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Crosshair} title="MISSION BOARD" color={T.red}>
         <select className="text-xs px-2 py-1.5 border outline-none" style={{ ...selectStyle, minWidth: "110px" }}
           value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>

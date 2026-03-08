@@ -52,7 +52,7 @@ export default function Intel() {
   const sorted   = [...filtered.filter(a => a.pinned), ...filtered.filter(a => !a.pinned)];
 
   return (
-    <div className="p-4 space-y-4 max-w-4xl mx-auto">
+    <div className="p-4 space-y-4 max-w-4xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Radio} title="INTEL FEED" color={T.amber}>
         {isAdmin && (
           <ActionBtn color={T.amber} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
