@@ -645,7 +645,7 @@ export default function Layout({ children, currentPageName }) {
         {/* Page content */}
         <main
           className="flex-1 overflow-auto"
-          style={{ background: "linear-gradient(160deg, #100c08 0%, #1a1008 60%, #1c1408 100%)" }}
+          style={{ background: "linear-gradient(160deg, #181a1c 0%, #111315 100%)" }}
         >
           {children}
         </main>
