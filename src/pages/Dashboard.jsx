@@ -110,7 +110,7 @@ export default function Dashboard() {
           </Panel>
 
           {/* Intel / Announcements */}
-          <Panel title="LATEST INTEL" titleColor={T.amber}
+          <Panel title="LATEST INTEL" titleColor={T.gold}
             headerRight={
               <Link to={createPageUrl("Intel")} className="text-xs" style={{ color: T.textFaint, fontSize: "9px", textDecoration: "none" }}>
                 FULL FEED →
