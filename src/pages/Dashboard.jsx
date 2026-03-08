@@ -44,7 +44,7 @@ export default function Dashboard() {
     <div className="p-4 space-y-4 max-w-7xl mx-auto">
       <PageHeader icon={Terminal} title="COMMAND HQ" color={T.amber}>
         <span className="text-xs" style={{ color: T.textFaint, fontSize: "9px", letterSpacing: "0.15em" }}>
-          {user ? `OPERATOR: ${user.full_name || user.email}` : "AUTHENTICATING..."}
+          {user ? `OPERATOR: ${myMember?.callsign || user.full_name || user.email}` : "AUTHENTICATING..."}
         </span>
       </PageHeader>
 
