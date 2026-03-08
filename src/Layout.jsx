@@ -193,22 +193,12 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         <div className="hidden sm:flex items-center gap-1 text-xs relative flex-1">
-          {/* Blinking cursor beacon */}
-          <motion.div
-            animate={{ opacity: [1, 0, 1] }}
-            transition={{ duration: 1, repeat: Infinity }}
-            style={{ width: "5px", height: "5px", borderRadius: "50%", background: C.accent, flexShrink: 0 }}
-          />
+          {/* Live indicator dot */}
+          <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: C.accent, flexShrink: 0 }} />
           <div className="flex flex-col" style={{ lineHeight: 1.3 }}>
-            <motion.span
-              key={timeStr}
-              initial={{ opacity: 0.4 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-              style={{ color: C.active, fontFamily: "'Orbitron', monospace", fontSize: "12px", letterSpacing: "0.12em" }}
-            >
+            <span style={{ color: C.active, fontFamily: "'Orbitron', monospace", fontSize: "12px", letterSpacing: "0.12em" }}>
               {timeStr}
-            </motion.span>
+            </span>
             <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.15em" }}>
               {dateStr} · AMERICA/VANCOUVER
             </span>
