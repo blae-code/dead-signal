@@ -105,11 +105,12 @@ function EkgCanvas({ data, dataKey, color, height = 90 }) {
 }
 
 // ── Chart card ────────────────────────────────────────────────────────────────
-function ChartCard({ title, data, dataKey, color, unit, threshold }) {
+function ChartCard({ title, data, dataKey, color, unit, threshold, maxValue }) {
   const latest = data.length > 0 ? data[data.length - 1][dataKey] : 0;
+  const thresholdValue = threshold || maxValue;
   const latestColor =
-    threshold && latest > threshold * 0.9 ? T.red :
-    threshold && latest > threshold * 0.7 ? T.amber :
+    thresholdValue && latest > thresholdValue * 0.9 ? T.red :
+    thresholdValue && latest > thresholdValue * 0.7 ? T.amber :
     color;
 
   return (
