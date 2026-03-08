@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Zap, Terminal, Users, Shield, Send, ChevronDown, ChevronRight, Loader } from "lucide-react";
 import { T } from "@/components/ui/TerminalCard";
+import RconPresetsPanel from "./RconPresetsPanel";
 
 // ── Collapsible section ───────────────────────────────────────────────────────
 function ToolSection({ title, color, icon: Icon, children, defaultOpen = false }) {
