@@ -59,6 +59,7 @@ import PlayerProfile from './pages/PlayerProfile';
 import MyStats from './pages/MyStats';
 import LootTracker from './pages/LootTracker';
 import DeathMap from './pages/DeathMap';
+import Challenges from './pages/Challenges';
 import __Layout from './Layout.jsx';
 
 
@@ -75,6 +76,7 @@ export const PAGES = {
     "MyStats": MyStats,
     "LootTracker": LootTracker,
     "DeathMap": DeathMap,
+    "Challenges": Challenges,
 }
 
 export const pagesConfig = {
