@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Map, Plus, Trash2, X, Save } from "lucide-react";
+import { Map, Plus, Trash2, X, Save, Radio, RadioTower } from "lucide-react";
 import { T, PageHeader, Panel, FormPanel, Field, ActionBtn, EmptyState, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
 
 const PIN_TYPES = ["Loot Cache","Safe House","Danger Zone","Resource Node","Enemy Sighting","Clan Base","Vehicle Spawn","Objective","Other"];
