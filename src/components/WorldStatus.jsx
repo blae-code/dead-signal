@@ -68,16 +68,17 @@ export default function WorldStatus({ weather }) {
 
   return (
     <div className="flex items-center gap-4 px-2">
-      {/* In-game time */}
-      <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
-        <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>GAME TIME</span>
-        <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
-          {inGameTime.hour}:{inGameTime.min}
-          <span style={{ color: inGameTime.isDaytime ? "#ffb000" : "#00e5ff", fontSize: "8px", marginLeft: "4px" }}>
-            {inGameTime.isDaytime ? "☀" : "☾"}
-          </span>
-        </span>
-      </div>
+      {/* In-game time & day */}
+       <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
+         <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>GAME TIME</span>
+         <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
+           {inGameTime.hour}:{inGameTime.min}
+           <span style={{ color: inGameTime.isDaytime ? "#ffb000" : "#00e5ff", fontSize: "8px", marginLeft: "4px" }}>
+             {inGameTime.isDaytime ? "☀" : "☾"}
+           </span>
+         </span>
+         <span style={{ color: C.textFaint, fontSize: "7px", letterSpacing: "0.1em", marginTop: "2px" }}>DAY {inGameTime.day}</span>
+       </div>
 
       <span style={{ color: C.border, fontSize: "16px" }}>|</span>
 
