@@ -38,18 +38,22 @@ const navSections = [
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const C = {
-  text:       "#e0d4c0",
-  textDim:    "#b8a890",
-  textFaint:  "#7a6a5a",
-  border:     "#2e1f0f",
-  borderBright:"#4a3020",
-  bg:         "#0c0806",
-  bgNav:      "#0a0704",
-  accent:     "#c49a14",
-  accentDim:  "#7a5a08",
-  green:      "#39ff14",
-  red:        "#ff3030",
-  cyan:       "#00e5ff",
+  text:        "#e8dcc8",
+  textDim:     "#c0aa88",
+  textFaint:   "#7a6a52",
+  border:      "#2a1e10",
+  borderBright:"#4e3a22",
+  bg:          "#0d0a07",
+  bgNav:       "#0a0704",
+  accent:      "#ffaa00",
+  accentDim:   "#7a5800",
+  green:       "#30ff60",
+  red:         "#ff2828",
+  cyan:        "#00e8ff",
+  purple:      "#b060ff",
+  teal:        "#00c8a0",
+  pink:        "#ff3090",
+  gold:        "#e8b800",
 };
 
 export default function Layout({ children, currentPageName }) {
