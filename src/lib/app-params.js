@@ -1,6 +1,36 @@
 const isNode = typeof window === 'undefined';
-const windowObj = isNode ? { localStorage: new Map() } : window;
-const storage = windowObj.localStorage;
+
+const createMemoryStorage = () => {
+	const memory = new Map();
+	return {
+		getItem: (key) => (memory.has(key) ? memory.get(key) : null),
+		setItem: (key, value) => {
+			memory.set(key, String(value));
+		},
+		removeItem: (key) => {
+			memory.delete(key);
+		},
+	};
+};
+
+const memoryStorage = createMemoryStorage();
+
+const resolveStorage = () => {
+	if (isNode) {
+		return memoryStorage;
+	}
+	try {
+		const storage = window.localStorage;
+		const probeKey = "__base44_storage_probe__";
+		storage.setItem(probeKey, "1");
+		storage.removeItem(probeKey);
+		return storage;
+	} catch {
+		return memoryStorage;
+	}
+};
+
+const storage = resolveStorage();
 
 const toSnakeCase = (str) => {
 	return str.replace(/([A-Z])/g, '_$1').toLowerCase();
@@ -14,10 +44,14 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
 	const urlParams = new URLSearchParams(window.location.search);
 	const searchParam = urlParams.get(paramName);
 	if (removeFromUrl) {
-		urlParams.delete(paramName);
-		const newUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ""
-			}${window.location.hash}`;
-		window.history.replaceState({}, document.title, newUrl);
+		try {
+			urlParams.delete(paramName);
+			const newUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ""
+				}${window.location.hash}`;
+			window.history.replaceState({}, document.title, newUrl);
+		} catch {
+			// Ignore URL mutation issues in restricted preview environments.
+		}
 	}
 	if (searchParam) {
 		storage.setItem(storageKey, searchParam);

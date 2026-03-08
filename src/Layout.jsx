@@ -106,7 +106,7 @@ const normalizeNavSections = (sections) => (
 
 export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [online, setOnline] = useState(navigator.onLine);
+  const [online, setOnline] = useState(() => (typeof navigator !== "undefined" ? navigator.onLine : true));
   const [weather, setWeather] = useState(null);
   const animationEnabled = useAnimationEnabled();
   const runtimeConfig = useRuntimeConfig();

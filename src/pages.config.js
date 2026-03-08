@@ -104,7 +104,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "ServerMonitor",
+    mainPage: "Dashboard",
     Pages: PAGES,
     Layout: __Layout,
 };
@@ -112,6 +112,7 @@ export const pagesConfig = {
 export const preloadPage = (pageKey) => {
     const Page = PAGES[pageKey];
     if (Page?.preload) {
-        Page.preload();
+        return Promise.resolve(Page.preload()).catch(() => null);
     }
+    return Promise.resolve(null);
 };
