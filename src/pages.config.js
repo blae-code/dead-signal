@@ -57,6 +57,7 @@ import TacticalMap from './pages/TacticalMap';
 import Dashboard from './pages/Dashboard';
 import PlayerProfile from './pages/PlayerProfile';
 import MyStats from './pages/MyStats';
+import LootTracker from './pages/LootTracker';
 import __Layout from './Layout.jsx';
 
 
@@ -71,6 +72,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "PlayerProfile": PlayerProfile,
     "MyStats": MyStats,
+    "LootTracker": LootTracker,
 }
 
 export const pagesConfig = {
