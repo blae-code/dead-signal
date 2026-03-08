@@ -108,6 +108,7 @@ const readFunctionContract = (root, functionId) => {
     hasRequireMethod: /requireMethod\s*\(/.test(source),
     hasRequireAdmin: /requireAdmin\s*\(/.test(source),
     hasRequireAuthenticated: /requireAuthenticated\s*\(/.test(source),
+    hasRequireTacticalWriter: /requireTacticalWriter\s*\(/.test(source),
     hasErrorResponse: /errorResponse\s*\(/.test(source),
     hasTryCatch: /try\s*\{[\s\S]*catch\s*\(/.test(source),
   };
@@ -288,13 +289,16 @@ export const runStaticAudit = async (root = process.cwd()) => {
       if (capability.required_role === "authenticated" && !functionContract.hasRequireAuthenticated) {
         rowIssues.push("Authenticated capability is not enforced by requireAuthenticated in backend function.");
       }
+      if (capability.required_role === "tactical_writer" && !functionContract.hasRequireTacticalWriter) {
+        rowIssues.push("Tactical-writer capability is not enforced by requireTacticalWriter in backend function.");
+      }
       if (capability.required_role === "authenticated" && functionContract.hasRequireAdmin) {
         rowIssues.push("Authenticated capability is over-restricted by requireAdmin.");
       }
-      if (capability.required_role === "admin"
+      if (capability.required_role !== "authenticated"
         && HIGH_RISK_LEVELS.has(capability.risk_level)
         && !capability.confirmation_required) {
-        rowIssues.push("High-risk admin capability must require confirmation.");
+        rowIssues.push("High-risk privileged capability must require confirmation.");
       }
     }
 

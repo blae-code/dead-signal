@@ -1,6 +1,6 @@
 # Live Function Audit Report
 
-Generated: 2026-03-08T17:16:43.826Z
+Generated: 2026-03-08T17:23:14.980Z
 
 ## Config
 
@@ -8,6 +8,7 @@ Generated: 2026-03-08T17:16:43.826Z
 - server_url: https://base44.app
 - admin_token: missing
 - non_admin_token: missing
+- tactical_writer_token: missing
 - allow_controlled_write: false
 - allow_disruptive: false
 

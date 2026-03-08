@@ -26,6 +26,7 @@ Optional environment:
 
 - `BASE44_SERVER_URL` (default: `https://base44.app`)
 - `AUDIT_NONADMIN_TOKEN` (for permission phase validation)
+- `AUDIT_TACTICAL_WRITER_TOKEN` (for tactical-writer allow validation)
 
 Default run (safe):
 
@@ -36,6 +37,10 @@ npm run audit:functions:live
 Default behavior:
 
 - Runs `read-only`, `permission`, and `dry-run` phases when credentials are available.
+- Permission phase validates:
+  - non-admin denial for `admin` capabilities
+  - non-admin denial for `tactical_writer` capabilities
+  - tactical-writer allow for `tactical_writer` capabilities (when token is provided)
 - Defers `controlled-write` and `deferred-disruptive` operations unless explicitly enabled.
 
 Enable controlled writes:

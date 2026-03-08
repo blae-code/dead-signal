@@ -97,6 +97,8 @@ const classifyPermissionOutcome = (result) => {
   return "fail";
 };
 
+const classifyAllowOutcome = (result) => classifyStandardOutcome(result);
+
 const shouldRunPhase = (phaseName, selectedPhases) => selectedPhases.includes(phaseName);
 
 const toMarkdown = (report) => {
@@ -111,6 +113,7 @@ const toMarkdown = (report) => {
   lines.push(`- server_url: ${report.config.server_url}`);
   lines.push(`- admin_token: ${report.config.admin_token_present ? "present" : "missing"}`);
   lines.push(`- non_admin_token: ${report.config.non_admin_token_present ? "present" : "missing"}`);
+  lines.push(`- tactical_writer_token: ${report.config.tactical_writer_token_present ? "present" : "missing"}`);
   lines.push(`- allow_controlled_write: ${report.config.allow_controlled_write}`);
   lines.push(`- allow_disruptive: ${report.config.allow_disruptive}`);
   lines.push("");
@@ -137,11 +140,12 @@ const toMarkdown = (report) => {
       lines.push("");
       continue;
     }
-    lines.push("| function_id | outcome | latency_ms | status | code | error |");
-    lines.push("| --- | --- | --- | --- | --- | --- |");
+    lines.push("| function_id | case | outcome | latency_ms | status | code | error |");
+    lines.push("| --- | --- | --- | --- | --- | --- | --- |");
     for (const item of phase.results) {
       const line = [
         item.function_id,
+        item.case || "",
         item.outcome,
         item.latency_ms ?? "",
         item.status ?? "",
@@ -175,7 +179,7 @@ const createClientFromToken = ({ appId, token, serverUrl }) =>
     requiresAuth: false,
   });
 
-const runPhase = async ({ phase, rows, client, payloadTemplates, classify }) => {
+const runPhase = async ({ phase, rows, client, payloadTemplates, classify, caseLabel = "" }) => {
   const results = [];
   for (const row of rows) {
     const basePayload = clone(payloadTemplates[row.function_id] || {});
@@ -185,6 +189,7 @@ const runPhase = async ({ phase, rows, client, payloadTemplates, classify }) => 
     const result = await invokeFunction(client, row.function_id, basePayload);
     results.push({
       function_id: row.function_id,
+      case: caseLabel,
       outcome: classify(result),
       latency_ms: result.latency_ms,
       status: result.status,
@@ -210,6 +215,7 @@ const main = async () => {
   const serverUrl = process.env.BASE44_SERVER_URL || "https://base44.app";
   const adminToken = process.env.AUDIT_ADMIN_TOKEN || process.env.BASE44_ADMIN_TOKEN || "";
   const nonAdminToken = process.env.AUDIT_NONADMIN_TOKEN || process.env.BASE44_NONADMIN_TOKEN || "";
+  const tacticalWriterToken = process.env.AUDIT_TACTICAL_WRITER_TOKEN || process.env.BASE44_TACTICAL_WRITER_TOKEN || "";
 
   const report = {
     generated_at: new Date().toISOString(),
@@ -218,6 +224,7 @@ const main = async () => {
       server_url: serverUrl,
       admin_token_present: Boolean(adminToken),
       non_admin_token_present: Boolean(nonAdminToken),
+      tactical_writer_token_present: Boolean(tacticalWriterToken),
       allow_controlled_write: options.allowControlledWrite,
       allow_disruptive: options.allowDisruptive,
       phases: options.phases,
@@ -261,6 +268,9 @@ const main = async () => {
   const nonAdminClient = nonAdminToken
     ? createClientFromToken({ appId, token: nonAdminToken, serverUrl })
     : null;
+  const tacticalWriterClient = tacticalWriterToken
+    ? createClientFromToken({ appId, token: tacticalWriterToken, serverUrl })
+    : null;
 
   if (shouldRunPhase("read-only", options.phases)) {
     const phaseRows = rows.filter((row) => row.execution_mode === "read-only");
@@ -270,6 +280,7 @@ const main = async () => {
       client: adminClient,
       payloadTemplates,
       classify: classifyStandardOutcome,
+      caseLabel: "admin_read",
     });
     report.phases.push({
       phase: "read-only",
@@ -280,23 +291,59 @@ const main = async () => {
   }
 
   if (shouldRunPhase("permission", options.phases)) {
-    if (!nonAdminClient) {
+    const phaseResults = [];
+    const notes = [];
+    if (nonAdminClient) {
+      const adminRows = rows.filter((row) => row.required_role === "admin");
+      const adminDenied = await runPhase({
+        phase: "permission",
+        rows: adminRows,
+        client: nonAdminClient,
+        payloadTemplates,
+        classify: classifyPermissionOutcome,
+        caseLabel: "non_admin_denied_admin",
+      });
+      phaseResults.push(...adminDenied);
+
+      const tacticalRows = rows.filter((row) => row.required_role === "tactical_writer");
+      const tacticalDenied = await runPhase({
+        phase: "permission",
+        rows: tacticalRows,
+        client: nonAdminClient,
+        payloadTemplates,
+        classify: classifyPermissionOutcome,
+        caseLabel: "non_admin_denied_tactical",
+      });
+      phaseResults.push(...tacticalDenied);
+    } else {
+      notes.push("Missing AUDIT_NONADMIN_TOKEN (or BASE44_NONADMIN_TOKEN).");
+    }
+
+    if (tacticalWriterClient) {
+      const tacticalRows = rows.filter((row) => row.required_role === "tactical_writer");
+      const tacticalAllowed = await runPhase({
+        phase: "permission",
+        rows: tacticalRows,
+        client: tacticalWriterClient,
+        payloadTemplates,
+        classify: classifyAllowOutcome,
+        caseLabel: "tactical_writer_allowed",
+      });
+      phaseResults.push(...tacticalAllowed);
+    } else {
+      notes.push("Missing AUDIT_TACTICAL_WRITER_TOKEN (or BASE44_TACTICAL_WRITER_TOKEN).");
+    }
+
+    if (phaseResults.length === 0) {
       report.phases.push({
         phase: "permission",
         status: "skipped",
-        reason: "Missing AUDIT_NONADMIN_TOKEN (or BASE44_NONADMIN_TOKEN).",
+        reason: notes.join(" "),
         results: [],
         summary: { pass: 0, fail: 0, blocked: 0, deferred: 0, skipped: 1 },
       });
     } else {
-      const phaseRows = rows.filter((row) => row.required_role === "admin");
-      const results = await runPhase({
-        phase: "permission",
-        rows: phaseRows,
-        client: nonAdminClient,
-        payloadTemplates,
-        classify: classifyPermissionOutcome,
-      });
+      const results = phaseResults;
       report.phases.push({
         phase: "permission",
         status: "completed",

@@ -1,4 +1,4 @@
-export type CapabilityRole = "authenticated" | "admin";
+export type CapabilityRole = "authenticated" | "admin" | "tactical_writer";
 export type CapabilityRisk = "safe" | "elevated" | "high" | "critical";
 export type CapabilitySurface =
   | "ops_center"
@@ -414,7 +414,7 @@ const CAPABILITIES: CapabilitySeed[] = [
     title: "Mutate Map Domain",
     description: "Execute tactical map domain mutations with role checks, dry-run support, and idempotent writes.",
     ui_surface: "field_ops",
-    required_role: "admin",
+    required_role: "tactical_writer",
     risk_level: "high",
     confirmation_required: true,
     observable_only: false,
@@ -911,7 +911,9 @@ export const listResolvedCapabilities = (
   return CAPABILITIES_WITH_SCHEMAS.map((capability) => ({
     ...capability,
     executable: capability.required_role === "authenticated"
-      || isAdmin
-      || (capability.function_id === "mutateMapDomain" && isTacticalWriter),
+      ? true
+      : capability.required_role === "admin"
+      ? isAdmin
+      : (isAdmin || isTacticalWriter),
   }));
 };

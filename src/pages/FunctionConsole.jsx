@@ -23,15 +23,21 @@ const RISK_COLORS = {
   critical: T.red,
 };
 
-const roleMessage = (capability, user) => {
-  if (capability?.function_id === "mutateMapDomain") {
-    return "Officer/lieutenant/commander or admin required for tactical map domain writes.";
-  }
+const roleMessage = (capability) => {
   const requiredRole = capability?.required_role;
   if (requiredRole === "admin") {
     return "Admin role required. Action remains visible for audit and operational awareness.";
   }
+  if (requiredRole === "tactical_writer") {
+    return "Officer/lieutenant/commander or admin role required for tactical writes.";
+  }
   return "Authentication required.";
+};
+
+const roleBadgeColor = (requiredRole) => {
+  if (requiredRole === "admin") return T.red;
+  if (requiredRole === "tactical_writer") return T.orange;
+  return T.green;
 };
 
 const toLocalClock = () => new Date().toLocaleTimeString("en-US", { hour12: false });
@@ -272,7 +278,7 @@ export default function FunctionConsole() {
               <Panel key={functionId} title={capability.title} titleColor={riskColor}>
                 <div className="p-3 space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge label={capability.required_role.toUpperCase()} color={capability.required_role === "admin" ? T.red : T.green} />
+                    <StatusBadge label={capability.required_role.toUpperCase()} color={roleBadgeColor(capability.required_role)} />
                     <StatusBadge label={capability.risk_level.toUpperCase()} color={riskColor} />
                     <StatusBadge label={capability.observable_only ? "OBSERVE" : "EXECUTE"} color={capability.observable_only ? T.cyan : T.amber} />
                     {!capability.executable && <StatusBadge label="LOCKED" color={T.red} />}
@@ -284,7 +290,7 @@ export default function FunctionConsole() {
 
                   <div style={{ color: T.textDim, fontSize: "10px" }}>{capability.description}</div>
 
-                  <PermissionGate allowed={capability.executable} message={roleMessage(capability, capabilitiesQuery.user)}>
+                  <PermissionGate allowed={capability.executable} message={roleMessage(capability)}>
                     <div className="space-y-2">
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                         <div>

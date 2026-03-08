@@ -58,6 +58,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -121,6 +122,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -179,6 +181,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -272,6 +275,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -349,6 +353,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -437,6 +442,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -505,6 +511,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -575,6 +582,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -654,6 +662,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -719,6 +728,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -777,6 +787,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -849,6 +860,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -905,6 +917,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -970,6 +983,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1033,6 +1047,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1091,6 +1106,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1193,6 +1209,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1258,6 +1275,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1321,6 +1339,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1386,6 +1405,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1469,6 +1489,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1560,6 +1581,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1646,6 +1668,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1709,6 +1732,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1719,7 +1743,7 @@
     "function_id": "mutateMapDomain",
     "title": "Mutate Map Domain",
     "ui_surface": "field_ops",
-    "required_role": "admin",
+    "required_role": "tactical_writer",
     "risk_level": "high",
     "confirmation_required": true,
     "observable_only": false,
@@ -1820,6 +1844,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": true,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1874,6 +1899,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1928,6 +1954,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -1982,6 +2009,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2036,6 +2064,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2115,6 +2144,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2192,6 +2222,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2283,6 +2314,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2378,6 +2410,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2488,6 +2521,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2564,6 +2598,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2641,6 +2676,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2746,6 +2782,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": true,
       "hasRequireAuthenticated": false,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2800,6 +2837,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
@@ -2891,6 +2929,7 @@
       "hasRequireMethod": true,
       "hasRequireAdmin": false,
       "hasRequireAuthenticated": true,
+      "hasRequireTacticalWriter": false,
       "hasErrorResponse": true,
       "hasTryCatch": true
     },
