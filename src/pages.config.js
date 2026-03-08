@@ -62,6 +62,7 @@ import DeathMap from './pages/DeathMap';
 import Challenges from './pages/Challenges';
 import LoadoutPlanner from './pages/LoadoutPlanner';
 import ClanBoard from './pages/ClanBoard';
+import LootSharing from './pages/LootSharing';
 import __Layout from './Layout.jsx';
 
 
@@ -81,6 +82,7 @@ export const PAGES = {
     "Challenges": Challenges,
     "LoadoutPlanner": LoadoutPlanner,
     "ClanBoard": ClanBoard,
+    "LootSharing": LootSharing,
 }
 
 export const pagesConfig = {
