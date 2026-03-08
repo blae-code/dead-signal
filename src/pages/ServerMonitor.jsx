@@ -11,35 +11,47 @@ import AlertHistoryPanel from "../components/server/AlertHistoryPanel";
 import AdminToolsPanel from "../components/server/AdminToolsPanel";
 import { T } from "@/components/ui/TerminalCard";
 
-// ── helpers ──────────────────────────────────────────────────────────────────
 const pingColor  = (ms)  => ms === null ? T.textFaint : ms < 80 ? T.green : ms < 200 ? T.amber : T.red;
 const lossColor  = (pct) => pct === 0 ? T.green : pct < 33 ? T.amber : T.red;
 const cpuColor   = (v)   => v > 80 ? T.red : v > 60 ? T.amber : T.green;
 const ramColor   = (mb)  => { const p = mb / 32768 * 100; return p > 80 ? T.red : p > 60 ? T.amber : T.cyan; };
 
-// ── Mini stat card ────────────────────────────────────────────────────────────
+// ── Stat card ─────────────────────────────────────────────────────────────────
 function StatPill({ icon: Icon, label, value, sub, color }) {
   return (
-    <motion.div
-      className="border p-3 flex flex-col gap-1"
-      style={{ borderColor: T.border, background: T.bg1 }}
-      whileHover={{ borderColor: color + "88" }}
-      transition={{ duration: 0.15 }}
+    <div
+      className="relative flex flex-col gap-1.5 p-3 overflow-hidden"
+      style={{
+        border: `1px solid ${T.border}`,
+        background: "linear-gradient(160deg, #0d0a07 0%, #0a0704 100%)",
+        boxShadow: `inset 0 1px 0 ${color}18`,
+      }}
     >
-      <div className="flex items-center gap-1.5">
-        <Icon size={9} style={{ color: T.textFaint }} />
-        <span style={{ color: T.textFaint, fontSize: "8px", letterSpacing: "0.15em", fontFamily: "'Orbitron', monospace" }}>{label}</span>
+      {/* Top accent */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${color}55, transparent)` }} />
+      {/* Corner glow */}
+      <div style={{ position: "absolute", top: 0, left: 0, width: "20px", height: "20px", background: `radial-gradient(circle at 0 0, ${color}18, transparent 70%)` }} />
+
+      <div className="flex items-center gap-1.5 relative">
+        <Icon size={9} style={{ color: color + "99" }} />
+        <span style={{ color: T.textFaint, fontSize: "7.5px", letterSpacing: "0.2em", fontFamily: "'Orbitron', monospace" }}>{label}</span>
       </div>
-      <motion.div
-        key={value}
-        initial={{ opacity: 0.5 }}
-        animate={{ opacity: 1 }}
-        style={{ color, fontFamily: "'Orbitron', monospace", fontSize: "13px", fontWeight: "bold", lineHeight: 1 }}
+      <div
+        style={{
+          color,
+          fontFamily: "'Orbitron', monospace",
+          fontSize: "14px",
+          fontWeight: "bold",
+          lineHeight: 1,
+          textShadow: `0 0 12px ${color}66`,
+        }}
       >
         {value}
-      </motion.div>
-      {sub && <div style={{ color: T.textFaint, fontSize: "8px" }}>{sub}</div>}
-    </motion.div>
+      </div>
+      {sub && (
+        <div style={{ color: T.textFaint, fontSize: "7.5px", letterSpacing: "0.08em" }}>{sub}</div>
+      )}
+    </div>
   );
 }
 
@@ -47,39 +59,49 @@ function StatPill({ icon: Icon, label, value, sub, color }) {
 function GaugeBar({ label, value, max, unit, color }) {
   const pct = Math.min((value / max) * 100, 100);
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <div className="flex justify-between items-baseline">
-        <span style={{ color: T.textFaint, fontSize: "9px" }}>{label}</span>
-        <span style={{ color, fontSize: "10px", fontFamily: "'Orbitron', monospace" }}>
+        <span style={{ color: T.textFaint, fontSize: "8px", letterSpacing: "0.12em" }}>{label}</span>
+        <span style={{ color, fontSize: "10px", fontFamily: "'Orbitron', monospace", textShadow: `0 0 6px ${color}66` }}>
           {typeof value === "number" ? value.toFixed(0) : value}{unit}
         </span>
       </div>
-      <div style={{ height: "3px", background: T.border }}>
+      <div style={{ height: "3px", background: "rgba(0,0,0,0.6)", border: `1px solid ${T.border}` }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          style={{ height: "100%", background: color, boxShadow: `0 0 4px ${color}88` }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          style={{ height: "100%", background: `linear-gradient(90deg, ${color}88, ${color})`, boxShadow: `0 0 6px ${color}66` }}
         />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ fontSize: "7px", color: T.textFaint + "88" }}>0</div>
+        <div style={{ fontSize: "7px", color: T.textFaint + "88" }}>{max}{unit}</div>
       </div>
     </div>
   );
 }
 
-// ── Online status beacon ──────────────────────────────────────────────────────
+// ── Status beacon ─────────────────────────────────────────────────────────────
 function StatusBeacon({ online, loading }) {
+  const color = loading ? T.textFaint : online ? T.green : T.red;
   return (
-    <div className="flex items-center gap-2">
-      <motion.div
-        animate={{ opacity: online ? [1, 0.3, 1] : 1, scale: online ? [1, 1.1, 1] : 1 }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-        style={{
-          width: "10px", height: "10px", borderRadius: "50%",
-          background: loading ? T.textFaint : online ? T.green : T.red,
-          boxShadow: loading ? "none" : `0 0 10px ${online ? T.green : T.red}`,
-        }}
-      />
-      <span style={{ color: loading ? T.textFaint : online ? T.green : T.red, fontFamily: "'Orbitron', monospace", fontSize: "12px", fontWeight: "bold" }}>
+    <div className="flex items-center gap-2.5">
+      <div style={{ position: "relative", width: "12px", height: "12px" }}>
+        {online && !loading && (
+          <motion.div
+            animate={{ scale: [1, 1.8, 1], opacity: [0.6, 0, 0.6] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{ position: "absolute", inset: 0, borderRadius: "50%", background: T.green }}
+          />
+        )}
+        <div style={{
+          position: "absolute", inset: "2px", borderRadius: "50%",
+          background: color,
+          boxShadow: loading ? "none" : `0 0 10px ${color}, 0 0 20px ${color}55`,
+        }} />
+      </div>
+      <span style={{ color, fontFamily: "'Orbitron', monospace", fontSize: "13px", fontWeight: "bold", letterSpacing: "0.08em", textShadow: `0 0 10px ${color}88` }}>
         {loading ? "POLLING..." : online ? "ONLINE" : "OFFLINE"}
       </span>
     </div>
@@ -107,7 +129,6 @@ export default function ServerMonitor() {
   const [user, setUser]                   = useState(null);
   const prevOnlineRef                     = useRef(null);
 
-  // Fetch user to gate admin tools
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
@@ -126,11 +147,8 @@ export default function ServerMonitor() {
         if (s.online === true) setDowntimeAlert(false);
         prevOnlineRef.current = s.online;
       }
-    } catch (e) {
-      // silently keep last known
-    } finally {
-      setStatusLoading(false);
-    }
+    } catch (e) {}
+    finally { setStatusLoading(false); }
   };
 
   useEffect(() => {
@@ -200,42 +218,77 @@ export default function ServerMonitor() {
     setAlertRefreshTick(n => n + 1);
   };
 
-  const isAdmin = user?.role === "admin";
-  const online = status?.online;
-  const cpu = status?.cpu ?? 0;
-  const ram = status?.ramUsedMB ?? 0;
-  const disk = status?.diskMB ?? 0;
-  const players = status?.playerCount ?? 0;
-  const ping = status?.responseTime ?? null;
-  const loss = status?.packetLoss ?? 0;
-  const fps = status?.serverFps ?? 0;
-  const rx = ((status?.networkRxKB ?? 0) / 1024).toFixed(2);
-  const tx = ((status?.networkTxKB ?? 0) / 1024).toFixed(2);
+  const isAdmin   = user?.role === "admin";
+  const online    = status?.online;
+  const cpu       = status?.cpu ?? 0;
+  const ram       = status?.ramUsedMB ?? 0;
+  const disk      = status?.diskMB ?? 0;
+  const players   = status?.playerCount ?? 0;
+  const ping      = status?.responseTime ?? null;
+  const loss      = status?.packetLoss ?? 0;
+  const fps       = status?.serverFps ?? 0;
+  const rx        = ((status?.networkRxKB ?? 0) / 1024).toFixed(2);
+  const tx        = ((status?.networkTxKB ?? 0) / 1024).toFixed(2);
   const healthPct = online ? Math.max(0, 100 - loss - (ping > 200 ? 30 : ping > 80 ? 10 : 0)) : 0;
+  const healthColor = healthPct > 70 ? T.green : healthPct > 40 ? T.amber : T.red;
 
   return (
-    <div className="p-4 pb-24 space-y-4 max-w-screen-2xl mx-auto">
+    <div
+      className="p-4 pb-24 space-y-4 max-w-screen-2xl mx-auto"
+      style={{ minHeight: "100vh" }}
+    >
+      <style>{`
+        @keyframes threat-blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        @keyframes hdr-scan {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
 
-      {/* Alert banners */}
+      {/* ── ALERT BANNERS ─────────────────────────────────────────────────── */}
       <AnimatePresence>
         {alertBanners.map(b => (
           <motion.div
             key={b.id}
-            initial={{ opacity: 0, y: -16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            className="flex items-center justify-between px-3 py-2 border text-xs"
-            style={{ borderColor: T.red, background: "#1a0000", color: T.red }}
+            initial={{ opacity: 0, y: -16, scaleY: 0.8 }}
+            animate={{ opacity: 1, y: 0, scaleY: 1 }}
+            exit={{ opacity: 0, y: -16, scaleY: 0.8 }}
+            className="flex items-center justify-between px-4 py-2.5 text-xs relative overflow-hidden"
+            style={{ border: `1px solid ${T.red}55`, background: "linear-gradient(90deg, #1a0000, #0d0000)", color: T.red }}
           >
-            <span><AlertTriangle size={10} className="inline mr-2" />{b.message}</span>
-            <button onClick={() => setAlertBanners(p => p.filter(x => x.id !== b.id))}><X size={10} /></button>
+            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "2px", background: T.red, boxShadow: `0 0 8px ${T.red}` }} />
+            <span className="flex items-center gap-2">
+              <AlertTriangle size={10} style={{ animation: "threat-blink 0.8s infinite" }} />
+              <span style={{ fontFamily: "'Orbitron', monospace", fontSize: "9px", letterSpacing: "0.1em" }}>{b.message}</span>
+            </span>
+            <button onClick={() => setAlertBanners(p => p.filter(x => x.id !== b.id))} style={{ opacity: 0.7 }}>
+              <X size={10} />
+            </button>
           </motion.div>
         ))}
       </AnimatePresence>
 
-      {/* ── HEADER BAR ──────────────────────────────────────────────────────── */}
-      <div className="border px-4 py-3 flex flex-wrap items-center gap-4"
-        style={{ borderColor: online ? T.green + "44" : T.red + "44", background: "rgba(0,0,0,0.5)" }}>
+      {/* ── HEADER BAR ────────────────────────────────────────────────────── */}
+      <div
+        className="relative overflow-hidden"
+        style={{
+          border: `1px solid ${online ? T.green + "33" : T.red + "33"}`,
+          background: "linear-gradient(160deg, #0e0a06 0%, #0a0704 100%)",
+          boxShadow: `0 0 0 1px rgba(0,0,0,0.6), inset 0 1px 0 ${(online ? T.green : T.red)}18`,
+        }}
+      >
+        {/* Shimmer sweep */}
+        <div style={{
+          position: "absolute", top: 0, left: 0, width: "50%", height: "100%",
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.012), transparent)",
+          animation: "hdr-scan 5s linear infinite", pointerEvents: "none",
+        }} />
+        {/* Top hairline */}
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: "1px",
+          background: `linear-gradient(90deg, transparent, ${online ? T.green : T.red}55, transparent)`,
+        }} />
 
         {/* Downtime banner */}
         <AnimatePresence>
@@ -244,117 +297,187 @@ export default function ServerMonitor() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="w-full flex items-center gap-2 text-xs pb-2 border-b"
-              style={{ borderColor: T.red + "44", color: T.red }}
+              className="flex items-center gap-2 px-4 py-2 border-b text-xs"
+              style={{ borderColor: T.red + "33", background: "rgba(255,0,0,0.06)", color: T.red }}
             >
-              <AlertTriangle size={10} style={{ animation: "threat-blink 0.8s infinite" }} />
-              <span style={{ fontFamily: "'Orbitron', monospace", fontSize: "9px", letterSpacing: "0.15em" }}>
-                ⚠ SERVER OFFLINE — DOWNTIME DETECTED {lastPolled ? `— LAST SEEN ${lastPolled}` : ""}
+              <AlertTriangle size={9} style={{ animation: "threat-blink 0.8s infinite" }} />
+              <span style={{ fontFamily: "'Orbitron', monospace", fontSize: "8.5px", letterSpacing: "0.18em" }}>
+                ⚠ SERVER OFFLINE — DOWNTIME DETECTED{lastPolled ? ` — LAST SEEN ${lastPolled}` : ""}
               </span>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Status */}
-        <div className="flex items-center gap-3">
-          <Cpu size={12} style={{ color: T.amber }} />
-          <span style={{ color: T.amber, fontFamily: "'Orbitron', monospace", fontSize: "11px", letterSpacing: "0.2em" }}>SERVER MONITOR</span>
-          <span style={{ color: T.border }}>|</span>
-          <StatusBeacon online={online} loading={statusLoading} />
-        </div>
-
-        {/* Uptime */}
-        <div className="flex items-center gap-2">
-          <Clock size={9} style={{ color: T.textFaint }} />
-          <span style={{ color: T.textFaint, fontSize: "9px" }}>UPTIME</span>
-          <LiveUptime initialUptime={status?.uptime || "--:--:--"} statusLoading={statusLoading} />
-        </div>
-
-        {/* Health bar */}
-        <div className="flex items-center gap-2 flex-1 min-w-40">
-          <Activity size={9} style={{ color: T.textFaint }} />
-          <span style={{ color: T.textFaint, fontSize: "9px" }}>HEALTH</span>
-          <div className="flex gap-0.5 flex-1">
-            {Array.from({ length: 20 }).map((_, i) => {
-              const filled = i < Math.round(healthPct / 5);
-              return (
-                <div key={i} style={{
-                  flex: 1, height: "5px",
-                  background: filled ? (healthPct > 70 ? T.green : healthPct > 40 ? T.amber : T.red) : T.border,
-                  opacity: filled ? 1 : 0.3,
-                }} />
-              );
-            })}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 relative">
+          {/* Title + beacon */}
+          <div className="flex items-center gap-3">
+            <div style={{
+              width: "28px", height: "28px",
+              border: `1px solid ${T.amber}44`,
+              background: `radial-gradient(circle, ${T.amber}18 0%, transparent 70%)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: `inset 0 0 6px ${T.amber}22`,
+            }}>
+              <Cpu size={13} style={{ color: T.amber }} />
+            </div>
+            <div>
+              <div style={{ color: T.amber, fontFamily: "'Orbitron', monospace", fontSize: "11px", fontWeight: "bold", letterSpacing: "0.22em", textShadow: `0 0 12px ${T.amber}66` }}>
+                SERVER MONITOR
+              </div>
+              <div style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.18em" }}>HUMANITZ · BISECT HOSTING</div>
+            </div>
           </div>
-          <span style={{ color: T.textFaint, fontSize: "8px" }}>{healthPct.toFixed(0)}%</span>
-        </div>
 
-        {/* Last polled + refresh */}
-        <div className="flex items-center gap-2 ml-auto">
-          {lastPolled && <span style={{ color: T.textFaint, fontSize: "8px" }}>POLLED {lastPolled}</span>}
-          <button onClick={fetchStatus} className="p-1 hover:opacity-70 transition-opacity" title="Refresh">
-            <RefreshCw size={11} style={{ color: T.textDim }} />
-          </button>
+          <div style={{ width: "1px", height: "28px", background: T.border }} />
+
+          <StatusBeacon online={online} loading={statusLoading} />
+
+          <div style={{ width: "1px", height: "28px", background: T.border }} />
+
+          {/* Uptime */}
+          <div className="flex items-center gap-2.5">
+            <Clock size={9} style={{ color: T.textFaint }} />
+            <div>
+              <div style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.18em", marginBottom: "1px" }}>UPTIME</div>
+              <LiveUptime initialUptime={status?.uptime || "--:--:--"} statusLoading={statusLoading} />
+            </div>
+          </div>
+
+          <div style={{ width: "1px", height: "28px", background: T.border }} />
+
+          {/* Health bar */}
+          <div className="flex items-center gap-2.5 flex-1 min-w-48">
+            <Activity size={9} style={{ color: T.textFaint }} />
+            <div className="flex flex-col flex-1">
+              <div className="flex justify-between mb-1">
+                <span style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.18em" }}>SERVER HEALTH</span>
+                <span style={{ color: healthColor, fontSize: "7px", fontFamily: "'Orbitron', monospace", textShadow: `0 0 6px ${healthColor}` }}>{healthPct.toFixed(0)}%</span>
+              </div>
+              <div style={{ display: "flex", gap: "2px" }}>
+                {Array.from({ length: 20 }).map((_, i) => {
+                  const filled = i < Math.round(healthPct / 5);
+                  return (
+                    <div key={i} style={{
+                      flex: 1, height: "5px",
+                      background: filled ? healthColor : T.border,
+                      opacity: filled ? 1 : 0.2,
+                      boxShadow: filled ? `0 0 3px ${healthColor}88` : "none",
+                    }} />
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Poll / refresh */}
+          <div className="flex items-center gap-2 ml-auto">
+            {lastPolled && (
+              <span style={{ color: T.textFaint, fontSize: "7.5px", letterSpacing: "0.1em" }}>
+                POLLED {lastPolled}
+              </span>
+            )}
+            <button
+              onClick={fetchStatus}
+              className="flex items-center gap-1 px-2 py-1 border hover:opacity-80 transition-opacity"
+              style={{ borderColor: T.border, color: T.textDim, fontSize: "7px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.1em" }}
+              title="Refresh"
+            >
+              <RefreshCw size={9} />
+              <span>REFRESH</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ── STAT PILLS ROW ───────────────────────────────────────────────────── */}
+      {/* ── STAT PILLS ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-        <StatPill icon={Users}    label="PLAYERS"     value={statusLoading ? "..." : `${players}/64`} sub={`${Math.round(players / 0.64)}% cap`} color={T.cyan} />
+        <StatPill icon={Users}    label="PLAYERS"     value={statusLoading ? "..." : `${players}/64`} sub={`${Math.round(players / 0.64)}% capacity`} color={T.cyan} />
         <StatPill icon={Zap}      label="SERVER FPS"  value={statusLoading ? "..." : fps} sub={fps >= 59 ? "OPTIMAL" : fps > 0 ? "DEGRADED" : "N/A"} color={fps >= 59 ? T.green : T.amber} />
-        <StatPill icon={Wifi}     label="PING"        value={statusLoading ? "..." : ping === null ? "---" : `${ping}ms`} sub={ping === null ? "" : ping < 80 ? "EXCELLENT" : "FAIR"} color={pingColor(ping)} />
-        <StatPill icon={Radio}    label="PACKET LOSS" value={statusLoading ? "..." : `${loss}%`} sub={loss === 0 ? "CLEAN" : "DEGRADED"} color={lossColor(loss)} />
+        <StatPill icon={Wifi}     label="PING"        value={statusLoading ? "..." : ping === null ? "---" : `${ping}ms`} sub={ping === null ? "NO DATA" : ping < 80 ? "EXCELLENT" : "FAIR"} color={pingColor(ping)} />
+        <StatPill icon={Radio}    label="PKT LOSS"    value={statusLoading ? "..." : `${loss}%`} sub={loss === 0 ? "CLEAN" : "DEGRADED"} color={lossColor(loss)} />
         <StatPill icon={Cpu}      label="CPU"         value={statusLoading ? "..." : `${cpu.toFixed(0)}%`} sub={cpu > 80 ? "CRITICAL" : cpu > 60 ? "ELEVATED" : "NORMAL"} color={cpuColor(cpu)} />
         <StatPill icon={Database} label="RAM"         value={statusLoading ? "..." : `${(ram / 1024).toFixed(1)}GB`} sub={`${(ram / 32768 * 100).toFixed(0)}% of 32GB`} color={ramColor(ram)} />
         <StatPill icon={Database} label="DISK"        value={statusLoading ? "..." : `${(disk / 1024).toFixed(0)}GB`} sub="used" color={T.amber} />
         <StatPill icon={Activity} label="NETWORK"     value={statusLoading ? "..." : `↓${rx}`} sub={`↑${tx} MB/s`} color={T.cyan} />
       </div>
 
-      {/* ── MAIN GRID: 3 columns ─────────────────────────────────────────────── */}
+      {/* ── MAIN 3-COLUMN GRID ────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
-        {/* LEFT: Gauges + Charts + Forecast */}
+        {/* LEFT: Gauges + Charts + Forecast + Alerts */}
         <div className="xl:col-span-2 space-y-4">
 
           {/* Resource gauges */}
-          <div className="border p-4 space-y-3" style={{ borderColor: T.border, background: T.bg1 }}>
-            <div style={{ color: T.textFaint, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.15em", paddingBottom: "4px", borderBottom: `1px solid ${T.border}` }}>
-              // RESOURCE UTILIZATION
+          <div
+            className="relative overflow-hidden"
+            style={{
+              border: `1px solid ${T.border}`,
+              background: "linear-gradient(160deg, #0d0a07 0%, #080602 100%)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)",
+            }}
+          >
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.amber}44, transparent)` }} />
+            <div className="px-4 py-2.5 border-b flex items-center gap-2" style={{ borderColor: T.border }}>
+              <Database size={9} style={{ color: T.textFaint }} />
+              <span style={{ color: T.textFaint, fontSize: "8.5px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>RESOURCE UTILIZATION</span>
             </div>
-            <GaugeBar label="CPU" value={cpu} max={100} unit="%" color={cpuColor(cpu)} />
-            <GaugeBar label="RAM" value={ram / 1024} max={32} unit=" GB" color={ramColor(ram)} />
-            <GaugeBar label="DISK" value={disk / 1024} max={1024} unit=" GB" color={T.amber} />
-            <div className="grid grid-cols-2 gap-3 pt-1 border-t" style={{ borderColor: T.border }}>
-              <div>
-                <div style={{ color: T.textFaint, fontSize: "8px", marginBottom: "2px" }}>NET DOWNLOAD</div>
-                <div style={{ color: T.cyan, fontFamily: "'Orbitron', monospace", fontSize: "12px" }}>↓ {rx} MB/s</div>
-              </div>
-              <div>
-                <div style={{ color: T.textFaint, fontSize: "8px", marginBottom: "2px" }}>NET UPLOAD</div>
-                <div style={{ color: T.amber, fontFamily: "'Orbitron', monospace", fontSize: "12px" }}>↑ {tx} MB/s</div>
+            <div className="p-4 space-y-4">
+              <GaugeBar label="CPU" value={cpu} max={100} unit="%" color={cpuColor(cpu)} />
+              <GaugeBar label="RAM" value={ram / 1024} max={32} unit=" GB" color={ramColor(ram)} />
+              <GaugeBar label="DISK" value={disk / 1024} max={1024} unit=" GB" color={T.amber} />
+
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t" style={{ borderColor: T.border + "88" }}>
+                <div className="relative p-3" style={{ border: `1px solid ${T.cyan}22`, background: `${T.cyan}08` }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.cyan}44, transparent)` }} />
+                  <div style={{ color: T.textFaint, fontSize: "7.5px", letterSpacing: "0.15em", marginBottom: "4px" }}>↓ DOWNLOAD</div>
+                  <div style={{ color: T.cyan, fontFamily: "'Orbitron', monospace", fontSize: "13px", fontWeight: "bold", textShadow: `0 0 8px ${T.cyan}66` }}>
+                    {rx} <span style={{ fontSize: "9px", opacity: 0.7 }}>MB/s</span>
+                  </div>
+                </div>
+                <div className="relative p-3" style={{ border: `1px solid ${T.amber}22`, background: `${T.amber}08` }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.amber}44, transparent)` }} />
+                  <div style={{ color: T.textFaint, fontSize: "7.5px", letterSpacing: "0.15em", marginBottom: "4px" }}>↑ UPLOAD</div>
+                  <div style={{ color: T.amber, fontFamily: "'Orbitron', monospace", fontSize: "13px", fontWeight: "bold", textShadow: `0 0 8px ${T.amber}66` }}>
+                    {tx} <span style={{ fontSize: "9px", opacity: 0.7 }}>MB/s</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Performance time-series charts */}
-          <div className="border p-3 space-y-2" style={{ borderColor: T.border, background: T.bg1 }}>
-            <div style={{ color: T.textFaint, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.15em", paddingBottom: "6px", borderBottom: `1px solid ${T.border}` }}>
-              // LIVE TIME-SERIES (60s)
+          {/* Charts */}
+          <div
+            className="relative overflow-hidden"
+            style={{
+              border: `1px solid ${T.border}`,
+              background: "linear-gradient(160deg, #0d0a07 0%, #080602 100%)",
+            }}
+          >
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.green}44, transparent)` }} />
+            <div className="px-4 py-2.5 border-b flex items-center gap-2" style={{ borderColor: T.border }}>
+              <Activity size={9} style={{ color: T.textFaint }} />
+              <span style={{ color: T.textFaint, fontSize: "8.5px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>LIVE TIME-SERIES — 60s WINDOW</span>
             </div>
-            <PerformanceCharts status={status} statusLoading={statusLoading} />
+            <div className="p-3">
+              <PerformanceCharts status={status} statusLoading={statusLoading} />
+            </div>
           </div>
 
           {/* Forecast collapsible */}
-          <div className="border" style={{ borderColor: T.border, background: T.bg1 }}>
+          <div
+            className="relative overflow-hidden"
+            style={{ border: `1px solid ${T.border}`, background: "linear-gradient(160deg, #0d0a07 0%, #080602 100%)" }}
+          >
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.cyan}44, transparent)` }} />
             <button
               onClick={() => setShowForecast(!showForecast)}
-              className="w-full flex items-center gap-2 px-3 py-2 hover:opacity-80 transition-opacity"
+              className="w-full flex items-center gap-2.5 px-4 py-3 hover:opacity-80 transition-opacity"
             >
               <TrendingUp size={10} style={{ color: T.cyan }} />
-              <span style={{ color: T.cyan, fontSize: "10px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.15em", flex: 1, textAlign: "left" }}>
-                // PERFORMANCE FORECAST (48H)
+              <span style={{ color: T.cyan, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.18em", flex: 1, textAlign: "left", textShadow: `0 0 8px ${T.cyan}66` }}>
+                PERFORMANCE FORECAST — 48H PROJECTION
               </span>
-              <span style={{ color: T.textFaint, fontSize: "9px" }}>{showForecast ? "▼ HIDE" : "▶ SHOW"}</span>
+              <span style={{ color: T.textFaint, fontSize: "8px", fontFamily: "'Orbitron', monospace" }}>{showForecast ? "▼" : "▶"}</span>
             </button>
             <AnimatePresence>
               {showForecast && (
@@ -364,7 +487,7 @@ export default function ServerMonitor() {
                   exit={{ height: 0, opacity: 0 }}
                   style={{ overflow: "hidden" }}
                 >
-                  <div className="px-3 pb-3 border-t" style={{ borderColor: T.border }}>
+                  <div className="px-4 pb-4 border-t" style={{ borderColor: T.border }}>
                     <PerformanceForecast status={status} />
                   </div>
                 </motion.div>
@@ -384,15 +507,18 @@ export default function ServerMonitor() {
           {isAdmin ? (
             <AdminToolsPanel status={status} />
           ) : (
-            <div className="border p-6 text-center" style={{ borderColor: T.border, background: T.bg1 }}>
-              <div style={{ color: T.textFaint, fontSize: "10px", fontFamily: "'Orbitron', monospace" }}>// ADMIN ACCESS REQUIRED</div>
-              <div style={{ color: T.textFaint, fontSize: "9px", marginTop: "8px" }}>Admin tools are only visible to administrators.</div>
+            <div
+              className="relative flex flex-col items-center justify-center p-8 text-center overflow-hidden"
+              style={{ border: `1px solid ${T.border}`, background: "linear-gradient(160deg, #0d0a07 0%, #080602 100%)", minHeight: "200px" }}
+            >
+              <div style={{ color: T.textFaint, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>// ADMIN ACCESS REQUIRED</div>
+              <div style={{ color: T.textFaint, fontSize: "8px", marginTop: "10px", lineHeight: 1.6 }}>Admin tools are only visible to administrators.</div>
             </div>
           )}
         </div>
       </div>
 
-      {/* ── BOTTOM CONSOLE DRAWER ────────────────────────────────────────────── */}
+      {/* ── BOTTOM CONSOLE ────────────────────────────────────────────────── */}
       <BottomConsoleDrawer
         consoleLines={consoleLines}
         onConsoleInput={handleCommand}
