@@ -501,6 +501,9 @@ export default function ServerMonitor() {
             <AlertRulesPanel onTriggered={handleTriggered} />
             <AlertHistoryPanel refreshTick={alertRefreshTick} />
           </div>
+
+          {/* Event Feed */}
+          <EventFeed events={events} maxHeight="500px" />
         </div>
 
         {/* RIGHT: Admin Tools */}
