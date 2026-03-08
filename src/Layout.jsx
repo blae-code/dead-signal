@@ -29,9 +29,18 @@ const navSections = [
   {
     label: "LOGISTICS",
     items: [
-      { label: "INVENTORY",    page: "Inventory",     icon: Package,   code: "INV", color: "#ff6a00", dot: "#ff6a00" },
-      { label: "INTEL FEED",   page: "Intel",         icon: Radio,     code: "INT", color: "#ffaa00", dot: "#ffaa00" },
-      { label: "AI AGENT",     page: "AIAgent",       icon: Bot,       code: "AI",  color: "#a8c820", dot: "#a8c820" },
+      { label: "INVENTORY",    page: "Inventory",        icon: Package,   code: "INV", color: "#ff6a00", dot: "#ff6a00" },
+      { label: "INTEL FEED",   page: "Intel",            icon: Radio,     code: "INT", color: "#ffaa00", dot: "#ffaa00" },
+      { label: "AI AGENT",     page: "AIAgent",          icon: Bot,       code: "AI",  color: "#a8c820", dot: "#a8c820" },
+    ],
+  },
+  {
+    label: "SURVIVAL OPS",
+    items: [
+      { label: "SURVIVAL PLAN",   page: "SurvivalPlanner",    icon: Map,       code: "PLAN", color: "#00b896", dot: "#00b896" },
+      { label: "SQUAD VITALS",    page: "SquadVitalsMonitor", icon: Activity,  code: "VITAL", color: "#39ff14", dot: "#39ff14" },
+      { label: "SUPPLY CHAIN",    page: "SupplyChainManager", icon: Package,   code: "SUP", color: "#d4a800", dot: "#d4a800" },
+      { label: "POST-ANALYSIS",   page: "PostMissionAnalysis", icon: Activity, code: "POST", color: "#ffaa00", dot: "#ffaa00" },
     ],
   },
 ];
