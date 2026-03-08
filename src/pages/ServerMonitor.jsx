@@ -504,17 +504,84 @@ export default function ServerMonitor() {
 
         {/* RIGHT: Admin Tools */}
         <div className="space-y-3">
+          <div className="space-y-2">
+          {/* Redacted Admin Header */}
+          <div
+            className="relative flex items-center gap-3 px-3 py-2.5 overflow-hidden"
+            style={{
+              border: `1px solid ${T.red}22`,
+              background: "linear-gradient(135deg, #1a0a04, #0a0404)",
+              boxShadow: `inset 0 1px 0 ${T.red}08`,
+            }}
+          >
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.red}33, transparent)` }} />
+            <div style={{
+              width: "24px", height: "24px",
+              border: `1px solid ${T.red}22`,
+              background: `radial-gradient(circle, ${T.red}10, transparent 70%)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: `0 0 8px ${T.red}12`,
+            }}>
+              <Lock size={11} style={{ color: T.red }} />
+            </div>
+            <div>
+              <div style={{ color: T.red, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.24em", textShadow: `0 0 8px ${T.red}33` }}>
+                ADMIN TOOLS
+              </div>
+              <div style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.16em" }}>ACCESS DENIED</div>
+            </div>
+            <div className="ml-auto flex items-center gap-1.5">
+              <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: T.red, boxShadow: `0 0 5px ${T.red}` }} />
+              <span style={{ color: T.red, fontSize: "7px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.14em" }}>UNAUTHORIZED</span>
+            </div>
+          </div>
+
+          {/* Redacted Content */}
           {isAdmin ? (
             <AdminToolsPanel status={status} events={events} />
           ) : (
-            <div
-              className="relative flex flex-col items-center justify-center p-8 text-center overflow-hidden"
-              style={{ border: `1px solid ${T.border}`, background: "linear-gradient(160deg, #1c1e21 0%, #14161a 100%)", minHeight: "200px" }}
-            >
-              <div style={{ color: T.textFaint, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>// ADMIN ACCESS REQUIRED</div>
-              <div style={{ color: T.textFaint, fontSize: "8px", marginTop: "10px", lineHeight: 1.6 }}>Admin tools are only visible to administrators.</div>
-            </div>
+            <>
+              {["AI RCON ADVISOR", "QUICK ACTIONS", "SERVER BROADCAST", "PLAYER MANAGEMENT", "RCON PRESETS", "CUSTOM RCON"].map(title => (
+                <div key={title}
+                  className="relative overflow-hidden"
+                  style={{
+                    border: `1px solid ${T.border}22`,
+                    background: "linear-gradient(160deg, rgba(20,15,10,0.3), rgba(15,10,5,0.2))",
+                    boxShadow: "inset 0 1px 0 rgba(0,0,0,0.4)",
+                  }}
+                >
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${T.red}22, transparent)` }} />
+                  <div
+                    className="px-3 py-2.5 flex items-center justify-between"
+                    style={{ borderColor: T.border, background: `${T.red}05` }}
+                  >
+                    <span style={{ color: T.textFaint, fontSize: "8px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.18em", opacity: 0.5 }}>
+                      {title}
+                    </span>
+                    <div style={{ fontSize: "9px", color: T.textFaint, fontFamily: "'Orbitron', monospace", letterSpacing: "0.12em", opacity: 0.5 }}>
+                      [REDACTED]
+                    </span>
+                  </div>
+                  <div className="px-3 py-3 space-y-2">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          height: "18px",
+                          background: `linear-gradient(90deg, ${T.red}15, ${T.red}08, ${T.red}15)`,
+                          border: `1px solid ${T.red}15`,
+                          borderRadius: "2px",
+                          animation: `shimmer 2s infinite`,
+                          animationDelay: `${i * 0.2}s`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </>
           )}
+        </div>
         </div>
       </div>
 
