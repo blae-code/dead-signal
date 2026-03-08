@@ -274,7 +274,7 @@ export default function ServerMonitor() {
         className="relative overflow-hidden"
         style={{
           border: `1px solid ${online ? T.green + "33" : T.red + "33"}`,
-          background: "linear-gradient(160deg, #0e0a06 0%, #0a0704 100%)",
+          background: "linear-gradient(160deg, #080c10 0%, #060a0e 100%)",
           boxShadow: `0 0 0 1px rgba(0,0,0,0.6), inset 0 1px 0 ${(online ? T.green : T.red)}18`,
         }}
       >
