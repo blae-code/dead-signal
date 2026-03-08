@@ -10,6 +10,7 @@ import AlertRulesPanel from "../components/server/AlertRulesPanel";
 import AlertHistoryPanel from "../components/server/AlertHistoryPanel";
 import AdminToolsPanel from "../components/server/AdminToolsPanel";
 import EventFeed from "../components/server/EventFeed";
+import AutomationDashboard from "../components/server/AutomationDashboard";
 import { T } from "@/components/ui/TerminalCard";
 
 const pingColor  = (ms)  => ms === null ? T.textFaint : ms < 80 ? T.green : ms < 200 ? T.gold : T.red;
