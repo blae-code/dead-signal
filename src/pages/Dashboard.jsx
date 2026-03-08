@@ -244,7 +244,7 @@ export default function Dashboard() {
         <div className="space-y-4">
           <Panel
             title="ROSTER STATUS"
-            titleColor={T.green}
+            titleColor={ENTITY_COLORS.ClanMember}
             headerRight={
               <Link to={createPageUrl("ClanRoster")} className="text-xs" style={{ color: T.textFaint, fontSize: "9px", textDecoration: "none" }}>
                 FULL ROSTER →
