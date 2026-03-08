@@ -15,7 +15,6 @@ import BroadcastModal from "@/components/map/BroadcastModal";
 const EMPTY_PIN = { title: "", type: "Loot Cache", note: "", status: "Unknown", horde_size: 0, horde_direction: "N", rallyMins: 10 };
 
 export default function TacticalMap() {
-  const canvasRef = useRef(null);
 
   // ── Data ──────────────────────────────────────────────────────────────────
   const [pins, setPins]             = useState([]);
@@ -245,9 +244,9 @@ export default function TacticalMap() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Point Atlas Map Iframe */}
         <div className="lg:col-span-2 space-y-2">
-          <div style={{ border: `1px solid ${T.border}`, background: T.bg1, overflow: "hidden", height: "600px" }}>
+          <div style={{ border: `1px solid ${T.border}`, background: T.bg1, overflow: "hidden", height: "calc(100vh - 380px)", minHeight: "500px" }}>
             <iframe
-              src="https://point-atlas.io/map/1/Humanitz"
+              src="https://point-atlas.io/map/1/Humanitz?embed=1"
               style={{ width: "100%", height: "100%", border: "none" }}
               allow="fullscreen"
             />
