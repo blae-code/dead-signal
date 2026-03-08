@@ -62,9 +62,9 @@ export function PageHeader({ icon: Icon, title, color = T.amber, children }) {
     <div
       className="relative flex items-center gap-3 flex-wrap px-4 py-3 overflow-hidden"
       style={{
-        border: `1px solid ${color}33`,
-        background: `linear-gradient(135deg, ${color}0a 0%, #0a080600 60%)`,
-        boxShadow: `inset 0 1px 0 ${color}18`,
+        border: `1px solid ${color}44`,
+        background: `linear-gradient(135deg, ${color}0f 0%, #0a080600 60%)`,
+        boxShadow: `inset 0 1px 0 ${color}28, inset 0 -1px 0 rgba(0,0,0,0.4), 0 6px 20px ${color}18`,
       }}
     >
       <div style={accentLine(color)} />
