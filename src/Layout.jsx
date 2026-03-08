@@ -50,10 +50,10 @@ const C = {
   green:       "#30ff60",
   red:         "#ff2828",
   cyan:        "#00e8ff",
-  purple:      "#b060ff",
-  teal:        "#00c8a0",
-  pink:        "#ff3090",
-  gold:        "#e8b800",
+  olive:       "#a8c820",
+  teal:        "#00b896",
+  steel:       "#4ab8d4",
+  gold:        "#d4a800",
 };
 
 export default function Layout({ children, currentPageName }) {
