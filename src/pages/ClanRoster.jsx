@@ -105,11 +105,11 @@ export default function ClanRoster() {
 
       <Panel>
         <TableHeader columns={["CALLSIGN", "ROLE", "STATUS", "K/D", "HRS", ""]}
-          style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 64px" }} />
+          style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 80px" }} />
         {members.length === 0
           ? <EmptyState message="NO OPERATORS ENLISTED" />
           : members.map(m => (
-            <TableRow key={m.id} style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 64px" }}
+            <TableRow key={m.id} style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 80px" }}
               onClick={() => setSelected(selected?.id === m.id ? null : m)}>
               <span className="text-xs font-bold" style={{ color: T.text }}>{m.callsign}</span>
               <span className="text-xs" style={{ color: ROLE_COLORS[m.role] || T.textDim }}>{m.role}</span>
