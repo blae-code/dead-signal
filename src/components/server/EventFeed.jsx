@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, Clock, Zap, Users, AlertTriangle, X } from "lucide-react";
+import { Search, Filter, Clock, Zap, Users, AlertTriangle, X, Radio } from "lucide-react";
 import { T } from "@/components/ui/TerminalCard";
 
 const severityConfig = {
