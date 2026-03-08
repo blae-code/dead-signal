@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Sun, Cloud, CloudRain } from "lucide-react";
+import { Sun, Cloud, CloudRain, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const C = {
   text: "#e0d4c0",
