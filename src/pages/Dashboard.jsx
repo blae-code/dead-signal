@@ -139,7 +139,7 @@ export default function Dashboard() {
         <div className="space-y-4">
 
           {/* Clan Roster snapshot */}
-          <Panel title="ROSTER STATUS" titleColor={T.green}
+          <Panel title="ROSTER STATUS" titleColor={T.teal}
             headerRight={
               <Link to={createPageUrl("ClanRoster")} className="text-xs" style={{ color: T.textFaint, fontSize: "9px", textDecoration: "none" }}>
                 FULL ROSTER →
