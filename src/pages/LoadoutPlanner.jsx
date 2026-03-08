@@ -1,27 +1,34 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Shield, Plus, Trash2, Star } from "lucide-react";
-import { T, PageHeader, Panel, FormPanel, Field, ActionBtn, EmptyState } from "@/components/ui/TerminalCard";
+import { T, PageHeader, FormPanel, Field, ActionBtn, EmptyState } from "@/components/ui/TerminalCard";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
-const ROLES = ["Combat","Scavenger","Medic","Scout","Builder","Generalist"];
 const ROLE_COLORS = { Combat: T.red, Scavenger: T.amber, Medic: T.green, Scout: T.cyan, Builder: "#b8a890", Generalist: T.textDim };
-
-const DEFAULT_SLOTS = [
-  "Primary Weapon", "Secondary Weapon", "Melee",
-  "Helmet", "Body Armor", "Backpack",
-  "Medical Kit", "Food", "Water",
-  "Ammo (Primary)", "Ammo (Secondary)", "Tools"
-];
-
-const empty = { name: "", role: "Generalist", notes: "", is_active: false, slots: DEFAULT_SLOTS.map(s => ({ slot: s, item: "", notes: "" })) };
+const pickFirst = (values) => values.find((value) => typeof value === "string" && value.trim()) || "";
+const buildEmpty = (roles, defaultSlots) => ({
+  name: "",
+  role: pickFirst(roles),
+  notes: "",
+  is_active: false,
+  slots: defaultSlots.map((slot) => ({ slot, item: "", notes: "" })),
+});
 
 export default function LoadoutPlanner() {
+  const runtimeConfig = useRuntimeConfig();
+  const ROLES = runtimeConfig.getArray(["taxonomy", "loadout_roles"]);
+  const DEFAULT_SLOTS = runtimeConfig.getArray(["taxonomy", "loadout_default_slots"]);
   const [user, setUser] = useState(null);
   const [loadouts, setLoadouts] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(empty);
+  const [form, setForm] = useState(() => buildEmpty(ROLES, DEFAULT_SLOTS));
   const [editingId, setEditingId] = useState(null);
   const [expanded, setExpanded] = useState(null);
+
+  useEffect(() => {
+    if (form.role && Array.isArray(form.slots) && form.slots.length > 0) return;
+    setForm((prev) => ({ ...prev, ...buildEmpty(ROLES, DEFAULT_SLOTS) }));
+  }, [ROLES, DEFAULT_SLOTS, form.role, form.slots]);
 
   useEffect(() => {
     const load = async () => {
@@ -42,7 +49,7 @@ export default function LoadoutPlanner() {
       const created = await base44.entities.Loadout.create(entry);
       setLoadouts(prev => [created, ...prev]);
     }
-    setForm(empty);
+    setForm(buildEmpty(ROLES, DEFAULT_SLOTS));
     setShowForm(false);
     setEditingId(null);
   };
@@ -79,10 +86,15 @@ export default function LoadoutPlanner() {
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
       <PageHeader icon={Shield} title="LOADOUT PLANNER" color={T.cyan}>
-        <ActionBtn color={T.cyan} onClick={() => { setShowForm(!showForm); setForm(empty); setEditingId(null); }}>
+        <ActionBtn color={T.cyan} onClick={() => { setShowForm(!showForm); setForm(buildEmpty(ROLES, DEFAULT_SLOTS)); setEditingId(null); }}>
           <Plus size={10} /> NEW LOADOUT
         </ActionBtn>
       </PageHeader>
+      {runtimeConfig.error && (
+        <div className="border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
+          RUNTIME TAXONOMY UNAVAILABLE
+        </div>
+      )}
 
       {showForm && (
         <FormPanel title={editingId ? "EDIT LOADOUT" : "NEW LOADOUT"} titleColor={T.cyan} onClose={() => { setShowForm(false); setEditingId(null); }}>

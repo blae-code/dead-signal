@@ -15,7 +15,7 @@ const PIN_ICONS = {
 };
 const STATUS_COLORS = { Fresh: T.green, Looted: T.textDim, Unknown: T.amber, Active: T.cyan, Cleared: T.textFaint };
 
-export default function PinDetail({ pin, isAdmin, onClose, onStatusCycle, onDelete }) {
+export default function PinDetail({ pin, isAdmin, onClose, onStatusCycle, onDelete, hordeSightingType = "", rallyPointType = "" }) {
   const isStale = pin.expires_at && new Date(pin.expires_at).getTime() < Date.now();
   const expiresIn = pin.expires_at ? Math.round((new Date(pin.expires_at) - Date.now()) / 60000) : null;
 
@@ -31,14 +31,14 @@ export default function PinDetail({ pin, isAdmin, onClose, onStatusCycle, onDele
 
         <div className="text-xs" style={{ color: T.textDim }}>TYPE: {pin.type}</div>
 
-        {pin.type === "Horde Sighting" && (
+        {hordeSightingType && pin.type === hordeSightingType && (
           <div className="text-xs space-y-1" style={{ color: T.red }}>
             {pin.horde_size > 0 && <div>SIZE: ~{pin.horde_size} infected</div>}
             {pin.horde_direction && <div>MOVING: {pin.horde_direction}</div>}
           </div>
         )}
 
-        {pin.type === "Rally Point" && pin.rally_expires_at && (() => {
+        {rallyPointType && pin.type === rallyPointType && pin.rally_expires_at && (() => {
           const secsLeft = Math.max(0, Math.round((new Date(pin.rally_expires_at) - Date.now()) / 1000));
           return <div className="text-xs" style={{ color: "#ff00ff" }}>RALLY IN: {secsLeft}s</div>;
         })()}

@@ -1,25 +1,30 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Shield, ArrowLeft, Crosshair, Activity, Clock, Skull, Target, Star, Zap, ThumbsUp } from "lucide-react";
+import { Shield, ArrowLeft, ThumbsUp } from "lucide-react";
 import { T, PageHeader, Panel, StatGrid, EmptyState, ActionBtn } from "@/components/ui/TerminalCard";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
 const ROLE_COLORS   = { Commander: T.orange, Lieutenant: T.amber, Scout: T.cyan, Engineer: T.green, Medic: "#ff5555", Grunt: T.textDim };
 const STATUS_COLORS = { Active: T.green, Inactive: T.textDim, MIA: T.amber, KIA: T.red };
 const ACT_COLORS    = { mission_completed: T.green, kill: T.red, death: T.amber, loot_found: T.cyan, resource_gathered: T.orange, player_joined: T.green, player_left: T.textDim };
 const ACT_ICONS     = { mission_completed: "⚑", kill: "☠", death: "†", loot_found: "◆", resource_gathered: "◉", player_joined: "▶", player_left: "◀" };
 const ACT_LABELS    = { mission_completed: "MISSION COMPLETED", kill: "KILL", death: "DEATH", loot_found: "LOOT FOUND", resource_gathered: "RESOURCES GATHERED", player_joined: "JOINED SERVER", player_left: "LEFT SERVER" };
+const pickByToken = (values, token) =>
+  values.find((value) => typeof value === "string" && value.toLowerCase() === token) || "";
 
 // Derive achievements from stats
-function computeAchievements(member, missions, activityLogs) {
+function computeAchievements(member, missions, activityLogs, statuses) {
   const achievements = [];
   const kills = member.kills || 0;
   const deaths = member.deaths || 0;
   const kd = deaths > 0 ? kills / deaths : kills;
   const playtime = member.playtime_hours || 0;
-  const completedMissions = missions.filter(m => m.status === "Complete").length;
+  const completedMissions = statuses.completeMissionStatus
+    ? missions.filter((mission) => mission.status === statuses.completeMissionStatus).length
+    : 0;
 
   if (kills >= 100)        achievements.push({ label: "CENTURION",      desc: "100+ kills",           icon: "☠", color: T.red });
   if (kills >= 50)         achievements.push({ label: "HUNTER",         desc: "50+ kills",            icon: "🎯", color: T.orange });
@@ -30,12 +35,22 @@ function computeAchievements(member, missions, activityLogs) {
   if (completedMissions >= 10) achievements.push({ label: "MISSION EXPERT", desc: "10+ missions done", icon: "⚑", color: T.green });
   if (completedMissions >= 5)  achievements.push({ label: "FIELD OPS",  desc: "5+ missions done",     icon: "✦", color: T.cyan });
   if (member.role === "Commander") achievements.push({ label: "COMMANDER",  desc: "Clan commander",   icon: "◆", color: T.orange });
-  if (member.status === "Active" && playtime > 0) achievements.push({ label: "ACTIVE DUTY", desc: "Currently active", icon: "●", color: T.green });
+  if (statuses.activeClanStatus && member.status === statuses.activeClanStatus && playtime > 0) {
+    achievements.push({ label: "ACTIVE DUTY", desc: "Currently active", icon: "●", color: T.green });
+  }
 
   return achievements;
 }
 
 export default function PlayerProfile() {
+  const runtimeConfig = useRuntimeConfig();
+  const missionStatuses = runtimeConfig.getArray(["taxonomy", "mission_statuses"]);
+  const clanStatuses = runtimeConfig.getArray(["taxonomy", "clan_statuses"]);
+  const completeMissionStatus = pickByToken(missionStatuses, "complete");
+  const activeMissionStatus = pickByToken(missionStatuses, "active");
+  const pendingMissionStatus = pickByToken(missionStatuses, "pending");
+  const activeClanStatus = pickByToken(clanStatuses, "active");
+
   const params   = new URLSearchParams(window.location.search);
   const memberId = params.get("id");
 
@@ -111,9 +126,14 @@ export default function PlayerProfile() {
 
   const roleColor = ROLE_COLORS[member.role] || T.textDim;
   const kd = member.deaths > 0 ? (member.kills / member.deaths).toFixed(2) : (member.kills || 0);
-  const completedMissions = missions.filter(m => m.status === "Complete");
-  const activeMissions    = missions.filter(m => m.status === "Active" || m.status === "Pending");
-  const achievements      = computeAchievements(member, missions, activity);
+  const completedMissions = completeMissionStatus
+    ? missions.filter((mission) => mission.status === completeMissionStatus)
+    : [];
+  const activeMissionStatuses = [activeMissionStatus, pendingMissionStatus].filter(Boolean);
+  const activeMissions = activeMissionStatuses.length > 0
+    ? missions.filter((mission) => activeMissionStatuses.includes(mission.status))
+    : [];
+  const achievements = computeAchievements(member, missions, activity, { completeMissionStatus, activeClanStatus });
 
   return (
     <div className="p-4 space-y-4 max-w-5xl mx-auto">
@@ -195,7 +215,7 @@ export default function PlayerProfile() {
               ? <EmptyState message="NO ACTIVE ASSIGNMENTS" />
               : activeMissions.map(m => (
                 <div key={m.id} className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: T.border + "44" }}>
-                  <span style={{ color: m.status === "Active" ? T.green : T.amber, fontSize: "7px" }}>●</span>
+                  <span style={{ color: m.status === activeMissionStatus ? T.green : T.amber, fontSize: "7px" }}>●</span>
                   <span className="text-xs flex-1 truncate" style={{ color: T.text }}>{m.title}</span>
                   <span className="text-xs" style={{ color: T.textFaint, fontSize: "9px" }}>{m.priority}</span>
                 </div>

@@ -1,5 +1,4 @@
 import { T, Panel, ActionBtn, EmptyState } from "@/components/ui/TerminalCard";
-import { Trash2 } from "lucide-react";
 
 const PIN_COLORS = {
   "Loot Cache": T.amber, "Safe House": T.green, "Danger Zone": T.red,
@@ -15,8 +14,9 @@ const PIN_ICONS = {
 };
 const STATUS_COLORS = { Fresh: T.green, Looted: T.textDim, Unknown: T.amber, Active: T.cyan, Cleared: T.textFaint };
 
-export default function MapSidebar({ pins, playerLocs, myCallsign, routePoints, onPinClick, onClearRoute, onSaveRoute, isAdmin }) {
-  const activeLocs = playerLocs.filter(loc => Date.now() - new Date(loc.timestamp).getTime() < 5 * 60 * 1000);
+export default function MapSidebar({ pins, playerLocs, myCallsign, routePoints, onPinClick, onClearRoute, onSaveRoute, nowMs }) {
+  const now = nowMs ?? Date.now();
+  const activeLocs = playerLocs;
 
   return (
     <div className="space-y-3">
@@ -58,7 +58,7 @@ export default function MapSidebar({ pins, playerLocs, myCallsign, routePoints, 
           {pins.length === 0
             ? <EmptyState message="NO PINS" />
             : pins.map(pin => {
-                const isStale = pin.expires_at && new Date(pin.expires_at).getTime() < Date.now();
+                const isStale = pin.expires_at && new Date(pin.expires_at).getTime() < now;
                 return (
                   <button key={pin.id} onClick={() => onPinClick(pin)}
                     className="w-full text-left px-3 py-2 border-b flex items-center gap-2 hover:bg-white hover:bg-opacity-5 transition-colors"

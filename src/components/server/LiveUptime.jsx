@@ -3,17 +3,16 @@ import { motion } from "framer-motion";
 import { T } from "@/components/ui/TerminalCard";
 
 export default function LiveUptime({ initialUptime, statusLoading }) {
-  const [uptime, setUptime] = useState(initialUptime || "--:--:--");
-  const [key, setKey] = useState(0);
+  const [uptime, setUptime] = useState(initialUptime || "UNAVAILABLE");
 
   // Parse uptime string to seconds, or return 0 if invalid
   const parseUptimeToSeconds = (uptimeStr) => {
-    if (!uptimeStr || uptimeStr === "--:--:--") return 0;
+    if (!uptimeStr || uptimeStr === "--:--:--" || uptimeStr === "UNAVAILABLE") return null;
     const parts = uptimeStr.split(":").map(p => parseInt(p, 10));
     if (parts.length === 3) {
       return parts[0] * 3600 + parts[1] * 60 + parts[2];
     }
-    return 0;
+    return null;
   };
 
   // Format seconds to HH:MM:SS
@@ -29,12 +28,11 @@ export default function LiveUptime({ initialUptime, statusLoading }) {
     if (statusLoading) return;
 
     let currentSeconds = parseUptimeToSeconds(initialUptime);
+    if (currentSeconds === null) return;
 
     const interval = setInterval(() => {
       currentSeconds += 1;
       setUptime(formatUptime(currentSeconds));
-      // Force re-animation by updating key
-      setKey(prev => prev + 1);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -42,33 +40,22 @@ export default function LiveUptime({ initialUptime, statusLoading }) {
 
   // Update when initial uptime changes (new server status poll)
   useEffect(() => {
-    if (!statusLoading && initialUptime && initialUptime !== "--:--:--") {
+    if (!statusLoading && initialUptime && initialUptime !== "--:--:--" && initialUptime !== "UNAVAILABLE") {
       setUptime(initialUptime);
-      setKey(prev => prev + 1);
+    } else if (!statusLoading && (!initialUptime || initialUptime === "--:--:--")) {
+      setUptime("UNAVAILABLE");
     }
   }, [initialUptime, statusLoading]);
 
-  const getUptimeColor = () => {
-    const seconds = parseUptimeToSeconds(uptime);
-    const hours = Math.floor(seconds / 3600);
-    if (hours >= 24) return T.green;
-    if (hours >= 12) return T.cyan;
-    if (hours >= 4) return T.amber;
-    return T.red;
-  };
-
   return (
-    <div
-      style={{
-        color: getUptimeColor(),
-        fontFamily: "'Orbitron', monospace",
-        fontSize: "13px",
-        fontWeight: "bold",
-        minWidth: "48px",
-        textAlign: "right",
-      }}
+    <motion.div
+      initial={false}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+      className="font-bold text-base"
+      style={{ color: T.amber, fontFamily: "'Orbitron', monospace" }}
     >
       {uptime}
-    </div>
+    </motion.div>
   );
 }

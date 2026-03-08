@@ -21,6 +21,28 @@ const isBreached = (operator: string, actual: number, threshold: number): boolea
     return false;
 };
 
+const mapWithConcurrency = async <T, R>(
+    items: T[],
+    concurrency: number,
+    mapper: (item: T, index: number) => Promise<R>,
+): Promise<R[]> => {
+    if (items.length === 0) return [];
+    const workerCount = Math.max(1, Math.min(concurrency, items.length));
+    const results = new Array<R>(items.length);
+    let cursor = 0;
+
+    await Promise.all(Array.from({ length: workerCount }).map(async () => {
+        while (true) {
+            const index = cursor;
+            cursor += 1;
+            if (index >= items.length) break;
+            results[index] = await mapper(items[index], index);
+        }
+    }));
+
+    return results;
+};
+
 Deno.serve(async (req) => {
     try {
         requireMethod(req, 'POST');
@@ -56,7 +78,7 @@ Deno.serve(async (req) => {
         // Load all enabled alert rules
         const rules = await base44.asServiceRole.entities.AlertRule.filter({ enabled: true });
         const now = new Date();
-        const triggered = [] as any[];
+        const candidates = [] as Array<{ rule: Record<string, any>; actual: number; threshold: number }>;
         const skipped = [] as any[];
 
         for (const rule of rules) {
@@ -90,40 +112,14 @@ Deno.serve(async (req) => {
                 if (minutesSince < (rule.cooldown_minutes || 15)) continue;
             }
 
-            // Log to alert history
-            if (!dryRun) {
-                await base44.asServiceRole.entities.AlertHistory.create({
-                rule_id: rule.id,
-                rule_name: rule.name,
-                metric: rule.metric,
-                threshold,
-                actual_value: actual,
-                operator: rule.operator,
-                notified_inapp: rule.notify_inapp ?? true,
-                notified_email: rule.notify_email ?? false,
-                email_address: rule.email_address || "",
-                target_id: targetId,
-                source: 'live',
-            });
-            }
+            candidates.push({ rule, actual, threshold });
+        }
 
-            // Send email if configured
-            if (!dryRun && rule.notify_email && rule.email_address) {
-                const opLabel = rule.operator === 'gt' ? 'exceeded' : 'dropped below';
-                await base44.asServiceRole.integrations.Core.SendEmail({
-                    to: rule.email_address,
-                    subject: `[DEAD SIGNAL] Alert: ${rule.name}`,
-                    body: `Server alert triggered!\n\nRule: ${rule.name}\nMetric: ${rule.metric}\nThreshold: ${threshold}\nActual: ${actual}\n\nThe metric has ${opLabel} your threshold of ${threshold}.\n\nTime: ${now.toISOString()}`,
-                });
-            }
-
-            // Update last_triggered_at on the rule
-            if (!dryRun) {
-                await base44.asServiceRole.entities.AlertRule.update(rule.id, {
-                    last_triggered_at: now.toISOString(),
-                });
-            }
-
+        const alertConcurrencyRaw = Number(Deno.env.get('ALERT_EXECUTION_CONCURRENCY') || '4');
+        const alertConcurrency = Number.isFinite(alertConcurrencyRaw) && alertConcurrencyRaw > 0
+            ? Math.floor(alertConcurrencyRaw)
+            : 4;
+        const triggered = await mapWithConcurrency(candidates, alertConcurrency, async ({ rule, actual, threshold }) => {
             const item: Record<string, unknown> = {
                 rule: rule.name,
                 metric: rule.metric,
@@ -132,6 +128,40 @@ Deno.serve(async (req) => {
                 operator: rule.operator,
                 target_id: targetId,
             };
+
+            if (!dryRun) {
+                const sideEffects: Promise<unknown>[] = [
+                    base44.asServiceRole.entities.AlertHistory.create({
+                        rule_id: rule.id,
+                        rule_name: rule.name,
+                        metric: rule.metric,
+                        threshold,
+                        actual_value: actual,
+                        operator: rule.operator,
+                        notified_inapp: rule.notify_inapp ?? true,
+                        notified_email: rule.notify_email ?? false,
+                        email_address: rule.email_address || "",
+                        target_id: targetId,
+                        source: 'live',
+                    }),
+                    base44.asServiceRole.entities.AlertRule.update(rule.id, {
+                        last_triggered_at: now.toISOString(),
+                    }),
+                ];
+
+                if (rule.notify_email && rule.email_address) {
+                    const opLabel = rule.operator === 'gt' ? 'exceeded' : 'dropped below';
+                    sideEffects.push(
+                        base44.asServiceRole.integrations.Core.SendEmail({
+                            to: rule.email_address,
+                            subject: `[DEAD SIGNAL] Alert: ${rule.name}`,
+                            body: `Server alert triggered!\n\nRule: ${rule.name}\nMetric: ${rule.metric}\nThreshold: ${threshold}\nActual: ${actual}\n\nThe metric has ${opLabel} your threshold of ${threshold}.\n\nTime: ${now.toISOString()}`,
+                        }),
+                    );
+                }
+
+                await Promise.allSettled(sideEffects);
+            }
 
             const remediationCommand = typeof rule.remediation_command === 'string'
                 ? rule.remediation_command.trim()
@@ -149,8 +179,7 @@ Deno.serve(async (req) => {
                             ? policy.reason || 'remediation_blocked_by_policy'
                             : 'sensitive_remediation_disallowed',
                     };
-                    triggered.push(item);
-                    continue;
+                    return item;
                 }
                 try {
                     await sendPanelCommand(remediationCommand, targetId);
@@ -169,8 +198,8 @@ Deno.serve(async (req) => {
                 }
             }
 
-            triggered.push(item);
-        }
+            return item;
+        });
 
         return Response.json({
             checked: rules.length,

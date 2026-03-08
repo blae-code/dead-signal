@@ -1,22 +1,35 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Crosshair, Plus, X, Save, Trash2, ChevronDown, ChevronUp } from "lucide-react";
-import { T, PageHeader, StatGrid, Panel, FormPanel, Field, FilterPill, ActionBtn, TableRow, EmptyState, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
+import { Crosshair, Plus, Save, ChevronDown, ChevronUp } from "lucide-react";
+import { T, PageHeader, FormPanel, Field, ActionBtn, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
-const STATUSES  = ["Pending", "Active", "Complete", "Failed", "Aborted"];
-const PRIORITIES = ["Critical", "High", "Medium", "Low"];
 const STATUS_COLORS   = { Pending: T.amber, Active: T.green, Complete: T.cyan, Failed: T.red, Aborted: T.textDim };
 const PRIORITY_COLORS = { Critical: T.red, High: T.orange, Medium: T.amber, Low: T.green };
+const STATUS_FILTER_ALL = "__all__";
+const pickFirst = (values) => values.find((value) => typeof value === "string" && value.trim()) || "";
 
-const empty = { title: "", briefing: "", status: "Pending", priority: "Medium", objective_coords: "", reward: "", deadline: "", debrief_notes: "" };
+const buildEmpty = (statuses, priorities) => ({
+  title: "",
+  briefing: "",
+  status: pickFirst(statuses),
+  priority: pickFirst(priorities),
+  objective_coords: "",
+  reward: "",
+  deadline: "",
+  debrief_notes: "",
+});
 
 export default function Missions() {
+  const runtimeConfig = useRuntimeConfig();
+  const STATUSES = runtimeConfig.getArray(["taxonomy", "mission_statuses"]);
+  const PRIORITIES = runtimeConfig.getArray(["taxonomy", "mission_priorities"]);
   const [missions, setMissions] = useState([]);
   const [expanded, setExpanded] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(empty);
-  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [form, setForm] = useState(() => buildEmpty(STATUSES, PRIORITIES));
+  const [filterStatus, setFilterStatus] = useState(STATUS_FILTER_ALL);
   const [user, setUser] = useState(null);
   const isAdmin = user?.role === "admin";
 
@@ -24,6 +37,13 @@ export default function Missions() {
     base44.auth.me().then(setUser).catch(() => {});
     base44.entities.Mission.list("-created_date").then(setMissions).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    setForm((prev) => {
+      if (prev.status && prev.priority) return prev;
+      return buildEmpty(STATUSES, PRIORITIES);
+    });
+  }, [STATUSES, PRIORITIES]);
 
   const handleSave = async () => {
     if (!form.title.trim()) return;
@@ -34,7 +54,7 @@ export default function Missions() {
       const c = await base44.entities.Mission.create(form);
       setMissions(m => [c, ...m]);
     }
-    setForm(empty); setEditing(null); setShowForm(false);
+    setForm(buildEmpty(STATUSES, PRIORITIES)); setEditing(null); setShowForm(false);
   };
 
   const handleDelete = async (id) => {
@@ -48,22 +68,28 @@ export default function Missions() {
     setMissions(m => m.map(x => x.id === id ? u : x));
   };
 
-  const filtered = filterStatus === "ALL" ? missions : missions.filter(m => m.status === filterStatus);
+  const filtered = filterStatus === STATUS_FILTER_ALL ? missions : missions.filter((mission) => mission.status === filterStatus);
 
   return (
     <div className="p-4 space-y-4 max-w-5xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Crosshair} title="MISSION BOARD" color={T.red}>
         <select className="text-xs px-2 py-1.5 border outline-none" style={{ ...selectStyle, minWidth: "110px" }}
           value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-          <option value="ALL">ALL STATUS</option>
+          <option value={STATUS_FILTER_ALL}>ALL STATUS</option>
           {STATUSES.map(s => <option key={s}>{s}</option>)}
         </select>
         {isAdmin && (
-          <ActionBtn color={T.red} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
+          <ActionBtn color={T.red} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(buildEmpty(STATUSES, PRIORITIES)); }}>
             <Plus size={10} /> NEW MISSION
           </ActionBtn>
         )}
       </PageHeader>
+
+      {runtimeConfig.error && (
+        <div className="border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
+          RUNTIME TAXONOMY UNAVAILABLE
+        </div>
+      )}
 
       <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
         {STATUSES.map(s => (

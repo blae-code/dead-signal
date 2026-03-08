@@ -1,205 +1,99 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { T } from "@/components/ui/TerminalCard";
+import { useLiveMetric } from "@/hooks/use-live-metric";
 
-// ── Heart-rate monitor canvas ─────────────────────────────────────────────────
-function EkgCanvas({ data, dataKey, color, height = 90, minVal = 0, maxVal = 100 }) {
-  const canvasRef = useRef(null);
+const toTimeLabel = () =>
+  new Date().toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d", { willReadFrequently: false });
-    const W = canvas.width;
-    const H = canvas.height;
+const pushPoint = (previous, key, value) => [
+  ...previous.slice(-59),
+  { time: toTimeLabel(), [key]: value },
+];
 
-    ctx.clearRect(0, 0, W, H);
-
-    // Grid lines (optimized: less frequent redraws)
-    ctx.strokeStyle = "rgba(58,42,26,0.3)";
-    ctx.lineWidth = 0.5;
-    for (let x = 0; x < W; x += W / 8) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-    }
-    for (let y = 0; y < H; y += H / 4) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-    }
-
-    if (data.length < 2) return;
-
-    const vals = data.map(d => d[dataKey]);
-    const min = Math.max(minVal, Math.min(...vals) * 0.95);
-    const max = Math.min(maxVal, Math.max(...vals) * 1.05);
-    const range = max - min || 1;
-
-    const toY = v => H - ((v - min) / range) * (H * 0.8) - H * 0.1;
-
-    const POINTS = 60;
-    const slice  = vals.slice(-POINTS);
-    const stepX  = W / (POINTS - 1);
-
-    // Draw line segments without individual shadow calls (huge perf boost)
-    ctx.strokeStyle = color + "dd";
-    ctx.lineWidth = 1.2;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    ctx.beginPath();
-    ctx.moveTo(0, toY(slice[0]));
-    for (let i = 1; i < slice.length; i++) {
-      const x = i * stepX;
-      const y = toY(slice[i]);
-      ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-
-    // Leading dot
-    if (slice.length > 0) {
-      const lx = (slice.length - 1) * stepX;
-      const ly = toY(slice[slice.length - 1]);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 8;
-      ctx.beginPath();
-      ctx.arc(lx, ly, 2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-    }
-
-  }, [data, dataKey, color, minVal, maxVal]);
-
+function ChartCard({ title, data, dataKey, color, unit, available, source }) {
+  const latest = data.length > 0 ? data[data.length - 1][dataKey] : null;
   return (
-    <canvas
-      ref={canvasRef}
-      width={280}
-      height={height}
-      style={{ width: "100%", height: `${height}px`, display: "block" }}
-    />
-  );
-}
-
-// ── Chart card ────────────────────────────────────────────────────────────────
-function ChartCard({ title, data, dataKey, color, unit, threshold, maxValue, minVal = 0 }) {
-  const latest = data.length > 0 ? data[data.length - 1][dataKey] : 0;
-  const thresholdValue = threshold || maxValue;
-  const latestColor =
-    thresholdValue && latest > thresholdValue * 0.9 ? T.red :
-    thresholdValue && latest > thresholdValue * 0.7 ? T.amber :
-    color;
-
-  const displayMin = minVal;
-  const displayMax = thresholdValue || maxValue || 100;
-
-  return (
-    <div
-      className="border"
-      style={{
-        borderColor: T.border,
-        background: "linear-gradient(180deg, #0a0704 0%, #080502 100%)",
-        boxShadow: `inset 0 1px 0 ${color}11`,
-        position: "relative",
-        overflow: "hidden",
-      }}
+    <motion.div
+      className="border p-3"
+      style={{ borderColor: T.border, background: T.bg1 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25 }}
     >
-      {/* Top accent line */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${color}55, transparent)` }} />
-
-      {/* Header */}
-      <div
-        className="flex items-center justify-between px-3 py-2 border-b"
-        style={{ borderColor: T.border }}
-      >
-        <span style={{ color: T.textFaint, fontSize: "8.5px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.18em" }}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px", fontFamily: "'Orbitron', monospace" }}>
           {title}
         </span>
-        <span
-          style={{ color: latestColor, fontSize: "12px", fontFamily: "'Orbitron', monospace", fontWeight: "bold",
-            textShadow: `0 0 8px ${latestColor}88` }}
-        >
-          {latest.toFixed(1)}{unit}
-        </span>
-      </div>
-
-      {/* Chart container with Y-axis labels */}
-      <div style={{ display: "flex", padding: "2px 0 0" }}>
-        {/* Y-axis labels */}
-        <div style={{ width: "28px", display: "flex", flexDirection: "column", justifyContent: "space-between", paddingRight: "4px", paddingTop: "2px", paddingBottom: "4px", background: "linear-gradient(180deg, rgba(20, 14, 8, 0.9) 0%, rgba(18, 12, 6, 0.95) 100%)" }}>
-          <span style={{ color: T.textFaint, fontSize: "6.5px", lineHeight: "1", textAlign: "right" }}>
-            {displayMax}
+        <div className="flex items-center gap-2">
+          <span className="text-xs" style={{ color }}>
+            {typeof latest === "number" ? `${latest}${unit}` : "UNAVAILABLE"}
           </span>
-          <span style={{ color: T.textFaint, fontSize: "6.5px", lineHeight: "1", textAlign: "right", opacity: 0.6 }}>
-            {((displayMax + displayMin) / 2).toFixed(0)}
+          <span className="text-[9px] px-1 border" style={{ color: available ? T.green : T.red, borderColor: available ? T.green + "55" : T.red + "55" }}>
+            {source || "unavailable"}
           </span>
-          <span style={{ color: T.textFaint, fontSize: "6.5px", lineHeight: "1", textAlign: "right" }}>
-            {displayMin}
-          </span>
-        </div>
-
-        {/* Canvas */}
-        <div style={{ flex: 1, background: "linear-gradient(180deg, rgba(20, 14, 8, 0.95) 0%, rgba(15, 10, 5, 0.98) 100%)", borderLeft: `1px solid ${T.border}` }}>
-          {data.length < 2 ? (
-            <div
-              className="flex items-center justify-center"
-              style={{ height: "90px", color: T.textFaint, fontSize: "8px", letterSpacing: "0.15em" }}
-            >
-              // AWAITING SIGNAL...
-            </div>
-          ) : (
-            <EkgCanvas data={data} dataKey={dataKey} color={color} minVal={displayMin} maxVal={displayMax} />
-          )}
         </div>
       </div>
-
-      {/* Threshold marker */}
-      {(threshold || maxValue) && (
-        <div className="flex items-center justify-between px-3 py-1 border-t" style={{ borderColor: T.border + "55" }}>
-          <span style={{ color: T.textFaint, fontSize: "7px", letterSpacing: "0.1em" }}>THRESHOLD</span>
-          <span style={{ color: T.amber + "99", fontSize: "7px", fontFamily: "'Orbitron', monospace" }}>{(threshold || maxValue)}{unit}</span>
-        </div>
-      )}
-    </div>
+      <div style={{ width: "100%", height: "150px" }}>
+        <ResponsiveContainer>
+          <LineChart data={data}>
+            <CartesianGrid stroke={T.border} strokeDasharray="3 3" />
+            <XAxis dataKey="time" hide />
+            <YAxis stroke={T.textFaint} width={34} tick={{ fontSize: 10 }} />
+            <Tooltip
+              contentStyle={{ background: T.bg1, border: `1px solid ${T.border}`, color: T.text, fontSize: "11px" }}
+              formatter={(value) => (typeof value === "number" ? `${value}${unit}` : "UNAVAILABLE")}
+            />
+            <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} isAnimationActive={false} connectNulls={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </motion.div>
   );
 }
 
-// ── Main export ───────────────────────────────────────────────────────────────
-export default function PerformanceCharts({ status, statusLoading }) {
-  const [cpuHistory,  setCpuHistory]  = useState([]);
-  const [ramHistory,  setRamHistory]  = useState([]);
+export default function PerformanceCharts({ status }) {
+  const cpuMetric = useLiveMetric(status, "cpu");
+  const ramMetric = useLiveMetric(status, "ramUsedMB");
+  const diskMetric = useLiveMetric(status, "diskMB");
+
+  const [cpuHistory, setCpuHistory] = useState([]);
+  const [ramHistory, setRamHistory] = useState([]);
   const [diskHistory, setDiskHistory] = useState([]);
-  const [fpsHistory,  setFpsHistory]  = useState([]);
-  const [lastStatus,  setLastStatus]  = useState(null);
 
   useEffect(() => {
     if (!status) return;
-    setLastStatus(status);
-    const now = new Date().toLocaleTimeString("en-US", { hour12: false });
-    setCpuHistory(p  => [...p.slice(-59),  { time: now, cpu:  status.cpu ?? 0 }]);
-    setRamHistory(p  => [...p.slice(-59),  { time: now, ram:  Math.round((status.ramUsedMB  ?? 0) / 1024 * 10) / 10 }]);
-    setDiskHistory(p => [...p.slice(-59),  { time: now, disk: Math.round((status.diskMB     ?? 0) / 1024 * 10) / 10 }]);
-    setFpsHistory(p  => [...p.slice(-59),  { time: now, fps:  status.serverFps ?? 0 }]);
-  }, [status]);
+    setCpuHistory((prev) => pushPoint(prev, "cpu", cpuMetric.available ? Number(cpuMetric.value) : null));
+    setRamHistory((prev) => pushPoint(prev, "ram", ramMetric.available ? Math.round((Number(ramMetric.value) / 1024) * 10) / 10 : null));
+    setDiskHistory((prev) => pushPoint(prev, "disk", diskMetric.available ? Math.round((Number(diskMetric.value) / 1024) * 10) / 10 : null));
+  }, [status, cpuMetric.available, cpuMetric.value, ramMetric.available, ramMetric.value, diskMetric.available, diskMetric.value]);
 
-  useEffect(() => {
-    if (!lastStatus) return;
-    const interval = setInterval(() => {
-      const now = new Date().toLocaleTimeString("en-US", { hour12: false });
-      setCpuHistory(p  => p.length > 0 ? [...p.slice(-59),  { time: now, cpu:  p[p.length - 1].cpu  }] : []);
-      setRamHistory(p  => p.length > 0 ? [...p.slice(-59),  { time: now, ram:  p[p.length - 1].ram  }] : []);
-      setDiskHistory(p => p.length > 0 ? [...p.slice(-59),  { time: now, disk: p[p.length - 1].disk }] : []);
-      setFpsHistory(p  => p.length > 0 ? [...p.slice(-59),  { time: now, fps:  p[p.length - 1].fps  }] : []);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [lastStatus]);
+  const cpuColor = useMemo(() => {
+    const valid = cpuHistory.filter((entry) => typeof entry.cpu === "number");
+    if (valid.length === 0) return T.textFaint;
+    const cpu = valid[valid.length - 1].cpu;
+    if (cpu > 80) return T.red;
+    if (cpu > 60) return T.amber;
+    return T.green;
+  }, [cpuHistory]);
 
-  const ramMax = lastStatus?.ramTotal ? Math.round((lastStatus.ramTotal ?? 32768) / 1024) : 32;
-  
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <ChartCard title="CPU %"     data={cpuHistory}  dataKey="cpu"  color={T.green}   unit="%"   threshold={80} />
-      <ChartCard title="RAM (GB)"  data={ramHistory}  dataKey="ram"  color={T.cyan}    unit=" GB" maxValue={ramMax} />
-      <ChartCard title="DISK (GB)" data={diskHistory} dataKey="disk" color={T.gold}    unit=" GB" />
-      <ChartCard title="SRV FPS"   data={fpsHistory}  dataKey="fps"  color={T.olive}   unit=""    threshold={60} />
-    </div>
+    <motion.div
+      className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, delay: 0.1 }}
+    >
+      <ChartCard title="CPU HISTORY" data={cpuHistory} dataKey="cpu" color={cpuColor} unit="%" available={cpuMetric.available} source={cpuMetric.source} />
+      <ChartCard title="RAM HISTORY" data={ramHistory} dataKey="ram" color={T.cyan} unit=" GB" available={ramMetric.available} source={ramMetric.source} />
+      <ChartCard title="DISK HISTORY" data={diskHistory} dataKey="disk" color={T.amber} unit=" GB" available={diskMetric.available} source={diskMetric.source} />
+    </motion.div>
   );
 }
+

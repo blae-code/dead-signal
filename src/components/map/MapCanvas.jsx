@@ -1,5 +1,6 @@
-import { useRef } from "react";
+import { useMemo } from "react";
 import { T } from "@/components/ui/TerminalCard";
+import { useAnimationEnabled } from "@/hooks/use-animation-enabled";
 
 const PIN_COLORS = {
   "Loot Cache": T.amber, "Safe House": T.green, "Danger Zone": T.red,
@@ -14,9 +15,9 @@ const PIN_ICONS = {
   "Rally Point": "★", "Route Waypoint": "◈", "Other": "●"
 };
 
-function getPinAlpha(pin) {
+function getPinAlpha(pin, now) {
   if (!pin.expires_at) return 1;
-  const msLeft = new Date(pin.expires_at).getTime() - Date.now();
+  const msLeft = new Date(pin.expires_at).getTime() - now;
   const totalMs = 6 * 3600 * 1000; // assume 6h total
   if (msLeft <= 0) return 0.15;
   return Math.max(0.2, Math.min(1, msLeft / totalMs));
@@ -29,8 +30,18 @@ export default function MapCanvas({
   pendingCoords, routePoints, broadcasts,
   showFog, fogSectors, fogClearable,
   showHeatmap, heatmapPoints,
-  placingMode, onClick, onPinClick
+  placingMode, onClick, onPinClick,
+  nowMs,
+  hordeSightingType = "",
+  rallyPointType = "",
 }) {
+  const animationEnabled = useAnimationEnabled();
+  const now = nowMs ?? Date.now();
+  const visiblePlayerLocs = useMemo(
+    () => playerLocs.filter((loc) => now - new Date(loc.timestamp).getTime() < 5 * 60 * 1000),
+    [playerLocs, now],
+  );
+
   return (
     <div
       ref={canvasRef}
@@ -125,8 +136,8 @@ export default function MapCanvas({
 
       {/* Pins */}
       {pins.map(pin => {
-        const alpha = getPinAlpha(pin);
-        const isStale = pin.expires_at && new Date(pin.expires_at).getTime() < Date.now();
+        const alpha = getPinAlpha(pin, now);
+        const isStale = pin.expires_at && new Date(pin.expires_at).getTime() < now;
         return (
           <button key={pin.id}
             onClick={e => { e.stopPropagation(); onPinClick(pin); }}
@@ -135,15 +146,15 @@ export default function MapCanvas({
             title={`${pin.title}${isStale ? " [STALE]" : ""}`}
           >
             <span style={{ filter: `drop-shadow(0 0 3px ${PIN_COLORS[pin.type]})` }}>{PIN_ICONS[pin.type]}</span>
-            {pin.type === "Rally Point" && pin.rally_expires_at && (() => {
-              const secsLeft = Math.max(0, Math.round((new Date(pin.rally_expires_at) - Date.now()) / 1000));
+            {rallyPointType && pin.type === rallyPointType && pin.rally_expires_at && (() => {
+              const secsLeft = Math.max(0, Math.round((new Date(pin.rally_expires_at) - now) / 1000));
               return secsLeft > 0 ? (
                 <span style={{ position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)", fontSize: "7px", color: "#ff00ff", whiteSpace: "nowrap" }}>
                   {secsLeft}s
                 </span>
               ) : null;
             })()}
-            {pin.type === "Horde Sighting" && pin.horde_direction && (
+            {hordeSightingType && pin.type === hordeSightingType && pin.horde_direction && (
               <span style={{ position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)", fontSize: "7px", color: T.red }}>
                 →{pin.horde_direction}
               </span>
@@ -153,12 +164,23 @@ export default function MapCanvas({
       })}
 
       {/* Player locations */}
-      {playerLocs.filter(loc => Date.now() - new Date(loc.timestamp).getTime() < 5 * 60 * 1000).map(loc => {
+      {visiblePlayerLocs.map(loc => {
         const isMe = loc.player_callsign === myCallsign;
         return (
           <div key={loc.id} className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{ left: `${loc.x}%`, top: `${loc.y}%` }}>
-            <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: isMe ? T.green : T.cyan, border: `2px solid ${isMe ? T.green : T.cyan}`, boxShadow: `0 0 8px ${isMe ? T.green : T.cyan}`, animation: "nav-dot-pulse 1.5s infinite" }} />
+            <div
+              className={animationEnabled ? "layout-nav-dot-pulse" : undefined}
+              style={{
+                width: "10px",
+                height: "10px",
+                borderRadius: "50%",
+                background: isMe ? T.green : T.cyan,
+                border: `2px solid ${isMe ? T.green : T.cyan}`,
+                boxShadow: `0 0 8px ${isMe ? T.green : T.cyan}`,
+                animationDuration: "1.5s",
+              }}
+            />
             <div style={{ position: "absolute", top: "12px", left: "50%", transform: "translateX(-50%)", color: isMe ? T.green : T.cyan, fontSize: "7px", whiteSpace: "nowrap", textShadow: `0 0 4px ${isMe ? T.green : T.cyan}`, fontFamily: "'Share Tech Mono', monospace" }}>
               {loc.player_callsign}{loc.in_vehicle ? " 🚗" : ""}
             </div>
@@ -182,7 +204,19 @@ export default function MapCanvas({
       {broadcasts.map(b => (
         <div key={b.id} className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
           style={{ left: `${b.x ?? 50}%`, top: `${b.y ?? 50}%`, zIndex: 10 }}>
-          <div style={{ background: "rgba(255,0,255,0.12)", border: "1px solid #ff00ff", color: "#ff00ff", fontSize: "9px", padding: "3px 8px", whiteSpace: "nowrap", animation: "threat-blink 0.8s infinite", fontFamily: "'Orbitron', monospace", letterSpacing: "0.1em" }}>
+          <div
+            className={animationEnabled ? "threat-blink" : undefined}
+            style={{
+              background: "rgba(255,0,255,0.12)",
+              border: "1px solid #ff00ff",
+              color: "#ff00ff",
+              fontSize: "9px",
+              padding: "3px 8px",
+              whiteSpace: "nowrap",
+              fontFamily: "'Orbitron', monospace",
+              letterSpacing: "0.1em",
+            }}
+          >
             ⚡ {b.message}
           </div>
         </div>

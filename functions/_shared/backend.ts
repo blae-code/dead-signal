@@ -391,6 +391,35 @@ const sleep = async (ms: number): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+const mapWithConcurrency = async <T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T, index: number) => Promise<R>,
+): Promise<R[]> => {
+  if (items.length === 0) {
+    return [];
+  }
+
+  const workerCount = Math.max(1, Math.min(concurrency, items.length));
+  const results = new Array<R>(items.length);
+  let cursor = 0;
+
+  await Promise.all(
+    Array.from({ length: workerCount }).map(async () => {
+      while (true) {
+        const index = cursor;
+        cursor += 1;
+        if (index >= items.length) {
+          break;
+        }
+        results[index] = await mapper(items[index], index);
+      }
+    }),
+  );
+
+  return results;
+};
+
 const parsePanelJson = (rawBody: string, contextCode: string): JsonObject => {
   const parsed = readJson(rawBody, contextCode);
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
@@ -976,10 +1005,10 @@ export const fetchExternalLiveSources = async (): Promise<ExternalSourceFetchRes
 
   const defaultTimeout = parseEnvInt("LIVE_SOURCE_TIMEOUT_MS", 8_000, 1_000);
   const retries = parseEnvInt("LIVE_SOURCE_RETRIES", 1, 0);
+  const concurrency = parseEnvInt("LIVE_SOURCE_CONCURRENCY", 3, 1);
   const maxAttempts = retries + 1;
-  const results: ExternalSourceFetchResult[] = [];
 
-  for (const source of sources) {
+  return mapWithConcurrency(sources, concurrency, async (source) => {
     let lastError: string | null = null;
     let finalStatus: number | null = null;
     let finalData: unknown | null = null;
@@ -1032,7 +1061,7 @@ export const fetchExternalLiveSources = async (): Promise<ExternalSourceFetchRes
       }
     }
 
-    results.push({
+    return {
       source_id: source.source_id,
       url: source.url,
       ok,
@@ -1042,8 +1071,6 @@ export const fetchExternalLiveSources = async (): Promise<ExternalSourceFetchRes
       source: ok ? "live" : "unavailable",
       data: ok ? finalData : null,
       error: ok ? null : (lastError || "External source unavailable."),
-    });
-  }
-
-  return results;
+    };
+  });
 };

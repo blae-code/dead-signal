@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronUp, Trash2, Send, Loader, X } from "lucide-react";
+import { ChevronUp, Trash2, Send, Loader } from "lucide-react";
 import { T } from "@/components/ui/TerminalCard";
 
 const TABS = {

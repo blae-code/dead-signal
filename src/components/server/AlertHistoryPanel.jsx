@@ -1,67 +1,101 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { History, Trash2 } from "lucide-react";
-import { motion } from "framer-motion";
-import { T } from "@/components/ui/TerminalCard";
+import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
+import { useQueryClient } from "@tanstack/react-query";
+
+const S = {
+  border: "#1e1e1e",
+  dim: "#555",
+  faint: "#333",
+  warn: "#ffb000",
+  danger: "#ff2020",
+  text: "#c8c8c8",
+};
+
+const opLabel = (op) => ({
+  gt: ">",
+  gte: ">=",
+  lt: "<",
+  lte: "<=",
+  eq: "=",
+  neq: "!=",
+}[op] || op);
+
+const valueColor = (actual, op, threshold) => {
+  const breached = op === "gt" || op === "gte"
+    ? actual >= threshold
+    : op === "lt" || op === "lte"
+      ? actual <= threshold
+      : actual === threshold;
+  return breached ? S.danger : S.warn;
+};
 
 export default function AlertHistoryPanel({ refreshTick }) {
-  const [history, setHistory] = useState([]);
+  const queryClient = useQueryClient();
+  const { data: history = [] } = useRealtimeEntityList({
+    queryKey: ["alert-history"],
+    entityName: "AlertHistory",
+    queryFn: () => base44.entities.AlertHistory.list("-created_date", 100).catch(() => []),
+    patchStrategy: "patch",
+  });
 
-  const load = () => {
-    base44.entities.AlertHistory.list("-created_date", 50).then(setHistory).catch(() => {});
-  };
-
-  useEffect(() => { load(); }, [refreshTick]);
+  useEffect(() => {
+    if (!refreshTick) return;
+    queryClient.invalidateQueries({ queryKey: ["alert-history"] });
+  }, [queryClient, refreshTick]);
 
   const clearAll = async () => {
-    for (const h of history) {
-      await base44.entities.AlertHistory.delete(h.id).catch(() => {});
-    }
-    setHistory([]);
+    await Promise.all(history.map((entry) => base44.entities.AlertHistory.delete(entry.id).catch(() => {})));
+    queryClient.invalidateQueries({ queryKey: ["alert-history"] });
   };
 
-  const severityColor = (s) => ({ CRITICAL: T.red, ALERT: T.orange, WARN: T.amber }[s] || T.textFaint);
+  const breachedCount = useMemo(
+    () => history.length,
+    [history.length],
+  );
 
   return (
-    <div className="border" style={{ borderColor: T.border, background: T.bg1 }}>
-      <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: T.border }}>
-        <div className="flex items-center gap-2">
-          <History size={10} style={{ color: T.red }} />
-          <span style={{ color: T.red, fontSize: "10px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.15em" }}>ALERT HISTORY</span>
-        </div>
+    <div className="border" style={{ borderColor: S.border, background: "#060606" }}>
+      <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: S.border }}>
+        <History size={11} style={{ color: S.warn }} />
+        <span
+          className="text-xs font-bold tracking-widest"
+          style={{ color: S.warn, fontFamily: "'Orbitron', monospace" }}
+        >
+          ALERT HISTORY ({breachedCount})
+        </span>
         {history.length > 0 && (
-          <button onClick={clearAll} className="hover:opacity-70 transition-opacity">
-            <Trash2 size={10} style={{ color: T.textFaint }} />
+          <button
+            onClick={clearAll}
+            className="ml-auto flex items-center gap-1 text-xs px-2 py-1 border"
+            style={{ borderColor: S.danger + "77", color: S.danger }}
+          >
+            <Trash2 size={10} />
+            CLEAR
           </button>
         )}
       </div>
 
-      <div className="overflow-y-auto" style={{ maxHeight: "200px" }}>
+      <div className="max-h-72 overflow-y-auto">
         {history.length === 0 ? (
-          <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>// NO ALERT HISTORY</div>
+          <div className="px-3 py-4 text-xs" style={{ color: S.faint }}>
+            // NO ALERT TRIGGERS
+          </div>
         ) : (
-          history.map((h, i) => (
-            <motion.div
-              key={h.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.03 }}
-              className="flex items-start gap-2 px-3 py-2"
-              style={{ borderBottom: `1px solid ${T.border}44` }}
-            >
-              <div
-                style={{ width: "6px", height: "6px", borderRadius: "50%", background: severityColor(h.severity), flexShrink: 0, marginTop: "3px" }}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="text-xs" style={{ color: T.text, fontSize: "10px" }}>{h.rule_name || h.metric}</div>
-                <div style={{ color: T.textFaint, fontSize: "9px" }}>
-                  {h.metric} {h.operator === "gt" ? ">" : "<"} {h.threshold} — actual: <span style={{ color: severityColor(h.severity) }}>{h.actual}</span>
-                </div>
+          history.map((item) => (
+            <div key={item.id} className="px-3 py-2 border-b text-xs" style={{ borderColor: S.border }}>
+              <div className="flex items-center justify-between gap-2">
+                <span style={{ color: S.text, fontWeight: 700 }}>{item.rule_name || "Rule Triggered"}</span>
+                <span style={{ color: S.dim }}>{item.created_date?.slice(0, 19)?.replace("T", " ") || ""}</span>
               </div>
-              <div style={{ color: T.textFaint, fontSize: "8px", flexShrink: 0 }}>
-                {new Date(h.created_date).toLocaleTimeString("en-US", { hour12: false })}
+              <div style={{ color: valueColor(item.actual_value, item.operator, item.threshold) }}>
+                {item.metric} {opLabel(item.operator)} {item.threshold} • actual {item.actual_value}
               </div>
-            </motion.div>
+              <div style={{ color: S.dim }}>
+                target: {item.target_id || "default"} • source: {item.source || "live"}
+              </div>
+            </div>
           ))
         )}
       </div>

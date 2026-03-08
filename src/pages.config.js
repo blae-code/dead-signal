@@ -47,32 +47,36 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import AIAgent from './pages/AIAgent';
-import Challenges from './pages/Challenges';
-import ClanBoard from './pages/ClanBoard';
-import ClanCalendar from './pages/ClanCalendar';
-import ClanMap from './pages/ClanMap';
-import ClanRoster from './pages/ClanRoster';
-import ClanTreasury from './pages/ClanTreasury';
-import ClanVoting from './pages/ClanVoting';
-import ClanWiki from './pages/ClanWiki';
-import Dashboard from './pages/Dashboard';
-import DeathMap from './pages/DeathMap';
-import Intel from './pages/Intel';
-import Inventory from './pages/Inventory';
-import LoadoutPlanner from './pages/LoadoutPlanner';
-import LootSharing from './pages/LootSharing';
-import LootTracker from './pages/LootTracker';
-import Missions from './pages/Missions';
-import MyStats from './pages/MyStats';
-import PlayerProfile from './pages/PlayerProfile';
-import PostMissionAnalysis from './pages/PostMissionAnalysis';
-import ServerMonitor from './pages/ServerMonitor';
-import SquadVitalsMonitor from './pages/SquadVitalsMonitor';
-import SupplyChainManager from './pages/SupplyChainManager';
-import SurvivalPlanner from './pages/SurvivalPlanner';
-import ResourceTradingHub from './pages/ResourceTradingHub';
+import { lazy } from "react";
 import __Layout from './Layout.jsx';
+
+const lazyPage = (loader) => {
+    const Page = lazy(loader);
+    Page.preload = loader;
+    return Page;
+};
+
+const AIAgent = lazyPage(() => import("./pages/AIAgent"));
+const Challenges = lazyPage(() => import("./pages/Challenges"));
+const ClanBoard = lazyPage(() => import("./pages/ClanBoard"));
+const ClanCalendar = lazyPage(() => import("./pages/ClanCalendar"));
+const ClanRoster = lazyPage(() => import("./pages/ClanRoster"));
+const ClanTreasury = lazyPage(() => import("./pages/ClanTreasury"));
+const ClanVoting = lazyPage(() => import("./pages/ClanVoting"));
+const ClanWiki = lazyPage(() => import("./pages/ClanWiki"));
+const Dashboard = lazyPage(() => import("./pages/Dashboard"));
+const DeathMap = lazyPage(() => import("./pages/DeathMap"));
+const EngineeringOps = lazyPage(() => import("./pages/EngineeringOps"));
+const Intel = lazyPage(() => import("./pages/Intel"));
+const Inventory = lazyPage(() => import("./pages/Inventory"));
+const LoadoutPlanner = lazyPage(() => import("./pages/LoadoutPlanner"));
+const LootSharing = lazyPage(() => import("./pages/LootSharing"));
+const LootTracker = lazyPage(() => import("./pages/LootTracker"));
+const Missions = lazyPage(() => import("./pages/Missions"));
+const MyStats = lazyPage(() => import("./pages/MyStats"));
+const PlayerProfile = lazyPage(() => import("./pages/PlayerProfile"));
+const ServerMonitor = lazyPage(() => import("./pages/ServerMonitor"));
+const TacticalMap = lazyPage(() => import("./pages/TacticalMap"));
 
 
 export const PAGES = {
@@ -80,13 +84,13 @@ export const PAGES = {
     "Challenges": Challenges,
     "ClanBoard": ClanBoard,
     "ClanCalendar": ClanCalendar,
-    "ClanMap": ClanMap,
     "ClanRoster": ClanRoster,
     "ClanTreasury": ClanTreasury,
     "ClanVoting": ClanVoting,
     "ClanWiki": ClanWiki,
     "Dashboard": Dashboard,
     "DeathMap": DeathMap,
+    "EngineeringOps": EngineeringOps,
     "Intel": Intel,
     "Inventory": Inventory,
     "LoadoutPlanner": LoadoutPlanner,
@@ -95,16 +99,19 @@ export const PAGES = {
     "Missions": Missions,
     "MyStats": MyStats,
     "PlayerProfile": PlayerProfile,
-    "PostMissionAnalysis": PostMissionAnalysis,
     "ServerMonitor": ServerMonitor,
-    "SquadVitalsMonitor": SquadVitalsMonitor,
-    "SupplyChainManager": SupplyChainManager,
-    "SurvivalPlanner": SurvivalPlanner,
-    "ResourceTradingHub": ResourceTradingHub,
+    "TacticalMap": TacticalMap,
 }
 
 export const pagesConfig = {
     mainPage: "ServerMonitor",
     Pages: PAGES,
     Layout: __Layout,
+};
+
+export const preloadPage = (pageKey) => {
+    const Page = PAGES[pageKey];
+    if (Page?.preload) {
+        Page.preload();
+    }
 };

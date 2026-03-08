@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, X, ChevronDown } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { T } from "@/components/ui/TerminalCard";
 
 const SEV_COLORS = { INFO: T.cyan, WARN: T.amber, ALERT: T.orange, CRITICAL: T.red };

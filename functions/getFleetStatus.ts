@@ -22,11 +22,14 @@ Deno.serve(async (req) => {
 
     const fleet = await Promise.all(targets.map(async (target) => {
       try {
-        const resources = await fetchPanelServerResources(target.target_id);
+        const [resources, detailsRaw] = await Promise.all([
+          fetchPanelServerResources(target.target_id),
+          includeDetails ? fetchPanelServerDetails(target.target_id) : Promise.resolve(null),
+        ]);
         const parsed = parsePanelResourceMetrics(resources);
         let detailsSummary: Record<string, unknown> | null = null;
-        if (includeDetails) {
-          const details = await fetchPanelServerDetails(target.target_id) as Record<string, any>;
+        if (detailsRaw) {
+          const details = detailsRaw as Record<string, any>;
           detailsSummary = {
             name: details?.attributes?.name ?? null,
             node: details?.attributes?.node ?? null,

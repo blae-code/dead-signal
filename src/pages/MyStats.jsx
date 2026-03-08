@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { BarChart2, TrendingUp, Skull, Clock, Target } from "lucide-react";
+import { BarChart2, Skull } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { T, PageHeader, Panel, StatGrid } from "@/components/ui/TerminalCard";
 

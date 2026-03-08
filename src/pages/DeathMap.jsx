@@ -2,16 +2,27 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Skull, Plus, Trash2, CheckCircle } from "lucide-react";
 import { T, PageHeader, Panel, FormPanel, Field, ActionBtn, EmptyState } from "@/components/ui/TerminalCard";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
-const CAUSES = ["Zombie","Player","Fall","Hunger","Thirst","Cold","Unknown"];
-const CAUSE_COLORS = { Zombie: T.green, Player: T.red, Fall: T.amber, Hunger: T.orange, Thirst: T.cyan, Cold: "#88ccff", Unknown: T.textDim };
-const empty = { cause: "Unknown", x: "", y: "", location_name: "", gear_lost: "", notes: "" };
+const pickFirst = (values) => values.find((value) => typeof value === "string" && value.trim()) || "";
+
+const buildEmpty = (causes) => ({
+  cause: pickFirst(causes),
+  x: "",
+  y: "",
+  location_name: "",
+  gear_lost: "",
+  notes: "",
+});
 
 export default function DeathMap() {
+  const runtimeConfig = useRuntimeConfig();
+  const CAUSES = runtimeConfig.getArray(["taxonomy", "death_causes"]);
+  const causeColors = useRef({});
   const [user, setUser] = useState(null);
   const [deaths, setDeaths] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(empty);
+  const [form, setForm] = useState(() => buildEmpty(CAUSES));
   const [placing, setPlacing] = useState(false);
   const [selected, setSelected] = useState(null);
   const mapRef = useRef(null);
@@ -25,6 +36,18 @@ export default function DeathMap() {
     };
     load();
   }, []);
+
+  useEffect(() => {
+    if (!form.cause) {
+      setForm((prev) => ({ ...prev, ...buildEmpty(CAUSES) }));
+    }
+  }, [CAUSES, form.cause]);
+
+  useEffect(() => {
+    causeColors.current = Object.fromEntries(
+      CAUSES.map((cause, index) => [cause, [T.green, T.red, T.amber, T.orange, T.cyan, "#88ccff", T.textDim][index % 7]]),
+    );
+  }, [CAUSES]);
 
   const handleMapClick = (e) => {
     if (!placing) return;
@@ -40,7 +63,7 @@ export default function DeathMap() {
     const entry = { ...form, player_email: user.email, x: Number(form.x), y: Number(form.y) };
     const created = await base44.entities.DeathMark.create(entry);
     setDeaths(prev => [created, ...prev]);
-    setForm(empty);
+    setForm(buildEmpty(CAUSES));
     setShowForm(false);
   };
 
@@ -54,18 +77,21 @@ export default function DeathMap() {
     setDeaths(prev => prev.map(x => x.id === d.id ? updated : x));
   };
 
-  const toPixel = (val, max = 14500, size) => (val / max) * size;
-
   return (
     <div className="p-4 space-y-4 max-w-5xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Skull} title="DEATH MAP" color={T.red}>
         <ActionBtn color={placing ? T.amber : T.red} onClick={() => { setPlacing(!placing); setShowForm(false); }}>
           <Plus size={10} /> {placing ? "CANCEL PLACEMENT" : "MARK DEATH"}
         </ActionBtn>
-        <ActionBtn color={T.green} onClick={() => { setPlacing(false); setShowForm(true); setForm(empty); }}>
+        <ActionBtn color={T.green} onClick={() => { setPlacing(false); setShowForm(true); setForm(buildEmpty(CAUSES)); }}>
           + MANUAL ENTRY
         </ActionBtn>
       </PageHeader>
+      {runtimeConfig.error && (
+        <div className="border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
+          RUNTIME TAXONOMY UNAVAILABLE
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2">
@@ -107,7 +133,6 @@ export default function DeathMap() {
 
           {/* Death markers */}
           {deaths.map(d => {
-            const rect = mapRef.current?.getBoundingClientRect() || { width: 600, height: 338 };
             const px = (d.x / 14500) * 100;
             const py = (d.y / 14500) * 100;
             return (
@@ -134,7 +159,7 @@ export default function DeathMap() {
                     minWidth: 140, zIndex: 20, fontSize: "10px"
                   }}>
                     <div style={{ color: T.amber, fontWeight: "bold", marginBottom: 2 }}>{d.location_name || `(${d.x}, ${d.y})`}</div>
-                    <div style={{ color: CAUSE_COLORS[d.cause] }}>Cause: {d.cause}</div>
+                    <div style={{ color: causeColors.current[d.cause] || T.textDim }}>Cause: {d.cause}</div>
                     {d.gear_lost && <div style={{ color: T.textDim }}>Lost: {d.gear_lost}</div>}
                     <div style={{ color: d.recovered ? T.green : T.textFaint }}>
                       {d.recovered ? "✓ RECOVERED" : "UNRECOVERED"}
@@ -195,7 +220,7 @@ export default function DeathMap() {
                 <Skull size={10} style={{ color: d.recovered ? T.green : T.red }} />
                 <div>
                   <div style={{ color: T.text, fontSize: "11px" }}>{d.location_name || `Grid (${d.x}, ${d.y})`}</div>
-                  <div style={{ color: CAUSE_COLORS[d.cause], fontSize: "9px" }}>{d.cause} · {d.created_date?.slice(0,10)}</div>
+                  <div style={{ color: causeColors.current[d.cause] || T.textDim, fontSize: "9px" }}>{d.cause} · {d.created_date?.slice(0,10)}</div>
                   {d.gear_lost && <div style={{ color: T.textFaint, fontSize: "9px" }}>Lost: {d.gear_lost}</div>}
                 </div>
               </div>

@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { MessageSquare, Send, Pin, Trash2 } from "lucide-react";
 import { T, PageHeader, ActionBtn } from "@/components/ui/TerminalCard";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
-const CHANNELS = ["General","Ops","Loot","Tactical","Off-Topic"];
-const CHAN_COLORS = { General: T.green, Ops: T.red, Loot: T.gold, Tactical: T.cyan, "Off-Topic": T.steel };
+const CHAN_COLORS = { General: T.text, Ops: T.red, Loot: T.amber, Tactical: T.cyan, "Off-Topic": T.textDim };
 
 export default function ClanBoard() {
+  const runtimeConfig = useRuntimeConfig();
+  const CHANNELS = runtimeConfig.getArray(["taxonomy", "clan_channels"]);
   const [user, setUser] = useState(null);
   const [member, setMember] = useState(null);
   const [channel, setChannel] = useState("General");
@@ -14,6 +16,13 @@ export default function ClanBoard() {
   const [input, setInput] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const bottomRef = useRef(null);
+
+  useEffect(() => {
+    if (CHANNELS.length === 0) return;
+    if (!CHANNELS.includes(channel)) {
+      setChannel(CHANNELS[0]);
+    }
+  }, [CHANNELS, channel]);
 
   useEffect(() => {
     const load = async () => {
@@ -76,10 +85,15 @@ export default function ClanBoard() {
   const regular = chanMsgs.filter(m => !m.pinned);
 
   return (
-    <div className="flex flex-col" style={{ minHeight: "calc(100vh - 48px)" }}>
+    <div className="flex flex-col" style={{ height: "calc(100vh - 48px)" }}>
       <div className="p-4 pb-2">
         <PageHeader icon={MessageSquare} title="CLAN BOARD" color={T.green} />
       </div>
+      {runtimeConfig.error && (
+        <div className="mx-4 mb-2 border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
+          RUNTIME TAXONOMY UNAVAILABLE
+        </div>
+      )}
 
       <div className="flex flex-1 overflow-hidden px-4 pb-4 gap-3">
         {/* Channel sidebar */}

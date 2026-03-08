@@ -1,69 +1,107 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Radio, Plus, Trash2, Save, Pin } from "lucide-react";
-import { T, PageHeader, FormPanel, Field, FilterPill, ActionBtn, EmptyState, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
+import { T, PageHeader, FormPanel, Field, FilterPill, ActionBtn, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
-const TYPES = ["Emergency", "Intel", "Ops", "General", "Maintenance"];
 const TYPE_COLORS = { Emergency: T.red, Intel: T.cyan, Ops: T.orange, General: T.green, Maintenance: T.amber };
 const TYPE_ICONS  = { Emergency: "⚠", Intel: "◈", Ops: "⚑", General: "◉", Maintenance: "⚙" };
-
-const empty = { title: "", body: "", type: "General", pinned: false };
+const ALL_FILTER = "__all__";
+const pickFirst = (values) => values.find((value) => typeof value === "string" && value.trim()) || "";
+const buildEmpty = (types) => ({
+  title: "",
+  body: "",
+  type: pickFirst(types),
+  pinned: false,
+});
 
 export default function Intel() {
-  const [announcements, setAnnouncements] = useState([]);
-  const [user, setUser] = useState(null);
+  const queryClient = useQueryClient();
+  const runtimeConfig = useRuntimeConfig();
+  const TYPES = runtimeConfig.getArray(["taxonomy", "intel_types"]);
+  const { data: user } = useQuery({
+    queryKey: ["auth", "me"],
+    queryFn: () => base44.auth.me(),
+    staleTime: 60_000,
+  });
+  const { data: announcements = [] } = useQuery({
+    queryKey: ["intel", "announcements"],
+    queryFn: () => base44.entities.Announcement.list("-created_date"),
+    staleTime: 15_000,
+  });
   const isAdmin = user?.role === "admin";
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm]     = useState(empty);
+  const [form, setForm]     = useState(() => buildEmpty(TYPES));
   const [editing, setEditing] = useState(null);
-  const [filter, setFilter] = useState("ALL");
+  const [filter, setFilter] = useState(ALL_FILTER);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-    base44.entities.Announcement.list("-created_date").then(setAnnouncements).catch(() => {});
+    if (form.type) return;
+    setForm((prev) => ({ ...prev, ...buildEmpty(TYPES) }));
+  }, [TYPES, form.type]);
+
+  useEffect(() => {
     const unsub = base44.entities.Announcement.subscribe(ev => {
-      if (ev.type === "create") setAnnouncements(a => [ev.data, ...a]);
-      if (ev.type === "update") setAnnouncements(a => a.map(x => x.id === ev.id ? ev.data : x));
-      if (ev.type === "delete") setAnnouncements(a => a.filter(x => x.id !== ev.id));
+      queryClient.setQueryData(["intel", "announcements"], (current = []) => {
+        if (ev.type === "create") return [ev.data, ...current];
+        if (ev.type === "update") return current.map((entry) => entry.id === ev.id ? ev.data : entry);
+        if (ev.type === "delete") return current.filter((entry) => entry.id !== ev.id);
+        return current;
+      });
     });
     return unsub;
-  }, []);
+  }, [queryClient]);
 
   const handleSave = async () => {
     if (!form.title.trim() || !form.body.trim()) return;
     const data = { ...form, posted_by: user?.full_name || user?.email || "Unknown" };
     if (editing) {
       const u = await base44.entities.Announcement.update(editing, data);
-      setAnnouncements(a => a.map(x => x.id === editing ? u : x));
+      queryClient.setQueryData(["intel", "announcements"], (current = []) =>
+        current.map((entry) => entry.id === editing ? u : entry),
+      );
     } else {
       const c = await base44.entities.Announcement.create(data);
-      setAnnouncements(a => [c, ...a]);
+      queryClient.setQueryData(["intel", "announcements"], (current = []) => [c, ...current]);
     }
-    setForm(empty); setEditing(null); setShowForm(false);
+    setForm(buildEmpty(TYPES)); setEditing(null); setShowForm(false);
   };
 
-  const handleDelete = async (id) => { await base44.entities.Announcement.delete(id); setAnnouncements(a => a.filter(x => x.id !== id)); };
+  const handleDelete = async (id) => {
+    await base44.entities.Announcement.delete(id);
+    queryClient.setQueryData(["intel", "announcements"], (current = []) =>
+      current.filter((entry) => entry.id !== id),
+    );
+  };
   const handlePin = async (ann) => {
     const u = await base44.entities.Announcement.update(ann.id, { pinned: !ann.pinned });
-    setAnnouncements(a => a.map(x => x.id === ann.id ? u : x));
+    queryClient.setQueryData(["intel", "announcements"], (current = []) =>
+      current.map((entry) => entry.id === ann.id ? u : entry),
+    );
   };
 
-  const filtered = filter === "ALL" ? announcements : announcements.filter(a => a.type === filter);
+  const filtered = filter === ALL_FILTER ? announcements : announcements.filter(a => a.type === filter);
   const sorted   = [...filtered.filter(a => a.pinned), ...filtered.filter(a => !a.pinned)];
 
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Radio} title="INTEL FEED" color={T.amber}>
         {isAdmin && (
-          <ActionBtn color={T.amber} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
+          <ActionBtn color={T.amber} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(buildEmpty(TYPES)); }}>
             <Plus size={10} /> BROADCAST
           </ActionBtn>
         )}
       </PageHeader>
+      {runtimeConfig.error && (
+        <div className="border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
+          RUNTIME TAXONOMY UNAVAILABLE
+        </div>
+      )}
 
       {/* Filter tabs */}
       <div className="flex gap-1.5 flex-wrap">
-        <FilterPill label="ALL" active={filter === "ALL"} color={T.amber} onClick={() => setFilter("ALL")} />
+        <FilterPill label="ALL" active={filter === ALL_FILTER} color={T.amber} onClick={() => setFilter(ALL_FILTER)} />
         {TYPES.map(t => (
           <FilterPill key={t} label={`${TYPE_ICONS[t]} ${t}`} active={filter === t}
             color={TYPE_COLORS[t]} onClick={() => setFilter(t)} />
@@ -112,7 +150,7 @@ export default function Intel() {
             const tc = TYPE_COLORS[a.type] || T.amber;
             return (
               <div key={a.id} className="border p-4 space-y-2"
-                style={{ borderColor: a.pinned ? tc + "66" : (a.type === "Emergency" ? T.red + "55" : T.border), background: T.bg1 }}>
+                style={{ borderColor: a.pinned ? tc + "66" : T.border, background: T.bg1 }}>
                 <div className="flex items-start gap-3">
                   {/* Type badge */}
                   <div className="flex-shrink-0 mt-0.5 w-6 h-6 border flex items-center justify-center text-xs"

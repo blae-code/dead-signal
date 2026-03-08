@@ -2,17 +2,43 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Target, Plus, Trash2, CheckCircle } from "lucide-react";
 import { T, PageHeader, Panel, FormPanel, Field, FilterPill, ActionBtn, EmptyState } from "@/components/ui/TerminalCard";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
-const CATS = ["All","Combat","Survival","Looting","Social","Exploration"];
 const CAT_COLORS = { Combat: T.red, Survival: T.green, Looting: T.amber, Social: T.cyan, Exploration: "#b8a890" };
-const empty = { title: "", description: "", category: "Combat", target: 10, progress: 0, deadline: "", reward_notes: "" };
+const pickByToken = (values, token) =>
+  values.find((value) => typeof value === "string" && value.toLowerCase() === token) || "";
+const pickFirst = (values) => values.find((value) => typeof value === "string" && value.trim()) || "";
+const pickFirstNonAll = (values) =>
+  values.find((value) => typeof value === "string" && value.toLowerCase() !== "all") || pickFirst(values);
+const buildEmpty = (cats) => ({
+  title: "",
+  description: "",
+  category: pickFirstNonAll(cats),
+  target: 10,
+  progress: 0,
+  deadline: "",
+  reward_notes: "",
+});
 
 export default function Challenges() {
+  const runtimeConfig = useRuntimeConfig();
+  const CATS = runtimeConfig.getArray(["taxonomy", "challenge_categories"]);
+  const allFilter = pickByToken(CATS, "all") || pickFirst(CATS);
   const [user, setUser] = useState(null);
   const [challenges, setChallenges] = useState([]);
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(empty);
+  const [form, setForm] = useState(() => buildEmpty(CATS));
+
+  useEffect(() => {
+    if (!form.category) {
+      setForm((prev) => ({ ...prev, ...buildEmpty(CATS) }));
+    }
+  }, [CATS, form.category]);
+
+  useEffect(() => {
+    if (!filter && allFilter) setFilter(allFilter);
+  }, [allFilter, filter]);
 
   useEffect(() => {
     const load = async () => {
@@ -28,7 +54,7 @@ export default function Challenges() {
     const entry = { ...form, player_email: user.email, target: Number(form.target), progress: Number(form.progress) };
     const created = await base44.entities.Challenge.create(entry);
     setChallenges(prev => [created, ...prev]);
-    setForm(empty);
+    setForm(buildEmpty(CATS));
     setShowForm(false);
   };
 
@@ -44,7 +70,7 @@ export default function Challenges() {
     setChallenges(prev => prev.filter(c => c.id !== id));
   };
 
-  const filtered = filter === "All" ? challenges : challenges.filter(c => c.category === filter);
+  const filtered = !filter || filter === allFilter ? challenges : challenges.filter((challenge) => challenge.category === filter);
   const active = filtered.filter(c => !c.completed);
   const done = filtered.filter(c => c.completed);
 
@@ -55,6 +81,11 @@ export default function Challenges() {
           <Plus size={10} /> NEW CHALLENGE
         </ActionBtn>
       </PageHeader>
+      {runtimeConfig.error && (
+        <div className="border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
+          RUNTIME TAXONOMY UNAVAILABLE
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2">

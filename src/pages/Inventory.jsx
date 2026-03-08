@@ -1,54 +1,78 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Package, Plus, Trash2, Save, X } from "lucide-react";
+import { Package, Plus, Trash2, Save } from "lucide-react";
 import { T, PageHeader, Panel, FormPanel, Field, FilterPill, ActionBtn, TableHeader, TableRow, EmptyState, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
+import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-const CATEGORIES = ["Weapon","Ammo","Medical","Food","Water","Tool","Material","Clothing","Misc"];
-const CONDITIONS = ["Pristine","Good","Worn","Damaged","Ruined"];
-const LOCATIONS  = ["Carried","Stash","Vehicle","Base Storage"];
 const CAT_COLORS  = { Weapon: T.red, Ammo: T.orange, Medical: "#ff5555", Food: T.green, Water: T.cyan, Tool: T.amber, Material: T.textDim, Clothing: "#b088ff", Misc: T.textFaint };
 const COND_COLORS = { Pristine: T.green, Good: T.green + "88", Worn: T.amber, Damaged: T.orange, Ruined: T.red };
+const ALL_FILTER = "__all__";
+const pickFirst = (values) => values.find((value) => typeof value === "string" && value.trim()) || "";
 
-const empty = { item_name: "", category: "Misc", quantity: 1, condition: "Good", weight: 0, location: "Carried", notes: "" };
+const buildEmpty = (categories, conditions, locations) => ({
+  item_name: "",
+  category: pickFirst(categories),
+  quantity: 1,
+  condition: pickFirst(conditions),
+  weight: 0,
+  location: pickFirst(locations),
+  notes: "",
+});
 
 export default function Inventory() {
-  const [items, setItems]       = useState([]);
-  const [user, setUser] = useState(null);
+  const runtimeConfig = useRuntimeConfig();
+  const queryClient = useQueryClient();
+  const CATEGORIES = runtimeConfig.getArray(["taxonomy", "inventory_categories"]);
+  const CONDITIONS = runtimeConfig.getArray(["taxonomy", "inventory_conditions"]);
+  const LOCATIONS = runtimeConfig.getArray(["taxonomy", "inventory_locations"]);
+  const { data: user = null } = useQuery({
+    queryKey: ["auth", "me"],
+    queryFn: () => base44.auth.me(),
+    retry: 1,
+  });
+  const ownerEmail = user?.email || null;
+  const { data: items = [] } = useRealtimeEntityList({
+    queryKey: ["inventory", ownerEmail || "all"],
+    entityName: "InventoryItem",
+    enabled: true,
+    patchStrategy: "patch",
+    queryFn: () => ownerEmail
+      ? base44.entities.InventoryItem.filter({ owner_email: ownerEmail })
+      : base44.entities.InventoryItem.list("-created_date"),
+  });
   const isAdmin = user?.role === "admin";
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm]         = useState(empty);
+  const [form, setForm]         = useState(() => buildEmpty(CATEGORIES, CONDITIONS, LOCATIONS));
   const [editing, setEditing]   = useState(null);
-  const [filterCat, setFilterCat] = useState("ALL");
-  const [filterLoc, setFilterLoc] = useState("ALL");
+  const [filterCat, setFilterCat] = useState(ALL_FILTER);
+  const [filterLoc, setFilterLoc] = useState(ALL_FILTER);
 
   useEffect(() => {
-    base44.auth.me().then(u => {
-      setUser(u);
-      base44.entities.InventoryItem.filter({ owner_email: u.email }).then(setItems).catch(() => {});
-    }).catch(() => {
-      base44.entities.InventoryItem.list("-created_date").then(setItems).catch(() => {});
-    });
-  }, []);
+    if (!form.category || !form.condition || !form.location) {
+      setForm((prev) => ({ ...prev, ...buildEmpty(CATEGORIES, CONDITIONS, LOCATIONS) }));
+    }
+  }, [CATEGORIES, CONDITIONS, LOCATIONS, form.category, form.condition, form.location]);
 
   const handleSave = async () => {
     if (!form.item_name.trim()) return;
     const data = { ...form, owner_email: user?.email };
     if (editing) {
-      const u = await base44.entities.InventoryItem.update(editing, data);
-      setItems(i => i.map(x => x.id === editing ? u : x));
+      await base44.entities.InventoryItem.update(editing, data);
     } else {
-      const c = await base44.entities.InventoryItem.create(data);
-      setItems(i => [...i, c]);
+      await base44.entities.InventoryItem.create(data);
     }
-    setForm(empty); setEditing(null); setShowForm(false);
+    queryClient.invalidateQueries({ queryKey: ["inventory"] });
+    setForm(buildEmpty(CATEGORIES, CONDITIONS, LOCATIONS)); setEditing(null); setShowForm(false);
   };
 
-  const handleDelete = async (id) => { await base44.entities.InventoryItem.delete(id); setItems(i => i.filter(x => x.id !== id)); };
+  const handleDelete = async (id) => { await base44.entities.InventoryItem.delete(id); queryClient.invalidateQueries({ queryKey: ["inventory"] }); };
   const handleEdit = (item) => { setForm({ ...item }); setEditing(item.id); setShowForm(true); };
 
   const filtered = items.filter(i =>
-    (filterCat === "ALL" || i.category === filterCat) &&
-    (filterLoc === "ALL" || i.location === filterLoc)
+    (filterCat === ALL_FILTER || i.category === filterCat) &&
+    (filterLoc === ALL_FILTER || i.location === filterLoc)
   );
 
   const totalWeight = filtered.reduce((a, i) => a + ((i.weight || 0) * (i.quantity || 1)), 0);
@@ -59,11 +83,16 @@ export default function Inventory() {
     <div className="p-4 space-y-4 max-w-6xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Package} title="INVENTORY" color={T.green}>
         {isAdmin && (
-          <ActionBtn color={T.green} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(empty); }}>
+          <ActionBtn color={T.green} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(buildEmpty(CATEGORIES, CONDITIONS, LOCATIONS)); }}>
             <Plus size={10} /> ADD ITEM
           </ActionBtn>
         )}
       </PageHeader>
+      {runtimeConfig.error && (
+        <div className="border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
+          RUNTIME TAXONOMY UNAVAILABLE
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -71,7 +100,7 @@ export default function Inventory() {
           { label: "TOTAL ITEMS",   value: totalItems,                                      color: T.green },
           { label: "TOTAL WEIGHT",  value: `${totalWeight.toFixed(1)}kg`,                  color: T.amber },
           { label: "CATEGORIES",    value: Object.values(byCategory).filter(v => v > 0).length, color: T.cyan },
-          { label: "LOCATION",      value: filterLoc === "ALL" ? "ALL" : filterLoc.toUpperCase(), color: T.textDim },
+          { label: "LOCATION",      value: filterLoc === ALL_FILTER ? "ALL" : filterLoc.toUpperCase(), color: T.textDim },
         ].map(({ label, value, color }) => (
           <div key={label} className="border p-2.5" style={{ borderColor: T.border, background: T.bg1 }}>
             <div className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</div>
@@ -82,23 +111,23 @@ export default function Inventory() {
 
       {/* Category filter pills */}
       <div className="flex flex-wrap gap-1.5">
-        <FilterPill label="ALL" active={filterCat === "ALL"} color={T.green} onClick={() => setFilterCat("ALL")} />
+        <FilterPill label="ALL" active={filterCat === ALL_FILTER} color={T.green} onClick={() => setFilterCat(ALL_FILTER)} />
         {CATEGORIES.filter(c => byCategory[c] > 0).map(c => (
           <FilterPill key={c} label={`${c} (${byCategory[c]})`} active={filterCat === c}
-            color={CAT_COLORS[c]} onClick={() => setFilterCat(filterCat === c ? "ALL" : c)} />
+            color={CAT_COLORS[c]} onClick={() => setFilterCat(filterCat === c ? ALL_FILTER : c)} />
         ))}
       </div>
 
       {/* Location filter */}
       <div className="flex gap-1.5 flex-wrap">
-        <FilterPill label="ALL LOCATIONS" active={filterLoc === "ALL"} color={T.green} onClick={() => setFilterLoc("ALL")} />
+        <FilterPill label="ALL LOCATIONS" active={filterLoc === ALL_FILTER} color={T.green} onClick={() => setFilterLoc(ALL_FILTER)} />
         {LOCATIONS.map(l => (
-          <FilterPill key={l} label={l} active={filterLoc === l} color={T.textDim} onClick={() => setFilterLoc(filterLoc === l ? "ALL" : l)} />
+          <FilterPill key={l} label={l} active={filterLoc === l} color={T.textDim} onClick={() => setFilterLoc(filterLoc === l ? ALL_FILTER : l)} />
         ))}
       </div>
 
       {showForm && isAdmin && (
-        <FormPanel title={editing ? "EDIT ITEM" : "ADD ITEM"} onClose={() => { setShowForm(false); setEditing(null); setForm(empty); }}>
+        <FormPanel title={editing ? "EDIT ITEM" : "ADD ITEM"} onClose={() => { setShowForm(false); setEditing(null); setForm(buildEmpty(CATEGORIES, CONDITIONS, LOCATIONS)); }}>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <div className="md:col-span-2">
               <Field label="ITEM NAME *">

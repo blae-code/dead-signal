@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAnimationEnabled } from "@/hooks/use-animation-enabled";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
 const C = {
   green: "#39ff14",
@@ -16,41 +18,18 @@ const C = {
   accent: "#b8860b",
 };
 
-// All navigable pages + quick actions
-const PAGES = [
-  { cmd: "goto dashboard",     label: "COMMAND HQ",     page: "Dashboard" },
-  { cmd: "goto server",        label: "SERVER MONITOR", page: "ServerMonitor" },
-  { cmd: "goto map",           label: "TACTICAL MAP",   page: "TacticalMap" },
-  { cmd: "goto roster",        label: "CLAN ROSTER",    page: "ClanRoster" },
-  { cmd: "goto missions",      label: "MISSIONS",       page: "Missions" },
-  { cmd: "goto inventory",     label: "INVENTORY",      page: "Inventory" },
-  { cmd: "goto intel",         label: "INTEL FEED",     page: "Intel" },
-  { cmd: "goto ai",            label: "AI AGENT",       page: "AIAgent" },
-  { cmd: "goto stats",         label: "MY STATS",       page: "MyStats" },
-  { cmd: "goto loot",          label: "LOOT TRACKER",   page: "LootTracker" },
-  { cmd: "goto loadout",       label: "LOADOUT PLANNER",page: "LoadoutPlanner" },
-  { cmd: "goto deaths",        label: "DEATH MAP",      page: "DeathMap" },
-  { cmd: "goto treasury",      label: "CLAN TREASURY",  page: "ClanTreasury" },
-  { cmd: "goto wiki",          label: "CLAN WIKI",      page: "ClanWiki" },
-  { cmd: "goto calendar",      label: "CLAN CALENDAR",  page: "ClanCalendar" },
-  { cmd: "goto vote",          label: "CLAN VOTING",    page: "ClanVoting" },
-  { cmd: "goto challenges",    label: "CHALLENGES",     page: "Challenges" },
-  { cmd: "goto board",         label: "CLAN BOARD",     page: "ClanBoard" },
-];
-
-const HELP_LINES = [
-  { text: "NAVIGATION: goto <page>   — e.g. goto map, goto server", color: C.cyan },
+const staticHelpPrefix = [
+  { text: "NAVIGATION: goto <page>   — route navigation", color: C.cyan },
   { text: "RCON:       rcon <cmd>    — send live server command", color: C.amber },
   { text: "ANNOUNCE:   announce <msg>— post intel announcement", color: C.textDim },
   { text: "SEARCH:     find <term>   — filter pages/commands", color: C.textDim },
-  { text: "STATUS:     status        — show server status", color: C.textDim },
+  { text: "STATUS:     status        — show live server status", color: C.textDim },
   { text: "CLEAR:      clear         — clear console output", color: C.textFaint },
-  { text: "TIME:       time          — show real & in-game time", color: C.textFaint },
+  { text: "TIME:       time          — show live timestamp", color: C.textFaint },
   { text: "WHOAMI:     whoami        — show your user info", color: C.textFaint },
-  { text: "Pages: " + PAGES.map(p => p.cmd.replace("goto ", "")).join(", "), color: C.textFaint },
 ];
 
-export default function HeaderCommandPrompt({ currentPageName, inGameTime }) {
+export default function HeaderCommandPrompt({ currentPageName }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [lines, setLines] = useState([
@@ -63,103 +42,99 @@ export default function HeaderCommandPrompt({ currentPageName, inGameTime }) {
   const inputRef = useRef(null);
   const outputRef = useRef(null);
   const navigate = useNavigate();
+  const animationEnabled = useAnimationEnabled();
+  const runtimeConfig = useRuntimeConfig();
 
-  // Auto-scroll output
+  const pages = useMemo(() => {
+    const configured = runtimeConfig.getArray(["terminal", "pages"]);
+    return configured
+      .filter((entry) => entry && typeof entry === "object")
+      .map((entry) => ({
+        cmd: typeof entry.cmd === "string" ? entry.cmd.toLowerCase() : "",
+        label: typeof entry.label === "string" ? entry.label : "",
+        page: typeof entry.page === "string" ? entry.page : "",
+      }))
+      .filter((entry) => entry.cmd && entry.page);
+  }, [runtimeConfig]);
+
+  const helpLines = useMemo(() => {
+    const pageNames = pages.map((entry) => entry.cmd.replace(/^goto\s+/i, "")).join(", ");
+    return [
+      ...staticHelpPrefix,
+      { text: pageNames ? `Pages: ${pageNames}` : "Pages: runtime config unavailable", color: C.textFaint },
+    ];
+  }, [pages]);
+
   useEffect(() => {
     if (outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight;
   }, [lines]);
 
-  // Focus input when opened
   useEffect(() => {
     if (open && inputRef.current) inputRef.current.focus();
   }, [open]);
 
-  // Keyboard shortcut: ` or Ctrl+` to open
   useEffect(() => {
-    const handler = (e) => {
-      if (e.key === "`" && !e.target.matches("input, textarea")) {
-        e.preventDefault();
-        setOpen(o => !o);
+    const handler = (event) => {
+      if (event.key === "`" && !event.target.matches("input, textarea")) {
+        event.preventDefault();
+        setOpen((value) => !value);
       }
-      if (e.key === "Escape") setOpen(false);
+      if (event.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
   const push = (text, color = C.text) => {
-    setLines(prev => [...prev.slice(-60), { text, color }]);
+    setLines((prev) => [...prev.slice(-60), { text, color }]);
   };
 
-  const updateSuggestions = (val) => {
-    if (!val.trim()) { setSuggestions([]); return; }
-    const lower = val.toLowerCase();
-    const pageMatches = PAGES.filter(p =>
-      p.cmd.includes(lower) || p.label.toLowerCase().includes(lower)
-    ).slice(0, 5);
+  const updateSuggestions = (value) => {
+    if (!value.trim()) {
+      setSuggestions([]);
+      return;
+    }
+    const lower = value.toLowerCase();
+    const pageMatches = pages
+      .filter((page) => page.cmd.includes(lower) || page.label.toLowerCase().includes(lower))
+      .slice(0, 5);
     setSuggestions(pageMatches);
   };
 
-  const handleInput = (e) => {
-    setInput(e.target.value);
-    updateSuggestions(e.target.value);
+  const handleInput = (event) => {
+    setInput(event.target.value);
+    updateSuggestions(event.target.value);
     setHistoryIdx(-1);
   };
 
-  const handleKeyDown = async (e) => {
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      const idx = Math.min(historyIdx + 1, history.length - 1);
-      setHistoryIdx(idx);
-      if (history[idx]) setInput(history[idx]);
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      const idx = Math.max(historyIdx - 1, -1);
-      setHistoryIdx(idx);
-      setInput(idx === -1 ? "" : history[idx]);
-    } else if (e.key === "Tab" && suggestions.length > 0) {
-      e.preventDefault();
-      setInput(suggestions[0].cmd);
-      setSuggestions([]);
-    } else if (e.key === "Enter") {
-      await executeCommand(input.trim());
-    }
-  };
-
-  const executeCommand = async (raw) => {
-    if (!raw) return;
-    push(`> ${raw}`, C.cyan);
-    setHistory(prev => [raw, ...prev.slice(0, 49)]);
+  const executeCommand = async (rawCommand) => {
+    if (!rawCommand) return;
+    push(`> ${rawCommand}`, C.cyan);
+    setHistory((prev) => [rawCommand, ...prev.slice(0, 49)]);
     setInput("");
     setSuggestions([]);
     setHistoryIdx(-1);
 
-    const lower = raw.toLowerCase();
-    const parts = raw.split(" ");
-    const cmd = parts[0].toLowerCase();
-    const args = parts.slice(1).join(" ");
+    const lower = rawCommand.toLowerCase();
+    const [first, ...rest] = rawCommand.split(" ");
+    const cmd = first.toLowerCase();
+    const args = rest.join(" ");
 
-    // HELP
     if (cmd === "help") {
-      HELP_LINES.forEach(l => push(l.text, l.color));
+      helpLines.forEach((line) => push(line.text, line.color));
       return;
     }
 
-    // CLEAR
     if (cmd === "clear") {
       setLines([{ text: "Console cleared.", color: C.textFaint }]);
       return;
     }
 
-    // TIME
     if (cmd === "time") {
-      const now = new Date();
-      push(`REAL TIME:    ${now.toLocaleTimeString("en-US", { hour12: false })} — ${now.toLocaleDateString()}`, C.text);
-      push(`IN-GAME TIME: ${inGameTime.hour}:${inGameTime.min} (${inGameTime.isDaytime ? "DAYTIME" : "NIGHTTIME"})`, C.amber);
+      push(`REAL TIME: ${new Date().toISOString()}`, C.text);
       return;
     }
 
-    // WHOAMI
     if (cmd === "whoami") {
       try {
         const user = await base44.auth.me();
@@ -172,58 +147,70 @@ export default function HeaderCommandPrompt({ currentPageName, inGameTime }) {
       return;
     }
 
-    // STATUS
     if (cmd === "status") {
-      push("Fetching server status...", C.textFaint);
+      push("Fetching live server status...", C.textFaint);
       try {
-        const res = await base44.functions.invoke("getServerStatus", {});
-        const s = res.data;
-        if (s?.error) { push(`ERROR: ${s.error}`, C.red); return; }
-        push(`SERVER STATE:   ${s?.state?.toUpperCase() || "UNKNOWN"}`, s?.online ? C.green : C.red);
-        push(`UPTIME:         ${s?.uptime || "--"}`, C.amber);
-        push(`CPU:            ${s?.cpu_percent?.toFixed(1) ?? "--"}%`, C.text);
-        push(`RAM:            ${s?.ram_used_mb?.toFixed(0) ?? "--"} MB used`, C.text);
-        push(`PING:           ${s?.ping_ms ?? "--"} ms`, C.cyan);
-        push(`PACKET LOSS:    ${s?.packet_loss_percent?.toFixed(1) ?? "--"}%`, C.text);
-        push(`PLAYERS:        ${s?.player_count ?? "0"}`, C.text);
-      } catch (err) {
-        push(`ERROR: ${err.message}`, C.red);
+        const response = await base44.functions.invoke("getServerStatus", {});
+        const status = response?.data;
+        if (status?.error) {
+          push(`ERROR: ${status.error}`, C.red);
+          return;
+        }
+        push(`SERVER STATE: ${status?.state?.toUpperCase?.() || "UNAVAILABLE"}`, status?.online ? C.green : C.red);
+        push(`UPTIME:       ${status?.uptime || "UNAVAILABLE"}`, C.amber);
+        push(`CPU:          ${status?.metric_available?.cpu ? `${status.cpu}%` : "UNAVAILABLE"}`, C.text);
+        push(`RAM:          ${status?.metric_available?.ramUsedMB ? `${status.ramUsedMB} MB used` : "UNAVAILABLE"}`, C.text);
+        push(`PING:         ${status?.metric_available?.responseTime ? `${status.responseTime} ms` : "UNAVAILABLE"}`, C.cyan);
+        push(`PLAYERS:      ${status?.metric_available?.playerCount ? `${status.playerCount}` : "UNAVAILABLE"}`, C.text);
+      } catch (error) {
+        push(`ERROR: ${error.message}`, C.red);
       }
       return;
     }
 
-    // RCON
     if (cmd === "rcon") {
-      if (!args) { push("Usage: rcon <command>", C.amber); return; }
+      if (!args) {
+        push("Usage: rcon <command>", C.amber);
+        return;
+      }
       push(`Sending RCON: ${args}`, C.textFaint);
       try {
-        const res = await base44.functions.invoke("sendRconCommand", { command: args });
-        if (res.data?.success) {
-          push(`✓ ${res.data.output}`, C.green);
+        const response = await base44.functions.invoke("sendRconCommand", { command: args });
+        if (response.data?.success) {
+          push(`✓ ${response.data.output}`, C.green);
         } else {
-          push(`✗ ${res.data?.error || "Unknown error"}`, C.red);
+          push(`✗ ${response.data?.error || "Unknown error"}`, C.red);
         }
-      } catch (err) {
-        push(`ERROR: ${err.message}`, C.red);
+      } catch (error) {
+        push(`ERROR: ${error.message}`, C.red);
       }
       return;
     }
 
-    // ANNOUNCE
     if (cmd === "announce") {
-      if (!args) { push("Usage: announce <message>", C.amber); return; }
+      if (!args) {
+        push("Usage: announce <message>", C.amber);
+        return;
+      }
       try {
         await base44.entities.Announcement.create({ title: "OPS TERMINAL", body: args, type: "Alert" });
         push(`✓ Announcement posted: "${args}"`, C.green);
-      } catch (err) {
-        push(`ERROR: ${err.message}`, C.red);
+      } catch (error) {
+        push(`ERROR: ${error.message}`, C.red);
       }
       return;
     }
 
-    // GOTO / navigation
     if (cmd === "goto" || cmd === "go") {
-      const target = PAGES.find(p => p.cmd === `goto ${args.toLowerCase()}` || p.label.toLowerCase().includes(args.toLowerCase()) || p.page.toLowerCase() === args.toLowerCase());
+      if (pages.length === 0) {
+        push("Runtime navigation config unavailable.", C.red);
+        return;
+      }
+      const target = pages.find((page) =>
+        page.cmd === `goto ${args.toLowerCase()}`
+        || page.label.toLowerCase().includes(args.toLowerCase())
+        || page.page.toLowerCase() === args.toLowerCase()
+      );
       if (target) {
         push(`Navigating to ${target.label}...`, C.green);
         setTimeout(() => { navigate(createPageUrl(target.page)); setOpen(false); }, 300);
@@ -233,60 +220,83 @@ export default function HeaderCommandPrompt({ currentPageName, inGameTime }) {
       return;
     }
 
-    // FIND / SEARCH suggestions
     if (cmd === "find" || cmd === "search") {
-      const matches = PAGES.filter(p => p.label.toLowerCase().includes(args.toLowerCase()) || p.page.toLowerCase().includes(args.toLowerCase()));
-      if (matches.length === 0) { push(`No matches for "${args}"`, C.amber); return; }
-      matches.forEach(m => push(`  ${m.cmd.padEnd(20)} → ${m.label}`, C.textDim));
+      const matches = pages.filter((page) =>
+        page.label.toLowerCase().includes(args.toLowerCase())
+        || page.page.toLowerCase().includes(args.toLowerCase())
+      );
+      if (matches.length === 0) {
+        push(`No matches for "${args}"`, C.amber);
+        return;
+      }
+      matches.forEach((match) => push(`  ${match.cmd.padEnd(20)} → ${match.label}`, C.textDim));
       return;
     }
 
-    // Bare page names
-    const pageMatch = PAGES.find(p => p.page.toLowerCase() === lower || p.label.toLowerCase() === lower || p.cmd === `goto ${lower}`);
+    const pageMatch = pages.find((page) =>
+      page.page.toLowerCase() === lower
+      || page.label.toLowerCase() === lower
+      || page.cmd === `goto ${lower}`
+    );
     if (pageMatch) {
       push(`Navigating to ${pageMatch.label}...`, C.green);
       setTimeout(() => { navigate(createPageUrl(pageMatch.page)); setOpen(false); }, 300);
       return;
     }
 
-    push(`Unknown command: "${raw}". Type "help" for commands.`, C.red);
+    push(`Unknown command: "${rawCommand}". Type "help" for commands.`, C.red);
+  };
+
+  const handleKeyDown = async (event) => {
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      const index = Math.min(historyIdx + 1, history.length - 1);
+      setHistoryIdx(index);
+      if (history[index]) setInput(history[index]);
+      return;
+    }
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      const index = Math.max(historyIdx - 1, -1);
+      setHistoryIdx(index);
+      setInput(index === -1 ? "" : history[index]);
+      return;
+    }
+    if (event.key === "Tab" && suggestions.length > 0) {
+      event.preventDefault();
+      setInput(suggestions[0].cmd);
+      setSuggestions([]);
+      return;
+    }
+    if (event.key === "Enter") {
+      await executeCommand(input.trim());
+    }
   };
 
   return (
     <>
-      {/* Trigger button — sits inside the palette container, no border needed */}
       <button
-        onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 w-full px-3 h-full transition-all"
+        onClick={() => setOpen((value) => !value)}
+        className="hidden md:flex items-center gap-2 px-3 py-1 border transition-all"
         style={{
-          background: open ? `${C.accent}0d` : "transparent",
+          borderColor: open ? C.accent + "88" : C.border,
+          background: open ? "rgba(184,134,11,0.08)" : "transparent",
           color: open ? C.accent : C.textDim,
           fontFamily: "'Share Tech Mono', monospace",
           fontSize: "10px",
           letterSpacing: "0.12em",
-          border: "none",
-          outline: "none",
-          cursor: "text",
         }}
         title="Open command terminal (` key)"
       >
-        <span style={{ color: open ? C.green : C.textFaint, fontSize: "9px" }}>▶</span>
-        <span style={{ color: open ? C.text : C.textFaint, flex: 1, textAlign: "left" }}>
-          {open ? "type command..." : "command terminal..."}
-        </span>
-        <span style={{ color: C.textFaint, fontSize: "7px" }}>ENTER ↵</span>
+        <span style={{ color: open ? C.green : C.textFaint }}>█</span>
+        <span>TERMINAL</span>
+        <span style={{ color: C.textFaint, fontSize: "8px" }}>[ ` ]</span>
       </button>
 
-      {/* Dropdown terminal */}
       <AnimatePresence>
         {open && (
           <>
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setOpen(false)}
-            />
-
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
             <motion.div
               initial={{ opacity: 0, y: -10, scaleY: 0.95 }}
               animate={{ opacity: 1, y: 0, scaleY: 1 }}
@@ -303,52 +313,47 @@ export default function HeaderCommandPrompt({ currentPageName, inGameTime }) {
                 boxShadow: `0 8px 40px rgba(0,0,0,0.9), 0 0 0 1px ${C.border}`,
               }}
             >
-              {/* Terminal header bar */}
               <div className="flex items-center justify-between px-3 py-1.5 border-b" style={{ borderColor: C.border }}>
                 <div className="flex items-center gap-2">
-                  <motion.div animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.8, repeat: Infinity }}
-                    style={{ width: "5px", height: "5px", borderRadius: "50%", background: C.green }} />
+                  <motion.div
+                    animate={animationEnabled ? { opacity: [1, 0, 1] } : { opacity: 1 }}
+                    transition={animationEnabled ? { duration: 0.8, repeat: Infinity } : undefined}
+                    style={{ width: "5px", height: "5px", borderRadius: "50%", background: C.green }}
+                  />
                   <span style={{ color: C.accent, fontSize: "9px", letterSpacing: "0.2em", fontFamily: "'Orbitron', monospace" }}>
                     OPS TERMINAL
                   </span>
                   <span style={{ color: C.textFaint, fontSize: "8px" }}>// {currentPageName}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span style={{ color: C.textFaint, fontSize: "8px" }}>ESC to close · Tab to autocomplete · ↑↓ history</span>
+                  <span style={{ color: C.textFaint, fontSize: "8px" }}>ESC to close · Tab autocomplete · ↑↓ history</span>
                   <button onClick={() => setOpen(false)} style={{ color: C.textFaint, fontSize: "12px" }}>✕</button>
                 </div>
               </div>
 
-              {/* Output lines */}
-              <div
-                ref={outputRef}
-                className="overflow-y-auto px-3 py-2 space-y-0.5"
-                style={{ height: "180px", fontFamily: "'Share Tech Mono', monospace" }}
-              >
-                {lines.map((line, i) => (
-                  <div key={i} className="text-xs leading-5" style={{ color: line.color, wordBreak: "break-all" }}>
+              <div ref={outputRef} className="overflow-y-auto px-3 py-2 space-y-0.5" style={{ height: "180px", fontFamily: "'Share Tech Mono', monospace" }}>
+                {lines.map((line, index) => (
+                  <div key={index} className="text-xs leading-5" style={{ color: line.color, wordBreak: "break-all" }}>
                     {line.text}
                   </div>
                 ))}
               </div>
 
-              {/* Suggestions */}
               {suggestions.length > 0 && (
                 <div className="border-t px-3 py-1 flex flex-wrap gap-2" style={{ borderColor: C.border }}>
-                  {suggestions.map((s, i) => (
+                  {suggestions.map((suggestion, index) => (
                     <button
-                      key={i}
-                      onMouseDown={() => { setInput(s.cmd); setSuggestions([]); inputRef.current?.focus(); }}
+                      key={`${suggestion.page}-${index}`}
+                      onMouseDown={() => { setInput(suggestion.cmd); setSuggestions([]); inputRef.current?.focus(); }}
                       className="text-xs px-2 py-0.5 border transition-colors hover:bg-white hover:bg-opacity-5"
                       style={{ borderColor: C.border, color: C.textDim, fontFamily: "'Share Tech Mono', monospace" }}
                     >
-                      {s.cmd} <span style={{ color: C.textFaint }}>— {s.label}</span>
+                      {suggestion.cmd} <span style={{ color: C.textFaint }}>— {suggestion.label}</span>
                     </button>
                   ))}
                 </div>
               )}
 
-              {/* Input row */}
               <div className="flex items-center gap-2 px-3 py-2 border-t" style={{ borderColor: C.accent + "33" }}>
                 <span style={{ color: C.green, fontSize: "11px", flexShrink: 0 }}>▶</span>
                 <input
@@ -358,34 +363,27 @@ export default function HeaderCommandPrompt({ currentPageName, inGameTime }) {
                   onKeyDown={handleKeyDown}
                   placeholder='type command... ("help" to list all)'
                   className="flex-1 bg-transparent outline-none text-xs"
-                  style={{
-                    color: C.text,
-                    fontFamily: "'Share Tech Mono', monospace",
-                    caretColor: C.green,
-                    border: "none",
-                    boxShadow: "none",
-                  }}
+                  style={{ color: C.text, fontFamily: "'Share Tech Mono', monospace", caretColor: C.green, border: "none", boxShadow: "none" }}
                   autoComplete="off"
                   spellCheck={false}
                 />
                 <span style={{ color: C.textFaint, fontSize: "8px", flexShrink: 0 }}>ENTER ↵</span>
               </div>
 
-              {/* Quick-nav shortcuts row */}
               <div className="flex flex-wrap gap-1 px-3 pb-2 border-t" style={{ borderColor: C.border }}>
-                {PAGES.slice(0, 8).map(p => (
+                {pages.slice(0, 8).map((page) => (
                   <button
-                    key={p.page}
-                    onMouseDown={() => executeCommand(p.cmd)}
+                    key={page.page}
+                    onMouseDown={() => executeCommand(page.cmd)}
                     className="text-xs px-1.5 py-0.5 border transition-colors hover:bg-white hover:bg-opacity-5"
                     style={{
-                      borderColor: currentPageName === p.page ? C.accent + "66" : C.border,
-                      color: currentPageName === p.page ? C.accent : C.textFaint,
+                      borderColor: currentPageName === page.page ? C.accent + "66" : C.border,
+                      color: currentPageName === page.page ? C.accent : C.textFaint,
                       fontFamily: "'Share Tech Mono', monospace",
                       fontSize: "8px",
                     }}
                   >
-                    {p.label}
+                    {page.label}
                   </button>
                 ))}
               </div>
@@ -396,3 +394,4 @@ export default function HeaderCommandPrompt({ currentPageName, inGameTime }) {
     </>
   );
 }
+

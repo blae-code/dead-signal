@@ -3,18 +3,32 @@ import { base44 } from "@/api/base44Client";
 import { BookOpen, Plus, Edit2, Trash2, Pin, Search } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { T, PageHeader, Panel, FormPanel, Field, FilterPill, ActionBtn, EmptyState } from "@/components/ui/TerminalCard";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
-const CATS = ["All","Base Building","Crafting","Survival","Weapons","Locations","Tactics","Rules","Other"];
 const CAT_COLORS = { "Base Building": "#b8a890", Crafting: T.amber, Survival: T.green, Weapons: T.red, Locations: T.cyan, Tactics: T.orange, Rules: "#c8a0e0", Other: T.textDim };
-const empty = { title: "", category: "Other", content: "", tags: "", pinned: false };
+const pickByToken = (values, token) =>
+  values.find((value) => typeof value === "string" && value.toLowerCase() === token) || "";
+const pickFirst = (values) => values.find((value) => typeof value === "string" && value.trim()) || "";
+const pickFirstNonAll = (values) =>
+  values.find((value) => typeof value === "string" && value.toLowerCase() !== "all") || pickFirst(values);
+const buildEmpty = (cats) => ({
+  title: "",
+  category: pickFirstNonAll(cats),
+  content: "",
+  tags: "",
+  pinned: false,
+});
 
 export default function ClanWiki() {
+  const runtimeConfig = useRuntimeConfig();
+  const CATS = runtimeConfig.getArray(["taxonomy", "clan_wiki_categories"]);
+  const allFilter = pickByToken(CATS, "all") || pickFirst(CATS);
   const [user, setUser] = useState(null);
   const [articles, setArticles] = useState([]);
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(empty);
+  const [form, setForm] = useState(() => buildEmpty(CATS));
   const [editingId, setEditingId] = useState(null);
   const [reading, setReading] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -30,6 +44,16 @@ export default function ClanWiki() {
     load();
   }, []);
 
+  useEffect(() => {
+    if (!filter && allFilter) setFilter(allFilter);
+  }, [allFilter, filter]);
+
+  useEffect(() => {
+    if (!form.category) {
+      setForm((prev) => ({ ...prev, ...buildEmpty(CATS) }));
+    }
+  }, [CATS, form.category]);
+
   const handleSave = async () => {
     const entry = {
       ...form,
@@ -44,7 +68,7 @@ export default function ClanWiki() {
       const created = await base44.entities.WikiArticle.create(entry);
       setArticles(prev => [created, ...prev]);
     }
-    setForm(empty);
+    setForm(buildEmpty(CATS));
     setShowForm(false);
     setEditingId(null);
   };
@@ -68,7 +92,7 @@ export default function ClanWiki() {
   };
 
   const filtered = articles
-    .filter(a => filter === "All" || a.category === filter)
+    .filter(a => !filter || filter === allFilter || a.category === filter)
     .filter(a => !search || a.title.toLowerCase().includes(search.toLowerCase()) || (a.tags || []).some(t => t.toLowerCase().includes(search.toLowerCase())))
     .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
 
@@ -76,11 +100,16 @@ export default function ClanWiki() {
     <div className="p-4 space-y-4 max-w-5xl mx-auto">
       <PageHeader icon={BookOpen} title="CLAN WIKI" color={T.cyan}>
         {isAdmin && (
-          <ActionBtn color={T.cyan} onClick={() => { setShowForm(!showForm); setForm(empty); setEditingId(null); setReading(null); }}>
+          <ActionBtn color={T.cyan} onClick={() => { setShowForm(!showForm); setForm(buildEmpty(CATS)); setEditingId(null); setReading(null); }}>
             <Plus size={10} /> NEW ARTICLE
           </ActionBtn>
         )}
       </PageHeader>
+      {runtimeConfig.error && (
+        <div className="border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
+          RUNTIME TAXONOMY UNAVAILABLE
+        </div>
+      )}
 
       {showForm && (
         <FormPanel title={editingId ? "EDIT ARTICLE" : "NEW ARTICLE"} titleColor={T.cyan} onClose={() => { setShowForm(false); setEditingId(null); }}>

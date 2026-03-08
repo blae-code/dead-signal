@@ -1,21 +1,38 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Package, Plus, Trash2, MapPin } from "lucide-react";
+import { Package, Plus, Trash2 } from "lucide-react";
 import { T, PageHeader, Panel, FormPanel, Field, FilterPill, ActionBtn, TableHeader, TableRow, EmptyState } from "@/components/ui/TerminalCard";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
-const CATS = ["All","Weapon","Ammo","Medical","Food","Water","Tool","Material","Clothing","Misc"];
-const CONDITIONS = ["Pristine","Good","Worn","Damaged","Ruined"];
-const empty = { item_name: "", category: "Misc", quantity: 1, condition: "Good", location_name: "", x: "", y: "", notes: "" };
+const pickByToken = (values, token) =>
+  values.find((value) => typeof value === "string" && value.toLowerCase() === token) || "";
+const pickFirst = (values) => values.find((value) => typeof value === "string" && value.trim()) || "";
+const pickFirstNonAll = (values) =>
+  values.find((value) => typeof value === "string" && value.toLowerCase() !== "all") || pickFirst(values);
+
+const buildEmpty = (cats, conditions) => ({
+  item_name: "",
+  category: pickFirstNonAll(cats),
+  quantity: 1,
+  condition: pickFirst(conditions),
+  location_name: "",
+  x: "",
+  y: "",
+  notes: "",
+});
 
 const COND_COLORS = { Pristine: T.green, Good: T.cyan, Worn: T.amber, Damaged: T.orange, Ruined: T.red };
 
 export default function LootTracker() {
+  const runtimeConfig = useRuntimeConfig();
+  const CATS = runtimeConfig.getArray(["taxonomy", "loot_categories"]);
+  const CONDITIONS = runtimeConfig.getArray(["taxonomy", "inventory_conditions"]);
+  const allFilter = pickByToken(CATS, "all") || pickFirst(CATS);
   const [user, setUser] = useState(null);
   const [finds, setFinds] = useState([]);
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(empty);
-  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState(() => buildEmpty(CATS, CONDITIONS));
 
   useEffect(() => {
     const load = async () => {
@@ -23,10 +40,19 @@ export default function LootTracker() {
       setUser(u);
       const data = await base44.entities.LootFind.filter({ player_email: u.email }, "-created_date", 200);
       setFinds(data);
-      setLoading(false);
     };
     load();
   }, []);
+
+  useEffect(() => {
+    if (!filter && allFilter) setFilter(allFilter);
+  }, [allFilter, filter]);
+
+  useEffect(() => {
+    if (!form.category || !form.condition) {
+      setForm((prev) => ({ ...prev, ...buildEmpty(CATS, CONDITIONS) }));
+    }
+  }, [CATS, CONDITIONS, form.category, form.condition]);
 
   const handleSave = async () => {
     const entry = { ...form, player_email: user.email, quantity: Number(form.quantity) || 1 };
@@ -34,7 +60,7 @@ export default function LootTracker() {
     if (form.y) entry.y = Number(form.y);
     const created = await base44.entities.LootFind.create(entry);
     setFinds(prev => [created, ...prev]);
-    setForm(empty);
+    setForm(buildEmpty(CATS, CONDITIONS));
     setShowForm(false);
   };
 
@@ -43,7 +69,7 @@ export default function LootTracker() {
     setFinds(prev => prev.filter(f => f.id !== id));
   };
 
-  const filtered = filter === "All" ? finds : finds.filter(f => f.category === filter);
+  const filtered = filter && filter !== allFilter ? finds.filter((find) => find.category === filter) : finds;
 
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
@@ -52,6 +78,11 @@ export default function LootTracker() {
           <Plus size={10} /> LOG FIND
         </ActionBtn>
       </PageHeader>
+      {runtimeConfig.error && (
+        <div className="border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
+          RUNTIME TAXONOMY UNAVAILABLE
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2">

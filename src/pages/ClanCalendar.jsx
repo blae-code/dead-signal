@@ -2,19 +2,48 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Calendar, Plus, Trash2, Users, Clock } from "lucide-react";
 import { T, PageHeader, Panel, FormPanel, Field, FilterPill, ActionBtn, EmptyState } from "@/components/ui/TerminalCard";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 
-const EVENT_TYPES = ["All","Raid","Loot Run","Base Building","Training","Meeting","Social","Other"];
 const TYPE_COLORS = { Raid: T.red, "Loot Run": T.amber, "Base Building": "#b8a890", Training: T.cyan, Meeting: T.green, Social: "#c8a0e0", Other: T.textDim };
-const empty = { title: "", type: "Raid", description: "", scheduled_at: "", duration_minutes: 60, max_players: "", notes: "", location_coords: "" };
+const pickByToken = (values, token) =>
+  values.find((value) => typeof value === "string" && value.toLowerCase() === token) || "";
+const pickFirst = (values) => values.find((value) => typeof value === "string" && value.trim()) || "";
+const pickFirstNonAll = (values) =>
+  values.find((value) => typeof value === "string" && value.toLowerCase() !== "all") || pickFirst(values);
+const buildEmpty = (types) => ({
+  title: "",
+  type: pickFirstNonAll(types),
+  description: "",
+  scheduled_at: "",
+  duration_minutes: 60,
+  max_players: "",
+  notes: "",
+  location_coords: "",
+});
 
 export default function ClanCalendar() {
+  const runtimeConfig = useRuntimeConfig();
+  const EVENT_TYPES = runtimeConfig.getArray(["taxonomy", "clan_event_types"]);
+  const EVENT_STATUSES = runtimeConfig.getArray(["taxonomy", "clan_event_statuses"]);
+  const allFilter = pickByToken(EVENT_TYPES, "all") || pickFirst(EVENT_TYPES);
+  const upcomingStatus = pickByToken(EVENT_STATUSES, "upcoming") || pickFirst(EVENT_STATUSES);
   const [user, setUser] = useState(null);
   const [member, setMember] = useState(null);
   const [events, setEvents] = useState([]);
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(empty);
+  const [form, setForm] = useState(() => buildEmpty(EVENT_TYPES));
   const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!form.type) {
+      setForm((prev) => ({ ...prev, ...buildEmpty(EVENT_TYPES) }));
+    }
+  }, [EVENT_TYPES, form.type]);
+
+  useEffect(() => {
+    if (!filter && allFilter) setFilter(allFilter);
+  }, [allFilter, filter]);
 
   useEffect(() => {
     const load = async () => {
@@ -36,11 +65,11 @@ export default function ClanCalendar() {
       duration_minutes: Number(form.duration_minutes),
       max_players: form.max_players ? Number(form.max_players) : undefined,
       attendees: [],
-      status: "Upcoming"
     };
+    if (upcomingStatus) entry.status = upcomingStatus;
     const created = await base44.entities.ClanEvent.create(entry);
     setEvents(prev => [...prev, created].sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at)));
-    setForm(empty);
+    setForm(buildEmpty(EVENT_TYPES));
     setShowForm(false);
   };
 
@@ -60,7 +89,7 @@ export default function ClanCalendar() {
   };
 
   const now = new Date();
-  const filtered = (filter === "All" ? events : events.filter(e => e.type === filter));
+  const filtered = !filter || filter === allFilter ? events : events.filter((event) => event.type === filter);
   const upcoming = filtered.filter(e => new Date(e.scheduled_at) >= now);
   const past = filtered.filter(e => new Date(e.scheduled_at) < now);
 
@@ -82,7 +111,7 @@ export default function ClanCalendar() {
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span style={{ color: T.text, fontSize: "12px", fontWeight: "bold" }}>{evt.title}</span>
               <span style={{ color: typeColor, fontSize: "9px", border: `1px solid ${typeColor}44`, padding: "1px 6px" }}>{evt.type}</span>
-              <span style={{ color: evt.status === "Upcoming" ? T.green : T.textDim, fontSize: "9px" }}>[{evt.status}]</span>
+              <span style={{ color: evt.status === upcomingStatus ? T.green : T.textDim, fontSize: "9px" }}>[{evt.status}]</span>
             </div>
             <div className="flex items-center gap-3 text-xs mb-1" style={{ color: T.textDim }}>
               <span><Clock size={9} style={{ display: "inline", marginRight: 3 }} />{formatDate(evt.scheduled_at)}</span>
@@ -122,6 +151,11 @@ export default function ClanCalendar() {
           </ActionBtn>
         )}
       </PageHeader>
+      {runtimeConfig.error && (
+        <div className="border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
+          RUNTIME TAXONOMY UNAVAILABLE
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2">

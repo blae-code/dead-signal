@@ -1,182 +1,255 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, Plus, Trash2, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { T } from "@/components/ui/TerminalCard";
-
-const METRICS = [
-  { value: "cpu", label: "CPU (%)" },
-  { value: "ramUsedMB", label: "RAM (MB)" },
-  { value: "diskMB", label: "Disk (MB)" },
-  { value: "networkRxKB", label: "Net RX (KB/s)" },
-  { value: "networkTxKB", label: "Net TX (KB/s)" },
-];
+import { Bell, Plus, Save, Trash2, PlayCircle } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRuntimeConfig } from "@/hooks/use-runtime-config";
+import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
 
 const EMPTY = {
-  name: "", metric: "cpu", operator: "gt", threshold: 80,
-  notify_inapp: true, notify_email: false, email_address: "",
-  enabled: true, cooldown_minutes: 15,
+  name: "",
+  metric: "",
+  operator: "",
+  threshold: 80,
+  notify_inapp: true,
+  notify_email: false,
+  email_address: "",
+  enabled: true,
+  cooldown_minutes: 15,
+  auto_remediate: false,
+  remediation_command: "",
+};
+
+const S = {
+  border: "#1e1e1e",
+  dim: "#555",
+  text: "#c8c8c8",
+  faint: "#333",
+  active: "#39ff14",
+  warn: "#ffb000",
+  danger: "#ff2020",
+  cyan: "#00e5ff",
 };
 
 export default function AlertRulesPanel({ onTriggered }) {
-  const [rules, setRules] = useState([]);
+  const queryClient = useQueryClient();
+  const runtimeConfig = useRuntimeConfig();
+  const metrics = runtimeConfig.getArray(["alerting", "metrics"]);
+  const operators = runtimeConfig.getArray(["alerting", "operators"]);
+  const defaultMetric = metrics[0]?.value || "";
+  const defaultOperator = operators[0]?.value || "";
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState({ ...EMPTY, metric: defaultMetric, operator: defaultOperator });
   const [saving, setSaving] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    base44.entities.AlertRule.list("-created_date", 50).then(setRules).catch(() => {});
-  }, []);
+  const { data: rules = [] } = useRealtimeEntityList({
+    queryKey: ["alert-rules"],
+    entityName: "AlertRule",
+    queryFn: () => base44.entities.AlertRule.list("-created_date", 50),
+    patchStrategy: "patch",
+  });
 
   const save = async () => {
-    if (!form.name.trim()) return;
+    if (!form.name.trim()) {
+      setError("Rule name is required.");
+      return;
+    }
+    if (!form.metric || !form.operator) {
+      setError("Runtime alert metric/operator catalog unavailable.");
+      return;
+    }
     setSaving(true);
-    const record = await base44.entities.AlertRule.create({ ...form, threshold: Number(form.threshold), cooldown_minutes: Number(form.cooldown_minutes) });
-    setRules(prev => [record, ...prev]);
-    setForm(EMPTY);
-    setShowForm(false);
-    setSaving(false);
+    setError(null);
+    try {
+      await base44.entities.AlertRule.create({
+        ...form,
+        threshold: Number(form.threshold),
+        cooldown_minutes: Number(form.cooldown_minutes),
+      });
+      setForm({ ...EMPTY, metric: defaultMetric, operator: defaultOperator });
+      setShowForm(false);
+      queryClient.invalidateQueries({ queryKey: ["alert-rules"] });
+    } catch (err) {
+      setError(err?.message || "Failed to save alert rule.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const remove = async (id) => {
-    await base44.entities.AlertRule.delete(id);
-    setRules(prev => prev.filter(r => r.id !== id));
+    await base44.entities.AlertRule.delete(id).catch(() => {});
+    queryClient.invalidateQueries({ queryKey: ["alert-rules"] });
   };
 
   const toggle = async (rule) => {
-    await base44.entities.AlertRule.update(rule.id, { enabled: !rule.enabled });
-    setRules(prev => prev.map(r => r.id === rule.id ? { ...r, enabled: !r.enabled } : r));
+    const enabled = !rule.enabled;
+    await base44.entities.AlertRule.update(rule.id, { enabled }).catch(() => {});
+    queryClient.invalidateQueries({ queryKey: ["alert-rules"] });
   };
 
   const runCheck = async () => {
     setChecking(true);
+    setError(null);
     try {
-      const res = await base44.functions.invoke('checkAlerts', {});
-      if (res.data?.triggered?.length > 0 && onTriggered) onTriggered(res.data.triggered);
-    } catch (e) {}
-    setChecking(false);
+      const response = await base44.functions.invoke("checkAlerts", {});
+      if (response?.data?.triggered?.length > 0 && onTriggered) {
+        onTriggered(response.data.triggered);
+      }
+    } catch (err) {
+      setError(err?.message || "Failed to run alert check.");
+    } finally {
+      setChecking(false);
+    }
   };
 
+  const enabledCount = useMemo(
+    () => rules.filter((rule) => rule.enabled).length,
+    [rules],
+  );
+  const metricLabel = (metric) => metrics.find((item) => item.value === metric)?.label || metric;
+  const opLabel = (operator) => operators.find((item) => item.value === operator)?.label || operator;
+
   return (
-    <div className="border" style={{ borderColor: T.border, background: T.bg1 }}>
-      <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: T.border }}>
-        <div className="flex items-center gap-2">
-          <Bell size={10} style={{ color: T.amber }} />
-          <span style={{ color: T.amber, fontSize: "10px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.15em" }}>ALERT RULES</span>
-        </div>
-        <div className="flex gap-1">
-          <button
-            onClick={runCheck}
-            disabled={checking}
-            className="text-xs px-2 py-0.5 border transition-opacity hover:opacity-80"
-            style={{ borderColor: T.cyan + "66", color: T.cyan, fontSize: "9px" }}
-          >
-            {checking ? "CHECKING..." : "RUN CHECK"}
-          </button>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="px-2 py-0.5 border transition-opacity hover:opacity-80"
-            style={{ borderColor: T.green + "66", color: T.green }}
-          >
-            <Plus size={10} />
-          </button>
-        </div>
+    <div className="border" style={{ borderColor: S.border, background: "#060606" }}>
+      <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: S.border }}>
+        <Bell size={11} style={{ color: S.warn }} />
+        <span className="text-xs font-bold tracking-widest" style={{ color: S.warn, fontFamily: "'Orbitron', monospace" }}>
+          ALERT RULES ({enabledCount}/{rules.length} ACTIVE)
+        </span>
+        <button onClick={runCheck} disabled={checking} className="ml-auto flex items-center gap-1 text-xs px-2 py-1 border" style={{ borderColor: S.cyan + "77", color: S.cyan }}>
+          <PlayCircle size={10} />
+          {checking ? "CHECKING..." : "RUN CHECK"}
+        </button>
+        <button onClick={() => setShowForm((value) => !value)} className="flex items-center gap-1 text-xs px-2 py-1 border" style={{ borderColor: S.warn + "77", color: S.warn }}>
+          <Plus size={10} />
+          RULE
+        </button>
       </div>
 
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="border-b px-3 py-2 space-y-2"
-            style={{ borderColor: T.green + "44", background: T.green + "08" }}
-          >
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <div style={{ color: T.textFaint, fontSize: "8px", marginBottom: "3px" }}>RULE NAME</div>
-                <input
-                  className="w-full px-2 py-1 border text-xs outline-none"
-                  style={{ borderColor: T.border, background: "rgba(20,15,10,0.9)", color: T.text, fontSize: "11px" }}
-                  value={form.name}
-                  onChange={e => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g. High CPU"
-                />
-              </div>
-              <div>
-                <div style={{ color: T.textFaint, fontSize: "8px", marginBottom: "3px" }}>METRIC</div>
-                <select
-                  className="w-full px-2 py-1 border text-xs outline-none"
-                  style={{ borderColor: T.border, background: "rgba(20,15,10,0.9)", color: T.text, fontSize: "11px" }}
-                  value={form.metric}
-                  onChange={e => setForm({ ...form, metric: e.target.value })}
-                >
-                  {METRICS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <div style={{ color: T.textFaint, fontSize: "8px", marginBottom: "3px" }}>OPERATOR</div>
-                <select
-                  className="w-full px-2 py-1 border text-xs outline-none"
-                  style={{ borderColor: T.border, background: "rgba(20,15,10,0.9)", color: T.text, fontSize: "11px" }}
-                  value={form.operator}
-                  onChange={e => setForm({ ...form, operator: e.target.value })}
-                >
-                  <option value="gt">&gt; Greater than</option>
-                  <option value="lt">&lt; Less than</option>
-                </select>
-              </div>
-              <div>
-                <div style={{ color: T.textFaint, fontSize: "8px", marginBottom: "3px" }}>THRESHOLD</div>
-                <input
-                  className="w-full px-2 py-1 border text-xs outline-none"
-                  style={{ borderColor: T.border, background: "rgba(20,15,10,0.9)", color: T.text, fontSize: "11px" }}
-                  type="number"
-                  value={form.threshold}
-                  onChange={e => setForm({ ...form, threshold: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={save}
-                disabled={saving || !form.name.trim()}
-                className="text-xs px-3 py-1 border transition-opacity hover:opacity-80"
-                style={{ borderColor: T.green + "88", color: T.green, opacity: saving ? 0.5 : 1 }}
-              >
-                {saving ? "SAVING..." : "SAVE RULE"}
-              </button>
-              <button
-                onClick={() => setShowForm(false)}
-                className="text-xs px-3 py-1 border"
-                style={{ borderColor: T.border, color: T.textFaint }}
-              >
-                CANCEL
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {runtimeConfig.error && (
+        <div className="px-3 py-2 text-xs border-b" style={{ borderColor: S.border, color: S.danger }}>
+          RUNTIME ALERT CATALOG UNAVAILABLE
+        </div>
+      )}
 
-      <div className="divide-y" style={{ divideColor: T.border }}>
+      {showForm && (
+        <div className="p-3 border-b space-y-2" style={{ borderColor: S.border }}>
+          <input
+            value={form.name}
+            onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+            placeholder="Rule name"
+            className="w-full text-xs px-2 py-1.5 border bg-transparent outline-none"
+            style={{ borderColor: S.border, color: S.text }}
+          />
+          <div className="grid grid-cols-3 gap-2">
+            <select
+              className="text-xs px-2 py-1.5 border bg-transparent outline-none"
+              style={{ borderColor: S.border, color: S.text }}
+              value={form.metric}
+              onChange={(event) => setForm((prev) => ({ ...prev, metric: event.target.value }))}
+            >
+              {metrics.map((metric) => (
+                <option key={metric.value} value={metric.value}>
+                  {metric.label}
+                </option>
+              ))}
+            </select>
+            <select
+              className="text-xs px-2 py-1.5 border bg-transparent outline-none"
+              style={{ borderColor: S.border, color: S.text }}
+              value={form.operator}
+              onChange={(event) => setForm((prev) => ({ ...prev, operator: event.target.value }))}
+            >
+              {operators.map((operator) => (
+                <option key={operator.value} value={operator.value}>
+                  {operator.label}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              value={form.threshold}
+              onChange={(event) => setForm((prev) => ({ ...prev, threshold: event.target.value }))}
+              className="text-xs px-2 py-1.5 border bg-transparent outline-none"
+              style={{ borderColor: S.border, color: S.text }}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="number"
+              value={form.cooldown_minutes}
+              onChange={(event) => setForm((prev) => ({ ...prev, cooldown_minutes: event.target.value }))}
+              className="text-xs px-2 py-1.5 border bg-transparent outline-none"
+              style={{ borderColor: S.border, color: S.text }}
+              placeholder="Cooldown (minutes)"
+            />
+            <input
+              type="email"
+              value={form.email_address}
+              onChange={(event) => setForm((prev) => ({ ...prev, email_address: event.target.value }))}
+              className="text-xs px-2 py-1.5 border bg-transparent outline-none"
+              style={{ borderColor: S.border, color: S.text }}
+              placeholder="Alert email (optional)"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: S.text }}>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={form.notify_inapp} onChange={(event) => setForm((prev) => ({ ...prev, notify_inapp: event.target.checked }))} />
+              IN-APP
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={form.notify_email} onChange={(event) => setForm((prev) => ({ ...prev, notify_email: event.target.checked }))} />
+              EMAIL
+            </label>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: S.text }}>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={form.auto_remediate} onChange={(event) => setForm((prev) => ({ ...prev, auto_remediate: event.target.checked }))} />
+              AUTO-REMEDIATE
+            </label>
+            <input
+              value={form.remediation_command}
+              onChange={(event) => setForm((prev) => ({ ...prev, remediation_command: event.target.value }))}
+              placeholder="remediation command"
+              className="text-xs px-2 py-1.5 border bg-transparent outline-none"
+              style={{ borderColor: S.border, color: S.text }}
+            />
+          </div>
+          <button onClick={save} disabled={saving || metrics.length === 0 || operators.length === 0} className="text-xs px-3 py-1.5 border flex items-center gap-1" style={{ borderColor: S.active + "88", color: S.active }}>
+            <Save size={10} />
+            {saving ? "SAVING..." : "SAVE RULE"}
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="px-3 py-2 text-xs border-b" style={{ borderColor: S.border, color: S.danger }}>
+          {error}
+        </div>
+      )}
+
+      <div className="max-h-72 overflow-y-auto">
         {rules.length === 0 ? (
-          <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>// NO RULES DEFINED</div>
+          <div className="px-3 py-4 text-xs" style={{ color: S.faint }}>
+            NO ALERT RULES
+          </div>
         ) : (
-          rules.map(rule => (
-            <div key={rule.id} className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: `1px solid ${T.border}44` }}>
-              <button
-                onClick={() => toggle(rule)}
-                style={{ width: "8px", height: "8px", borderRadius: "50%", background: rule.enabled ? T.green : T.textFaint, flexShrink: 0, border: "none" }}
-              />
+          rules.map((rule) => (
+            <div key={rule.id} className="px-3 py-2 border-b flex items-start gap-2" style={{ borderColor: S.border }}>
+              <button onClick={() => toggle(rule)} className="text-xs px-1.5 py-0.5 border" style={{ borderColor: rule.enabled ? S.active + "88" : S.dim + "66", color: rule.enabled ? S.active : S.dim }}>
+                {rule.enabled ? "ON" : "OFF"}
+              </button>
               <div className="flex-1 min-w-0">
-                <div className="text-xs truncate" style={{ color: T.text }}>{rule.name}</div>
-                <div style={{ color: T.textFaint, fontSize: "9px" }}>
-                  {rule.metric} {rule.operator === "gt" ? ">" : "<"} {rule.threshold}
+                <div className="text-xs font-bold" style={{ color: S.text }}>
+                  {rule.name}
+                </div>
+                <div className="text-xs" style={{ color: S.dim }}>
+                  {metricLabel(rule.metric)} {opLabel(rule.operator)} {rule.threshold} • cooldown {rule.cooldown_minutes || 15}m
                 </div>
               </div>
-              <button onClick={() => remove(rule.id)} className="hover:opacity-70">
-                <X size={10} style={{ color: T.textFaint }} />
+              <button onClick={() => remove(rule.id)} className="p-1" title="Delete rule">
+                <Trash2 size={10} style={{ color: S.danger }} />
               </button>
             </div>
           ))
@@ -185,3 +258,4 @@ export default function AlertRulesPanel({ onTriggered }) {
     </div>
   );
 }
+

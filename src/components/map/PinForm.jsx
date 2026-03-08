@@ -1,10 +1,19 @@
 import { T, FormPanel, Field, ActionBtn, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
 import { Save } from "lucide-react";
 
-const PIN_TYPES = ["Loot Cache","Safe House","Danger Zone","Resource Node","Enemy Sighting","Clan Base","Vehicle Spawn","Objective","Horde Sighting","Rally Point","Route Waypoint","Other"];
-const HORDE_DIRS = ["N","NE","E","SE","S","SW","W","NW"];
-
-export default function PinForm({ pin, onChange, onSave, onClose, expiryHours, onExpiryChange }) {
+export default function PinForm({
+  pin,
+  onChange,
+  onSave,
+  onClose,
+  expiryHours,
+  onExpiryChange,
+  pinTypes = [],
+  hordeDirections = [],
+  pinStatuses = [],
+  hordeSightingType = "",
+  rallyPointType = "",
+}) {
   return (
     <FormPanel title="NEW PIN" onClose={onClose}>
       <Field label="TITLE">
@@ -14,11 +23,11 @@ export default function PinForm({ pin, onChange, onSave, onClose, expiryHours, o
       <Field label="TYPE">
         <select className="w-full text-xs px-2 py-1.5 border outline-none" style={selectStyle}
           value={pin.type} onChange={e => onChange({ type: e.target.value })}>
-          {PIN_TYPES.map(t => <option key={t}>{t}</option>)}
+          {pinTypes.map(t => <option key={t}>{t}</option>)}
         </select>
       </Field>
 
-      {pin.type === "Horde Sighting" && (
+      {hordeSightingType && pin.type === hordeSightingType && (
         <>
           <Field label="HORDE SIZE (approx)">
             <input type="number" className="w-full text-xs px-2 py-1.5 border bg-transparent outline-none" style={inputStyle}
@@ -27,13 +36,13 @@ export default function PinForm({ pin, onChange, onSave, onClose, expiryHours, o
           <Field label="MOVEMENT DIRECTION">
             <select className="w-full text-xs px-2 py-1.5 border outline-none" style={selectStyle}
               value={pin.horde_direction || "N"} onChange={e => onChange({ horde_direction: e.target.value })}>
-              {HORDE_DIRS.map(d => <option key={d}>{d}</option>)}
+              {hordeDirections.map(d => <option key={d}>{d}</option>)}
             </select>
           </Field>
         </>
       )}
 
-      {pin.type === "Rally Point" && (
+      {rallyPointType && pin.type === rallyPointType && (
         <Field label="COUNTDOWN (minutes)">
           <input type="number" className="w-full text-xs px-2 py-1.5 border bg-transparent outline-none" style={inputStyle}
             placeholder="e.g. 10" value={pin.rallyMins || ""} onChange={e => onChange({ rallyMins: parseInt(e.target.value) || 10 })} />
@@ -43,7 +52,7 @@ export default function PinForm({ pin, onChange, onSave, onClose, expiryHours, o
       <Field label="STATUS">
         <select className="w-full text-xs px-2 py-1.5 border outline-none" style={selectStyle}
           value={pin.status} onChange={e => onChange({ status: e.target.value })}>
-          {["Fresh","Looted","Unknown","Active","Cleared"].map(s => <option key={s}>{s}</option>)}
+          {pinStatuses.map(s => <option key={s}>{s}</option>)}
         </select>
       </Field>
       <Field label="EXPIRES IN (hours, 0 = never)">
