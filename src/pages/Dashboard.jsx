@@ -50,10 +50,10 @@ export default function Dashboard() {
 
       {/* Top stats */}
       <StatGrid stats={[
-        { label: "ACTIVE OPS",     value: activeMissions, color: T.green },
-        { label: "OPERATORS ONLINE", value: activeMembers,  color: T.cyan },
-        { label: "ALERTS",         value: criticalEvents, color: criticalEvents > 0 ? T.red : T.textDim },
-        { label: "TOTAL INVENTORY", value: totalItems,     color: T.amber },
+        { label: "ACTIVE OPS",       value: activeMissions, color: T.green,                                      sub: "missions running" },
+        { label: "OPERATORS ONLINE", value: activeMembers,  color: T.teal,                                       sub: `of ${members.length} total` },
+        { label: "ALERTS",           value: criticalEvents, color: criticalEvents > 0 ? T.pink : T.textFaint,    sub: criticalEvents > 0 ? "ACTION REQUIRED" : "all clear" },
+        { label: "TOTAL INVENTORY",  value: totalItems,     color: T.gold,                                       sub: "items tracked" },
       ]} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
