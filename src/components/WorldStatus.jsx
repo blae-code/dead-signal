@@ -1,199 +1,112 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Cloud, CloudRain, Sun, Wind, Droplets, Eye, Gauge } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Sun, Cloud, CloudRain } from "lucide-react";
 
 const C = {
   text: "#e0d4c0",
   textDim: "#b8a890",
   textFaint: "#8a7a6a",
-  border: "#1e1e1e",
-  borderMid: "#2a2a2a",
+  border: "#3a2a1a",
 };
 
 export default function WorldStatus({ inGameTime, weather }) {
-  const [expanded, setExpanded] = useState(false);
+  const [tick, setTick] = useState(0);
 
-  // Calculate game season (based on game day in 120-day cycle)
+  // Re-derive every second so all values stay live
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const getGameSeason = () => {
     const now = new Date();
     const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
-    const gameDayInCycle = (dayOfYear * 12) % 120; // 120 game days = full cycle
-    
+    const gameDayInCycle = (dayOfYear * 12) % 120;
     if (gameDayInCycle < 30) return { name: "SPRING", color: "#39ff14", icon: "🌱" };
     if (gameDayInCycle < 60) return { name: "SUMMER", color: "#ffb000", icon: "☀️" };
     if (gameDayInCycle < 90) return { name: "AUTUMN", color: "#ff8000", icon: "🍂" };
     return { name: "WINTER", color: "#00e5ff", icon: "❄️" };
   };
 
-  // Simulate in-game weather independent of real weather
   const getGameWeather = () => {
-    const now = new Date();
-    const seed = Math.floor(now.getTime() / 3600000) % 4;
+    const seed = Math.floor(new Date().getTime() / 3600000) % 4;
     const conditions = [
-      { name: "CLEAR", icon: "☀️", color: "#ffb000", danger: 0 },
-      { name: "OVERCAST", icon: "☁️", color: "#999", danger: 1 },
-      { name: "RAIN", icon: "🌧️", color: "#00e5ff", danger: 2 },
-      { name: "STORM", icon: "⚡", color: "#ff2020", danger: 3 },
+      { name: "CLEAR",    icon: "☀️", color: "#ffb000" },
+      { name: "OVERCAST", icon: "☁️", color: "#999" },
+      { name: "RAIN",     icon: "🌧️", color: "#00e5ff", danger: true },
+      { name: "STORM",    icon: "⚡",  color: "#ff2020", danger: true },
     ];
     return conditions[seed];
   };
 
-  // Calculate environmental hazards based on time & season
-  const getHazards = () => {
+  const getHazard = () => {
     const hour = parseInt(inGameTime.hour);
-    const season = getGameSeason();
-    const gameWeather = getGameWeather();
-    const hazards = [];
-
-    if (hour < 6 || hour >= 20) hazards.push({ name: "NIGHT", severity: "WARN", color: "#ffb000" });
-    if (hour >= 20 || hour < 4) hazards.push({ name: "COLD", severity: "ALERT", color: "#00e5ff" });
-    if (gameWeather.danger >= 2) hazards.push({ name: "EXPOSURE", severity: "CRITICAL", color: "#ff2020" });
-    if (season.name === "SUMMER" && hour >= 12 && hour <= 16) hazards.push({ name: "HEATSTROKE", severity: "ALERT", color: "#ff8000" });
-
-    return hazards.length ? hazards : [{ name: "STABLE", severity: "OK", color: "#39ff14" }];
+    const gw = getGameWeather();
+    if (gw.danger) return { label: "EXPOSURE", color: "#ff2020" };
+    if (hour >= 20 || hour < 4) return { label: "COLD", color: "#00e5ff" };
+    if (hour < 6 || hour >= 20) return { label: "NIGHT", color: "#ffb000" };
+    return { label: "STABLE", color: "#39ff14" };
   };
 
   const season = getGameSeason();
   const gameWeather = getGameWeather();
-  const hazards = getHazards();
+  const hazard = getHazard();
 
   return (
-    <div style={{ borderColor: C.border }}>
-      {/* Collapsed header row */}
-      <motion.button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-3 py-2 border-b text-xs font-bold tracking-widest"
-        style={{ 
-          borderColor: C.border, 
-          color: C.textFaint,
-          background: "transparent",
-          cursor: "pointer",
-          fontFamily: "'Orbitron', monospace",
-          fontSize: "9px"
-        }}
-      >
-        <span className="flex items-center gap-2">
-          <span>{season.icon}</span>
-          <span style={{ color: season.color }}>{season.name}</span>
-          <span style={{ color: C.textFaint }}>•</span>
-          <span>{gameWeather.icon}</span>
-          <span style={{ color: gameWeather.color }}>{gameWeather.name}</span>
+    <div className="flex items-center gap-4 px-2">
+      {/* In-game time */}
+      <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
+        <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>GAME TIME</span>
+        <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
+          {inGameTime.hour}:{inGameTime.min}
+          <span style={{ color: inGameTime.isDaytime ? "#ffb000" : "#00e5ff", fontSize: "8px", marginLeft: "4px" }}>
+            {inGameTime.isDaytime ? "☀" : "☾"}
+          </span>
         </span>
-        <ChevronDown 
-          size={11} 
-          style={{ 
-            color: C.textFaint,
-            transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.2s"
-          }} 
-        />
-      </motion.button>
+      </div>
 
-      {/* Expanded details */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden border-b"
-            style={{ borderColor: C.border, background: "#080808" }}
-          >
-            <div className="px-3 py-3 space-y-3">
-              {/* In-game time detail */}
-              <div className="space-y-1">
-                <div className="text-xs" style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>GAME TIME</div>
-                <div className="flex items-center gap-2">
-                  {inGameTime.isDaytime ? (
-                    <Sun size={12} style={{ color: "#ffb000" }} />
-                  ) : (
-                    <Cloud size={12} style={{ color: "#00e5ff" }} />
-                  )}
-                  <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "13px" }}>
-                    {inGameTime.hour}:{inGameTime.min}
-                  </span>
-                  <span style={{ color: C.textDim, fontSize: "10px" }}>
-                    {inGameTime.isDaytime ? "DAYTIME" : "NIGHTTIME"}
-                  </span>
-                </div>
-              </div>
+      <span style={{ color: C.border, fontSize: "16px" }}>|</span>
 
-              {/* Season detail */}
-              <div className="space-y-1">
-                <div className="text-xs" style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>SEASON</div>
-                <div style={{ color: season.color, fontFamily: "'Orbitron', monospace", fontSize: "12px" }}>
-                  {season.icon} {season.name}
-                </div>
-              </div>
+      {/* Season */}
+      <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
+        <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>SEASON</span>
+        <span style={{ color: season.color, fontFamily: "'Orbitron', monospace", fontSize: "10px" }}>
+          {season.icon} {season.name}
+        </span>
+      </div>
 
-              {/* In-game weather conditions */}
-              <div className="space-y-1">
-                <div className="text-xs" style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>IN-GAME CONDITIONS</div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="flex items-center gap-1">
-                    {gameWeather.icon === "☀️" ? <Sun size={11} /> : gameWeather.icon === "☁️" ? <Cloud size={11} /> : <CloudRain size={11} />}
-                    <span style={{ color: gameWeather.color, fontSize: "10px" }}>{gameWeather.name}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Wind size={11} style={{ color: C.textDim }} />
-                    <span style={{ color: C.textDim, fontSize: "10px" }}>12 KM/H</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Droplets size={11} style={{ color: C.textDim }} />
-                    <span style={{ color: C.textDim, fontSize: "10px" }}>65%</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Eye size={11} style={{ color: C.textDim }} />
-                    <span style={{ color: C.textDim, fontSize: "10px" }}>800M</span>
-                  </div>
-                </div>
-              </div>
+      <span style={{ color: C.border, fontSize: "16px" }}>|</span>
 
-              {/* Environmental hazards */}
-              <div className="space-y-1">
-                <div className="text-xs" style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>ENVIRONMENTAL HAZARDS</div>
-                <div className="flex flex-wrap gap-2">
-                  {hazards.map(h => (
-                    <span 
-                      key={h.name}
-                      className="px-2 py-1 text-xs border"
-                      style={{ 
-                        borderColor: h.color + "66",
-                        color: h.color,
-                        background: h.color + "11",
-                        fontSize: "9px",
-                        fontFamily: "'Orbitron', monospace"
-                      }}
-                    >
-                      {h.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
+      {/* In-game weather */}
+      <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
+        <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>CONDITIONS</span>
+        <span style={{ color: gameWeather.color, fontFamily: "'Orbitron', monospace", fontSize: "10px" }}>
+          {gameWeather.icon} {gameWeather.name}
+        </span>
+      </div>
 
-              {/* Real-world weather context */}
-              {weather && (
-                <div className="space-y-1 border-t pt-2" style={{ borderColor: C.border }}>
-                  <div className="text-xs" style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>REAL-WORLD CONDITIONS</div>
-                  <div className="flex items-center gap-2">
-                    {weather.shortForecast.includes("Rain") ? (
-                      <CloudRain size={11} style={{ color: "#00e5ff" }} />
-                    ) : weather.shortForecast.includes("Cloud") ? (
-                      <Cloud size={11} style={{ color: "#666" }} />
-                    ) : (
-                      <Sun size={11} style={{ color: "#ffb000" }} />
-                    )}
-                    <span style={{ color: C.text, fontSize: "10px" }}>
-                      {weather.temp}°F • {weather.shortForecast}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <span style={{ color: C.border, fontSize: "16px" }}>|</span>
+
+      {/* Hazard */}
+      <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
+        <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>HAZARD</span>
+        <span style={{ color: hazard.color, fontFamily: "'Orbitron', monospace", fontSize: "10px",
+          animation: hazard.label !== "STABLE" ? "threat-blink 1s infinite" : "none" }}>
+          {hazard.label}
+        </span>
+      </div>
+
+      {/* Real-world weather if available */}
+      {weather && (
+        <>
+          <span style={{ color: C.border, fontSize: "16px" }}>|</span>
+          <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
+            <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>IRL WEATHER</span>
+            <span style={{ color: C.textDim, fontSize: "10px" }}>
+              {weather.temp}°F {weather.shortForecast.split(" ").slice(0, 2).join(" ")}
+            </span>
+          </div>
+        </>
+      )}
     </div>
   );
 }
