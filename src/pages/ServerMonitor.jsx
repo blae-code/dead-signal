@@ -12,7 +12,7 @@ import AdminToolsPanel from "../components/server/AdminToolsPanel";
 import { T } from "@/components/ui/TerminalCard";
 
 const pingColor  = (ms)  => ms === null ? T.textFaint : ms < 80 ? T.green : ms < 200 ? T.gold : T.red;
-const lossColor  = (pct) => pct === 0 ? T.teal : pct < 33 ? T.amber : T.red;
+const lossColor  = (pct) => pct === 0 ? T.teal : pct < 33 ? T.orange : T.red;
 const cpuColor   = (v)   => v > 80 ? T.red : v > 60 ? T.orange : T.green;
 const ramColor   = (mb)  => { const p = mb / 32768 * 100; return p > 80 ? T.red : p > 60 ? T.orange : T.cyan; };
 
