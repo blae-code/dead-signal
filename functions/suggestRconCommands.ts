@@ -17,14 +17,13 @@ Deno.serve(async (req) => {
     const actorId = user?.id || user?.email || 'unknown-admin';
     enforceRateLimit(`llm:suggestRconCommands:${actorId}`, 10, 60_000, 'llm_rate_limited');
 
-    const body = await parseJsonBody<{ context?: unknown }>(req);
-    if (!body.context || typeof body.context !== 'object' || Array.isArray(body.context)) {
-      throw new AppError(400, 'invalid_context', 'context must be a JSON object.');
-    }
-    const context = body.context;
+    const body = await parseJsonBody<{ context?: unknown, serverStatus?: unknown, recentEvents?: unknown }>(req);
+    const context = body.context || body.serverStatus || {};
+    const recentEvents = body.recentEvents || [];
+    
     const status = await base44.integrations.Core.InvokeLLM({
-      prompt: `Given this server context: ${JSON.stringify(context)}, suggest 5 optimal RCON commands to improve performance, manage players, or address issues. Consider: CPU usage, player count, current issues.
-Return JSON: { suggestions: [{command: string, reason: string, priority: "HIGH"|"MEDIUM"|"LOW"}] }`,
+      prompt: `Given this server context: ${JSON.stringify(context)} and recent events: ${JSON.stringify(recentEvents)}, suggest 5 optimal RCON commands to improve performance, manage players, or address issues. Consider: CPU usage, RAM usage, player count, packet loss, recent events, and performance metrics.
+Return JSON: { commands: [{command: string, reason: string}] }`,
       response_json_schema: {
         type: 'object',
         properties: {
