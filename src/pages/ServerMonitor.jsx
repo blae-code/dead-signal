@@ -398,7 +398,7 @@ export default function ServerMonitor() {
         <StatPill icon={Cpu}      label="CPU"         value={statusLoading ? "..." : `${cpu.toFixed(0)}%`} sub={cpu > 80 ? "CRITICAL" : cpu > 60 ? "ELEVATED" : "NORMAL"} color={cpuColor(cpu)} />
         <StatPill icon={Database} label="RAM"         value={statusLoading ? "..." : `${(ram / 1024).toFixed(1)}GB`} sub={`${(ram / 32768 * 100).toFixed(0)}% of 32GB`} color={ramColor(ram)} />
         <StatPill icon={Database} label="DISK"        value={statusLoading ? "..." : `${(disk / 1024).toFixed(0)}GB`} sub="used" color={T.gold} />
-        <StatPill icon={Activity} label="NETWORK"     value={statusLoading ? "..." : `↓${rx}`} sub={`↑${tx} MB/s`} color={T.teal} />
+        <StatPill icon={Activity} label="NETWORK"     value={statusLoading ? "..." : `↓${rx}`} sub={`↑${tx} MB/s`} color={T.steel} />
       </div>
 
       {/* ── MAIN 3-COLUMN GRID ────────────────────────────────────────────── */}
