@@ -59,7 +59,6 @@ export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [time, setTime] = useState(new Date());
   const [online, setOnline] = useState(navigator.onLine);
-  const [threatLevel] = useState(0); // 0=secure, 1=elevated, 2=critical
   const [weather, setWeather] = useState(null);
 
   useEffect(() => {
