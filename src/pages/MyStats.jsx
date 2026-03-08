@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { BarChart2, Skull } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { T, PageHeader, Panel, StatGrid } from "@/components/ui/TerminalCard";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 export default function MyStats() {
   const [user, setUser] = useState(null);
@@ -77,6 +79,15 @@ export default function MyStats() {
                 <div style={{ color: T.gold, fontFamily: "'Orbitron', monospace", fontSize: "14px", fontWeight: "bold" }}>{member.callsign}</div>
                 <div style={{ color: T.textDim, fontSize: "10px" }}>{member.role} · {member.status}</div>
               </div>
+              {member?.id && (
+                <Link
+                  to={createPageUrl(`PlayerProfile?id=${member.id}`)}
+                  className="ml-auto text-xs border px-2 py-1 hover:opacity-80 transition-opacity"
+                  style={{ borderColor: T.cyan + "55", color: T.cyan, textDecoration: "none", fontSize: "9px" }}
+                >
+                  OPEN IMMERSIVE PROFILE
+                </Link>
+              )}
             </div>
           </div>
 
