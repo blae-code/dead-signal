@@ -245,6 +245,55 @@ export default function PlayerProfile() {
           </div>
         </Panel>
       </div>
+
+      {/* Vouches */}
+      {member.user_email && (
+        <Panel title={`VOUCHES (${vouches.length})`} titleColor={T.green}
+          headerRight={
+            user && user.email !== member.user_email && !vouches.find(v => v.voucher_email === user.email) ? (
+              <ActionBtn small color={T.green} onClick={() => setShowVouchForm(!showVouchForm)}>
+                <ThumbsUp size={9} /> VOUCH
+              </ActionBtn>
+            ) : null
+          }>
+          {showVouchForm && (
+            <div className="px-3 py-3 border-b" style={{ borderColor: T.border }}>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div>
+                  <div style={{ color: T.textFaint, fontSize: "9px", marginBottom: 4 }}>RATING (1-5)</div>
+                  <input type="number" min="1" max="5" className="w-full border p-2 text-xs"
+                    style={{ borderColor: T.border, background: T.bg1, color: T.text }}
+                    value={vouchForm.rating} onChange={e => setVouchForm({...vouchForm, rating: e.target.value})} />
+                </div>
+                <div>
+                  <div style={{ color: T.textFaint, fontSize: "9px", marginBottom: 4 }}>COMMENT</div>
+                  <input className="w-full border p-2 text-xs"
+                    style={{ borderColor: T.border, background: T.bg1, color: T.text }}
+                    value={vouchForm.comment} onChange={e => setVouchForm({...vouchForm, comment: e.target.value})}
+                    placeholder="Great teammate..." />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <ActionBtn small color={T.textDim} onClick={() => setShowVouchForm(false)}>CANCEL</ActionBtn>
+                <ActionBtn small color={T.green} onClick={handleVouch}>SUBMIT VOUCH</ActionBtn>
+              </div>
+            </div>
+          )}
+          {vouches.length === 0 ? <EmptyState message="NO VOUCHES YET — BE THE FIRST" /> :
+            vouches.map(v => (
+              <div key={v.id} className="flex items-center gap-3 px-3 py-2 border-b" style={{ borderColor: T.border + "44" }}>
+                <div style={{ color: T.amber, fontFamily: "'Orbitron', monospace", fontSize: "12px", fontWeight: "bold", flexShrink: 0 }}>
+                  {"★".repeat(v.rating)}{"☆".repeat(5 - v.rating)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  {v.comment && <div style={{ color: T.text, fontSize: "11px" }}>{v.comment}</div>}
+                  <div style={{ color: T.textFaint, fontSize: "9px" }}>by {v.voucher_callsign || v.voucher_email} · {v.created_date?.slice(0,10)}</div>
+                </div>
+              </div>
+            ))
+          }
+        </Panel>
+      )}
     </div>
   );
 }
