@@ -1,0 +1,30 @@
+{
+  "config": {
+    "map_id": "global-map",
+    "image_url": "https://cdn.example.com/game-map.png",
+    "tile_url_template": null,
+    "image_width_px": 8192,
+    "image_height_px": 8192,
+    "min_zoom": 1,
+    "max_zoom": 5,
+    "default_zoom": 1,
+    "world_bounds": {
+      "min_x": 0,
+      "max_x": 10000,
+      "min_y": 0,
+      "max_y": 10000
+    },
+    "control_points": [
+      {
+        "id": "cp-top-left",
+        "image": { "x": 0, "y": 0 },
+        "world": { "x": 0, "y": 0 }
+      },
+      {
+        "id": "cp-bottom-right",
+        "image": { "x": 8192, "y": 8192 },
+        "world": { "x": 10000, "y": 10000 }
+      }
+    ]
+  }
+}
