@@ -56,6 +56,7 @@ import ServerMonitor from './pages/ServerMonitor';
 import TacticalMap from './pages/TacticalMap';
 import Dashboard from './pages/Dashboard';
 import PlayerProfile from './pages/PlayerProfile';
+import MyStats from './pages/MyStats';
 import __Layout from './Layout.jsx';
 
 
@@ -69,6 +70,7 @@ export const PAGES = {
     "TacticalMap": TacticalMap,
     "Dashboard": Dashboard,
     "PlayerProfile": PlayerProfile,
+    "MyStats": MyStats,
 }
 
 export const pagesConfig = {
