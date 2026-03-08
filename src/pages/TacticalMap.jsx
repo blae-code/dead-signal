@@ -75,9 +75,11 @@ export default function TacticalMap() {
           <option value="ALL">ALL TYPES</option>
           {PIN_TYPES.map(t => <option key={t}>{t}</option>)}
         </select>
-        <ActionBtn color={placing ? T.amber : T.green} onClick={() => { setPlacing(!placing); setShowForm(false); }}>
-          <Plus size={10} /> {placing ? "CANCEL" : "DROP PIN"}
-        </ActionBtn>
+        {isAdmin && (
+          <ActionBtn color={placing ? T.amber : T.green} onClick={() => { setPlacing(!placing); setShowForm(false); }}>
+            <Plus size={10} /> {placing ? "CANCEL" : "DROP PIN"}
+          </ActionBtn>
+        )}
       </PageHeader>
 
       {placing && (
@@ -193,9 +195,11 @@ export default function TacticalMap() {
                 {selectedPin.note && <p className="text-xs" style={{ color: T.textDim }}>{selectedPin.note}</p>}
                 <div className="text-xs" style={{ color: T.textFaint }}>COORDS: X{selectedPin.x?.toFixed(1)} Y{selectedPin.y?.toFixed(1)}</div>
                 {selectedPin.placed_by && <div className="text-xs" style={{ color: T.textFaint }}>BY: {selectedPin.placed_by}</div>}
-                <ActionBtn color={T.red} onClick={() => handleDeletePin(selectedPin.id)}>
-                  <Trash2 size={10} /> REMOVE PIN
-                </ActionBtn>
+                {isAdmin && (
+                  <ActionBtn color={T.red} onClick={() => handleDeletePin(selectedPin.id)}>
+                    <Trash2 size={10} /> REMOVE PIN
+                  </ActionBtn>
+                )}
               </div>
             </Panel>
           )}
