@@ -22,23 +22,23 @@ export const T = {
   textFaint: "#7a6a52",
   textGhost: "#3a2e20",
 
-  // ── Status — neon spectrum
-  green:   "#30ff60",   // lime-green (survival)
-  amber:   "#ffaa00",   // warm gold  (command)
-  red:     "#ff2828",   // hard red   (critical)
-  cyan:    "#00e8ff",   // ice-blue   (server / tech)
-  orange:  "#ff6a00",   // deep orange (warning)
-  purple:  "#b060ff",   // intel / AI
-  pink:    "#ff3090",   // hostile / danger accent
-  teal:    "#00c8a0",   // logistics / supply
-  gold:    "#e8b800",   // high-value / loot
+  // ── Status — military / industrial spectrum (high contrast, no pastels)
+  green:   "#39ff14",   // phosphor green  (operational / clear)
+  amber:   "#ffaa00",   // command amber   (standby / caution)
+  red:     "#ff2020",   // hard red        (critical / danger)
+  cyan:    "#00d4e8",   // steel-blue      (server / comms)
+  orange:  "#ff6600",   // hazard orange   (warning / elevated)
+  olive:   "#a8c820",   // field olive     (intel / secondary)
+  steel:   "#4ab8d4",   // cold steel-blue (network / data)
+  teal:    "#00b896",   // military teal   (logistics / supply)
+  gold:    "#d4a800",   // tactical gold   (high-value / loot)
 
   // ── Semantic shortcuts
-  online:  "#30ff60",
-  offline: "#ff2828",
+  online:  "#39ff14",
+  offline: "#ff2020",
   warn:    "#ffaa00",
-  info:    "#00e8ff",
-  ai:      "#b060ff",
+  info:    "#00d4e8",
+  ai:      "#a8c820",
 };
 
 // ── Panel top-hairline gradient ───────────────────────────────────────────────
