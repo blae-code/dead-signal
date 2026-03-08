@@ -71,62 +71,154 @@ export default function WorldStatus({ weather }) {
   const hazard = getHazard();
 
   return (
-    <div className="flex items-center gap-4 px-2">
-      {/* In-game time & day */}
-       <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
-         <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>GAME TIME</span>
-         <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
-           {inGameTime.hour}:{inGameTime.min}
-           <span style={{ color: inGameTime.isDaytime ? "#ffb000" : "#00e5ff", fontSize: "8px", marginLeft: "4px" }}>
-             {inGameTime.isDaytime ? "☀" : "☾"}
-           </span>
-         </span>
-         <span style={{ color: C.textFaint, fontSize: "7px", letterSpacing: "0.1em", marginTop: "2px" }}>DAY {inGameTime.day}</span>
-       </div>
-
-      <span style={{ color: C.border, fontSize: "16px" }}>|</span>
-
-      {/* Season */}
-      <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
-        <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>SEASON</span>
-        <span style={{ color: season.color, fontFamily: "'Orbitron', monospace", fontSize: "10px" }}>
-          {season.icon} {season.name}
-        </span>
-      </div>
-
-      <span style={{ color: C.border, fontSize: "16px" }}>|</span>
-
-      {/* In-game weather */}
-      <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
-        <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>CONDITIONS</span>
-        <span style={{ color: gameWeather.color, fontFamily: "'Orbitron', monospace", fontSize: "10px" }}>
-          {gameWeather.icon} {gameWeather.name}
-        </span>
-      </div>
-
-      <span style={{ color: C.border, fontSize: "16px" }}>|</span>
-
-      {/* Hazard */}
-      <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
-        <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>HAZARD</span>
-        <span style={{ color: hazard.color, fontFamily: "'Orbitron', monospace", fontSize: "10px",
-          animation: hazard.label !== "STABLE" ? "threat-blink 1s infinite" : "none" }}>
-          {hazard.label}
-        </span>
-      </div>
-
-      {/* Real-world weather if available */}
-      {weather && (
-        <>
-          <span style={{ color: C.border, fontSize: "16px" }}>|</span>
-          <div className="flex flex-col items-center" style={{ lineHeight: 1.2 }}>
-            <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>IRL WEATHER</span>
-            <span style={{ color: C.textDim, fontSize: "10px" }}>
-              {weather.temp}°F {weather.shortForecast.split(" ").slice(0, 2).join(" ")}
+    <TooltipProvider>
+      <div className="flex items-center gap-4 px-2">
+        {/* In-game time & day */}
+        <div className="flex flex-col items-center relative group" style={{ lineHeight: 1.2 }}>
+          <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>GAME TIME</span>
+          <div className="flex items-center gap-1">
+            <span style={{ color: C.text, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
+              {inGameTime.hour}:{inGameTime.min}
+              <span style={{ color: inGameTime.isDaytime ? "#ffb000" : "#00e5ff", fontSize: "8px", marginLeft: "4px" }}>
+                {inGameTime.isDaytime ? "☀" : "☾"}
+              </span>
             </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="opacity-60 hover:opacity-100 transition-opacity">
+                  <HelpCircle size={10} style={{ color: C.textFaint }} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs text-xs bg-opacity-95">
+                <div className="space-y-1 text-xs">
+                  <p className="font-bold text-amber-300">GAME TIME CYCLE</p>
+                  <p>60-minute cycle: 40 min day (06:00-17:59) + 20 min night (18:00-05:59)</p>
+                  <p className="text-gray-300 mt-2">🌞 <strong>Daytime:</strong> Visibility normal, reduced zombie spawn rates, safe for scavenging missions</p>
+                  <p className="text-gray-300">🌙 <strong>Nighttime:</strong> 40% reduced visibility, 3x zombie aggression, increased hypothermia risk</p>
+                  <p className="text-gray-300 mt-2">Day {inGameTime.day} of 120-day seasonal cycle</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
-        </>
-      )}
-    </div>
+          <span style={{ color: C.textFaint, fontSize: "7px", letterSpacing: "0.1em", marginTop: "2px" }}>DAY {inGameTime.day}</span>
+        </div>
+
+        <span style={{ color: C.border, fontSize: "16px" }}>|</span>
+
+        {/* Season */}
+        <div className="flex flex-col items-center relative" style={{ lineHeight: 1.2 }}>
+          <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>SEASON</span>
+          <div className="flex items-center gap-1">
+            <span style={{ color: season.color, fontFamily: "'Orbitron', monospace", fontSize: "10px" }}>
+              {season.icon} {season.name}
+            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="opacity-60 hover:opacity-100 transition-opacity">
+                  <HelpCircle size={10} style={{ color: C.textFaint }} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs text-xs bg-opacity-95">
+                <div className="space-y-1 text-xs">
+                  <p className="font-bold" style={{ color: season.color }}>{season.name}</p>
+                  {season.name === "SPRING" && <p>Resource spawns: +30% growth rate. Temp: -5°C to 15°C. Mutations less aggressive. Ideal for base building & farming.</p>}
+                  {season.name === "SUMMER" && <p>Resource spawns: +50% abundance. Temp: 10°C to 25°C. Dehydration risk increases. Fastest loot cycle but high horde density.</p>}
+                  {season.name === "AUTUMN" && <p>Resource spawns: Normal rates. Temp: 0°C to 15°C. Balanced conditions. Stable zombie behavior, reliable harvests.</p>}
+                  {season.name === "WINTER" && <p>Resource spawns: -40% availability. Temp: -15°C to 5°C. Hypothermia critical threat. Supplies scarce, survival tactics essential.</p>}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        <span style={{ color: C.border, fontSize: "16px" }}>|</span>
+
+        {/* In-game weather */}
+        <div className="flex flex-col items-center relative" style={{ lineHeight: 1.2 }}>
+          <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>CONDITIONS</span>
+          <div className="flex items-center gap-1">
+            <span style={{ color: gameWeather.color, fontFamily: "'Orbitron', monospace", fontSize: "10px" }}>
+              {gameWeather.icon} {gameWeather.name}
+            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="opacity-60 hover:opacity-100 transition-opacity">
+                  <HelpCircle size={10} style={{ color: C.textFaint }} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs text-xs bg-opacity-95">
+                <div className="space-y-1 text-xs">
+                  <p className="font-bold" style={{ color: gameWeather.color }}>WEATHER IMPACT</p>
+                  {gameWeather.name === "CLEAR" && <p>☀️ <strong>CLEAR:</strong> 100% visibility, normal zombie detection. Optimal for speed runs & supply missions. Watch for dehydration.</p>}
+                  {gameWeather.name === "OVERCAST" && <p>☁️ <strong>OVERCAST:</strong> 85% visibility, -15% zombie detection range. Ideal cover for stealth missions.</p>}
+                  {gameWeather.name === "RAIN" && <p>🌧️ <strong>RAIN:</strong> 60% visibility, -30% zombie audio detection, +20% hypothermia risk. Scent trails reset—perfect ambush timing.</p>}
+                  {gameWeather.name === "STORM" && <p>⚡ <strong>STORM:</strong> 35% visibility, +2x zombie aggression, lightning strikes possible (instant death). Avoid open areas. Take shelter immediately.</p>}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        <span style={{ color: C.border, fontSize: "16px" }}>|</span>
+
+        {/* Hazard */}
+        <div className="flex flex-col items-center relative" style={{ lineHeight: 1.2 }}>
+          <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>HAZARD</span>
+          <div className="flex items-center gap-1">
+            <span style={{ color: hazard.color, fontFamily: "'Orbitron', monospace", fontSize: "10px",
+              animation: hazard.label !== "STABLE" ? "threat-blink 1s infinite" : "none" }}>
+              {hazard.label}
+            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="opacity-60 hover:opacity-100 transition-opacity">
+                  <HelpCircle size={10} style={{ color: C.textFaint }} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs text-xs bg-opacity-95">
+                <div className="space-y-1 text-xs">
+                  <p className="font-bold" style={{ color: hazard.color }}>{hazard.label}</p>
+                  {hazard.label === "STABLE" && <p>✓ All environmental factors nominal. Best window for extended missions. Maintain hydration & food intake.</p>}
+                  {hazard.label === "NIGHT" && <p>🌙 Night hazard active (18:00-05:59). Visibility -40%, zombie aggression +3x. Recommend shelter or high-defense positions. Use lights strategically to avoid detection.</p>}
+                  {hazard.label === "COLD" && <p>❄️ Hypothermia risk active (below 0°C). Health depletes 5%/min without warmth source. Camp fires, heated bases, or thermal gear required. Monitor squad vitals.</p>}
+                  {hazard.label === "EXPOSURE" && <p>⚠️ CRITICAL: Extreme weather (STORM/RAIN) + hazard conditions. Immediate shelter required. Visibility critical, zombie threat maximum. Abort non-essential missions.</p>}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        {/* Real-world weather if available */}
+        {weather && (
+          <>
+            <span style={{ color: C.border, fontSize: "16px" }}>|</span>
+            <div className="flex flex-col items-center relative" style={{ lineHeight: 1.2 }}>
+              <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>IRL WEATHER</span>
+              <div className="flex items-center gap-1">
+                <span style={{ color: C.textDim, fontSize: "10px" }}>
+                  {weather.temp}°F {weather.shortForecast.split(" ").slice(0, 2).join(" ")}
+                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="opacity-60 hover:opacity-100 transition-opacity">
+                      <HelpCircle size={10} style={{ color: C.textFaint }} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs text-xs bg-opacity-95">
+                    <div className="space-y-1 text-xs">
+                      <p className="font-bold">REAL-WORLD CONDITIONS</p>
+                      <p>Current location: Vancouver, BC</p>
+                      <p>Temperature: {weather.temp}°F</p>
+                      <p>Forecast: {weather.shortForecast}</p>
+                      <p className="text-gray-300 mt-2">This is your actual environment while playing. Stay hydrated IRL and take breaks during extended sessions.</p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }
