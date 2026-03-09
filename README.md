@@ -140,8 +140,7 @@ Full multi-net tactical radio stack:
 **Core voice hooks**
 - `hooks/voice/useVoiceSession.jsx` — `VoiceSessionProvider` + `useVoiceSession()`. Manages multi-room LiveKit connections, participant state, PTT mode, emergency state, traffic log. Wraps `MapLayout` exclusively.
 - `hooks/voice/usePushToTalk.js` — Keyboard (Space) + mouse PTT with hold/toggle modes.
-- `hooks/voice/useCallsign.js` — Resolves current user's callsign from `base44.auth.me()`.
-- `hooks/voice/useVoiceDevices.js` — Enumerates system audio input/output devices.
+- `hooks/voice/useVoiceDevices.js` — Enumerates system audio input/output devices (audioinput + audiooutput via LiveKit static API).
 - `hooks/voice/useVoicePermissions.js` — Role-based access checks: `canAccessNet`, `canTransmitOn`, `isNetControl`, `canOpenEmergency`.
 
 **Voice library**
@@ -199,7 +198,7 @@ Full multi-net tactical radio stack:
 - DirectContactPanel / whisper rooms — deferred Phase 2.
 - ParticipantVoiceList grouped by net — deferred Phase 2.
 - Voice diagnostics panel — deferred Phase 3.
-- Scan loop logic in `useRadioRack` — scan UI renders, scan cycle not implemented.
+- Scan loop logic — scan mode button renders and toggles state, but automatic channel-cycle logic is not implemented.
 
 ---
 

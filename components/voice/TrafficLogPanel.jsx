@@ -159,7 +159,6 @@ export function TrafficLogPanel({ maxHeight = 300 }) {
         ) : (
           filtered.map((event, i) => <LogEntry key={`${event.timestamp}-${i}`} event={event} />)
         )}
-        <div ref={bottomRef} />
       </div>
     </div>
   );
