@@ -6,7 +6,6 @@ import UserNotRegisteredError from "@/components/UserNotRegisteredError";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
 import { queryClientInstance } from "@/lib/query-client";
 import PageNotFound from "@/lib/PageNotFound";
-import { LiveKitProvider } from "@/hooks/use-livekit";
 import MapLayout from "@/layouts/MapLayout";
 import { LEGACY_ROUTE_REDIRECTS } from "@/utils";
 import OperationsHome from "@/pages/operations/OperationsHome";
@@ -223,11 +222,9 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <LiveKitProvider>
-          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <AuthenticatedApp />
-          </Router>
-        </LiveKitProvider>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <AuthenticatedApp />
+        </Router>
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>

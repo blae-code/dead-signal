@@ -12,70 +12,76 @@ import {
 import { Headphones, Mic, MicOff, PhoneCall, Radio, Users, Volume2, VolumeX } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { useLiveKit } from "@/hooks/use-livekit";
+import { useVoiceSession } from "@/hooks/voice/useVoiceSession.jsx";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
-import {
-  buildClanRoomName,
-  buildMissionRoomName,
-  buildOpsRoomName,
-  parseVoiceRoomName,
-  sanitizeRoomToken,
-} from "@/lib/livekit-room-utils";
+
 import { ActionBtn, Panel, T } from "@/components/ui/TerminalCard";
 
-const ActiveSpeakerMeta = ({ onWhisper }) => {
-  const speaking = useIsSpeaking();
-  const info = useParticipantInfo();
-  const identity = info?.identity || "unknown";
-  const displayName = info?.name || identity;
-
-  return (
-    <div
-      className="border p-2"
-      style={{
-        borderColor: speaking ? `${T.green}66` : T.border,
-        background: speaking ? `${T.green}0d` : "rgba(24,24,28,0.8)",
-      }}
-    >
-      <ParticipantTile />
-      <div className="mt-1 flex items-center justify-between gap-2">
-        <span style={{ color: speaking ? T.green : T.textDim, fontSize: "9px", letterSpacing: "0.08em" }}>
-          {displayName}
-        </span>
-        {!info?.isLocal && (
-          <button
-            type="button"
-            onClick={() => onWhisper(identity)}
-            className="border px-1.5 py-0.5"
-            style={{ borderColor: `${T.cyan}55`, color: T.cyan, fontSize: "8px" }}
-            title="Open whisper channel"
-          >
-            WHISPER
-          </button>
-        )}
-      </div>
-    </div>
-  );
+const sanitizeRoomToken = (value, fallback = "channel") => {
+  const cleaned = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return cleaned || fallback;
 };
 
-const ParticipantTiles = ({ onWhisper }) => {
-  const participants = useParticipants();
-  if (!participants.length) {
-    return (
-      <div className="border px-3 py-3 text-xs" style={{ borderColor: T.border, color: T.textFaint }}>
-        NO ACTIVE PARTICIPANTS
-      </div>
-    );
+const buildMissionRoomName = (missionId) => `mission-${sanitizeRoomToken(missionId, "unknown")}`;
+const buildClanRoomName = (clanId = "primary") => `clan-${sanitizeRoomToken(clanId, "primary")}`;
+const buildOpsRoomName = () => "operations-oncall";
+const parseVoiceRoomName = (roomName) => {
+  const normalized = sanitizeRoomToken(roomName, "");
+  if (!normalized) {
+    return { kind: "unknown", roomName: "", isWhisper: false, baseRoomName: null };
   }
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-      <ParticipantLoop participants={participants}>
-        <ActiveSpeakerMeta onWhisper={onWhisper} />
-      </ParticipantLoop>
-    </div>
-  );
+  const whisperIndex = normalized.indexOf("-whisper-");
+  const baseRoomName = whisperIndex >= 0 ? normalized.slice(0, whisperIndex) : normalized;
+  const whisperTarget = whisperIndex >= 0 ? normalized.slice(whisperIndex + "-whisper-".length) : null;
+  const isWhisper = whisperIndex >= 0;
+
+  if (baseRoomName.startsWith("mission-")) {
+    return {
+      kind: "mission",
+      roomName: normalized,
+      isWhisper,
+      baseRoomName,
+      missionId: baseRoomName.slice("mission-".length),
+      whisperTarget,
+    };
+  }
+
+  if (baseRoomName.startsWith("clan-")) {
+    return {
+      kind: "clan",
+      roomName: normalized,
+      isWhisper,
+      baseRoomName,
+      clanId: baseRoomName.slice("clan-".length),
+      whisperTarget,
+    };
+  }
+
+  if (baseRoomName.startsWith("operations") || baseRoomName.startsWith("ops-") || baseRoomName.startsWith("system")) {
+    return {
+      kind: "operations",
+      roomName: normalized,
+      isWhisper,
+      baseRoomName,
+      whisperTarget,
+    };
+  }
+
+  return {
+    kind: "general",
+    roomName: normalized,
+    isWhisper,
+    baseRoomName,
+    whisperTarget,
+  };
 };
+
 
 const RoomConnectDialog = ({ open, roomLabel, displayName, onDisplayNameChange, onConfirm, onCancel, loading }) => {
   if (!open) return null;
@@ -128,20 +134,21 @@ export default function VoiceChannelPanel({
   const [roomPrompt, setRoomPrompt] = useState(null);
   const [displayName, setDisplayName] = useState("");
   const {
-    isConfigured,
-    sessions,
-    activeSession,
-    activeSessionRoom,
-    activeRoomName,
-    connectedRooms,
-    userIdentity,
-    lastError,
+    voiceSessionState,
     connectToRoom,
     disconnectRoom,
     setActiveRoomName,
-    openWhisperRoom,
     setMicrophoneEnabled,
-  } = useLiveKit();
+  } = useVoiceSession();
+
+  const {
+    activeTxNetId,
+    connectedNetIds,
+    connectionHealth,
+  } = voiceSessionState;
+
+  const isConfigured = true; // TODO: get from voiceSessionState
+  const lastError = connectionHealth === 'error'; // TODO: get from voiceSessionState
 
   const { data: user = null } = useQuery({
     queryKey: ["voice", "auth", "me"],
@@ -211,7 +218,7 @@ export default function VoiceChannelPanel({
   }, [clanId, includeClanRoom, includeMissionRooms, includeOpsRoom, missions, roomSeed]);
 
   const openConnectDialog = (roomName) => {
-    const currentName = clanMembership?.callsign || user?.full_name || user?.email || userIdentity || "";
+    const currentName = clanMembership?.callsign || user?.full_name || user?.email || "";
     setDisplayName(currentName);
     setRoomPrompt(roomName);
   };
@@ -222,7 +229,7 @@ export default function VoiceChannelPanel({
     try {
       await connectToRoom({
         roomName: roomPrompt,
-        userId: userIdentity || user?.email || undefined,
+        userId: user?.id || user?.email || undefined,
         displayName: displayName || undefined,
       });
       setRoomPrompt(null);
@@ -247,7 +254,7 @@ export default function VoiceChannelPanel({
     }).catch(() => null);
   };
 
-  const voiceStatus = activeSession?.connectionState === "connected" ? "ONLINE" : "STANDBY";
+  const voiceStatus = voiceSessionState.connectionHealth === "connected" ? "ONLINE" : "STANDBY";
 
   return (
     <Panel
@@ -255,7 +262,7 @@ export default function VoiceChannelPanel({
       titleColor={titleColor}
       headerRight={(
         <div className="flex items-center gap-1">
-          <span style={{ color: activeSession?.connectionState === "connected" ? T.green : T.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>
+          <span style={{ color: voiceSessionState.connectionHealth === "connected" ? T.green : T.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>
             {voiceStatus}
           </span>
           {includeClanRoom && user?.role === "admin" && (
@@ -280,8 +287,8 @@ export default function VoiceChannelPanel({
 
         <div className="grid grid-cols-1 gap-2">
           {derivedRooms.map((room) => {
-            const connected = connectedRooms.includes(room.roomName);
-            const selected = activeRoomName === room.roomName;
+            const connected = connectedNetIds.includes(room.roomName);
+            const selected = activeTxNetId === room.roomName;
             const roomMeta = parseVoiceRoomName(room.roomName);
             return (
               <div
@@ -333,70 +340,6 @@ export default function VoiceChannelPanel({
           onCancel={() => setRoomPrompt(null)}
           loading={Boolean(connectingRoom)}
         />
-
-        {activeSessionRoom && activeSession && (
-          <RoomContext.Provider value={activeSessionRoom}>
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  className="border px-2 py-1 text-[9px] flex items-center gap-1"
-                  style={{ borderColor: `${T.border}aa`, color: muted ? T.red : T.cyan }}
-                  onClick={() => setMuted((value) => !value)}
-                >
-                  {muted ? <VolumeX size={10} /> : <Volume2 size={10} />}
-                  {muted ? "AUDIO MUTED" : "AUDIO LIVE"}
-                </button>
-                <label className="flex items-center gap-1 border px-2 py-1" style={{ borderColor: T.border, color: T.textDim, fontSize: "9px" }}>
-                  VOL
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={volume}
-                    onChange={(event) => setVolume(Number(event.target.value))}
-                  />
-                </label>
-                <button
-                  type="button"
-                  className="border px-2 py-1 text-[9px] flex items-center gap-1"
-                  style={{ borderColor: `${T.border}aa`, color: T.green }}
-                  onClick={() => setMicrophoneEnabled(activeSession.roomName, true)}
-                >
-                  <Mic size={10} /> MIC ON
-                </button>
-                <button
-                  type="button"
-                  className="border px-2 py-1 text-[9px] flex items-center gap-1"
-                  style={{ borderColor: `${T.border}aa`, color: T.amber }}
-                  onClick={() => setMicrophoneEnabled(activeSession.roomName, false)}
-                >
-                  <MicOff size={10} /> MIC OFF
-                </button>
-              </div>
-
-              <RoomAudioRenderer volume={volume} muted={muted} />
-              {!compact && (
-                <ParticipantTiles
-                  onWhisper={(targetIdentity) => openWhisperRoom(targetIdentity)}
-                />
-              )}
-              <div className="border p-2" style={{ borderColor: T.border }}>
-                <ControlBar
-                  controls={{
-                    microphone: true,
-                    camera: false,
-                    chat: false,
-                    screenShare: false,
-                    leave: false,
-                    settings: true,
-                  }}
-                />
-              </div>
-            </div>
-          </RoomContext.Provider>
-        )}
       </div>
     </Panel>
   );

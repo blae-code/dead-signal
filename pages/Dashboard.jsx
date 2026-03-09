@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Terminal, Package, Activity, Skull, Wrench, Zap } from "lucide-react";
 import { T, PageHeader, Panel, StatGrid } from "@/components/ui/TerminalCard";
-import VoiceChannelPanel from "@/components/voice/VoiceChannelPanel";
+import { RadioRack } from "@/components/voice/RadioRack";
+import { TrafficLogPanel } from "@/components/voice/TrafficLogPanel";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -10,8 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
 import { CORE, ENTITY_COLORS, PAGE_PALETTES } from "@/components/ColorSystem";
-import { useLiveKit } from "@/hooks/use-livekit";
-import { buildMissionRoomName } from "@/lib/livekit-room-utils";
+
 
 const PAGE = PAGE_PALETTES.Dashboard;
 const SEV_COLORS = { INFO: T.textDim, WARN: CORE.warning, ALERT: CORE.warning, CRITICAL: CORE.critical };
@@ -22,7 +22,6 @@ const pickByToken = (values, token) =>
   values.find((value) => typeof value === "string" && value.toLowerCase() === token) || "";
 
 export default function Dashboard() {
-  const { connectedRooms } = useLiveKit();
   const runtimeConfig = useRuntimeConfig();
   const missionStatuses = runtimeConfig.getArray(["taxonomy", "mission_statuses"]);
   const clanStatuses = runtimeConfig.getArray(["taxonomy", "clan_statuses"]);
@@ -167,11 +166,8 @@ export default function Dashboard() {
                     >
                       {mission.priority}
                     </span>
-                    <span className="text-xs" style={{ color: missionStatusColors[mission.status] || T.textDim, fontSize: "9px" }}>
+<span className="text-xs" style={{ color: missionStatusColors[mission.status] || T.textDim, fontSize: "9px" }}>
                       {mission.status}
-                    </span>
-                    <span style={{ color: connectedRooms.includes(mission.voice_room_name || buildMissionRoomName(mission.id)) ? T.green : T.textFaint, fontSize: "8px", letterSpacing: "0.08em" }} title="Voice room status">
-                      {connectedRooms.includes(mission.voice_room_name || buildMissionRoomName(mission.id)) ? "VOICE" : "IDLE"}
                     </span>
                   </motion.div>
                 ))
@@ -335,14 +331,14 @@ export default function Dashboard() {
             </div>
           </Panel>
 
-          <VoiceChannelPanel
-            title="VOICE COMMS"
-            titleColor={T.cyan}
-            includeMissionRooms={true}
-            includeClanRoom={true}
-            includeOpsRoom={true}
-            compact={true}
-          />
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <RadioRack />
+            </div>
+            <div>
+              <TrafficLogPanel />
+            </div>
+          </div>
         </div>
       </div>
     </div>

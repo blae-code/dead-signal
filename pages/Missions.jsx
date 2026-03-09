@@ -4,8 +4,20 @@ import { Crosshair, Plus, Save, ChevronDown, ChevronUp } from "lucide-react";
 import { T, PageHeader, FormPanel, Field, ActionBtn, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import VoiceChannelPanel from "@/components/voice/VoiceChannelPanel";
-import { buildMissionRoomName } from "@/lib/livekit-room-utils";
-import { useLiveKit } from "@/hooks/use-livekit";
+import { useVoiceSession } from "@/hooks/voice/useVoiceSession.jsx";
+
+const sanitizeRoomToken = (value, fallback = "channel") => {
+  const cleaned = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return cleaned || fallback;
+};
+
+const buildMissionRoomName = (missionId) => `mission-${sanitizeRoomToken(missionId, "unknown")}`;
+
 
 const STATUS_COLORS   = { Pending: T.amber, Active: T.green, Complete: T.cyan, Failed: T.red, Aborted: T.textDim };
 const PRIORITY_COLORS = { Critical: T.red, High: T.orange, Medium: T.amber, Low: T.green };
@@ -24,7 +36,8 @@ const buildEmpty = (statuses, priorities) => ({
 });
 
 export default function Missions() {
-  const { connectedRooms } = useLiveKit();
+  const { voiceSessionState } = useVoiceSession();
+  const connectedRooms = voiceSessionState.connectedNetIds;
   const runtimeConfig = useRuntimeConfig();
   const STATUSES = runtimeConfig.getArray(["taxonomy", "mission_statuses"]);
   const PRIORITIES = runtimeConfig.getArray(["taxonomy", "mission_priorities"]);

@@ -171,6 +171,13 @@ const resolveSelectedMarker = (location, markers) => {
   return null;
 };
 
+import { AnnunciatorBar } from "@/components/voice/AnnunciatorBar";
+import { CommsRail } from "@/components/voice/CommsRail";
+import { RadioRack } from "@/components/voice/RadioRack";
+import {
+  VoiceSessionProvider
+} from "@/hooks/voice/useVoiceSession";
+
 export default function MapLayout() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -181,6 +188,7 @@ export default function MapLayout() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [railExpanded, setRailExpanded] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(true);
+  const [radioRackOpen, setRadioRackOpen] = useState(false);
   const [launching, setLaunching] = useState(false);
   const [launchWarning, setLaunchWarning] = useState("");
 
@@ -202,9 +210,9 @@ export default function MapLayout() {
     [location, mapLayers.markers],
   );
 
-  const appConfig = runtimeConfig.config?.app && typeof runtimeConfig.config.app === "object"
-    ? runtimeConfig.config.app
-    : {};
+  const appConfig = runtimeConfig.config?.app && typeof runtimeConfig.config.app === "object" ?
+    runtimeConfig.config.app :
+    {};
   const timezone = typeof appConfig.timezone === "string" ? appConfig.timezone : "America/Vancouver";
   const launchConfig = asObject(appConfig.launch);
   const envLaunchGameUrl = asString(import.meta.env.VITE_DEAD_SIGNAL_GAME_URL);
@@ -218,12 +226,12 @@ export default function MapLayout() {
   const launchDisabledReason = !launchEnabledFlag ? "launch_disabled" : (!launchHasTargets ? "missing_urls" : null);
   const launchEnabled = launchDisabledReason === null;
   const launchLabel = asString(launchConfig.label) || "DEPLOY";
-  const launchTooltip = launchWarning
-    || (launchDisabledReason === "launch_disabled"
-      ? "Launch disabled via app.launch.enabled=false."
-      : launchDisabledReason === "missing_urls"
-        ? "Set app.launch.game_url/app.launch.server_url or VITE_DEAD_SIGNAL_GAME_URL/VITE_DEAD_SIGNAL_SERVER_URL."
-        : asString(launchConfig.tooltip) || "Launch game and server in separate tabs/windows.");
+  const launchTooltip = launchWarning ||
+    (launchDisabledReason === "launch_disabled" ?
+      "Launch disabled via app.launch.enabled=false." :
+      launchDisabledReason === "missing_urls" ?
+      "Set app.launch.game_url/app.launch.server_url or VITE_DEAD_SIGNAL_GAME_URL/VITE_DEAD_SIGNAL_SERVER_URL." :
+      asString(launchConfig.tooltip) || "Launch game and server in separate tabs/windows.");
 
   useEffect(() => {
     setDrawerOpen(true);
@@ -328,28 +336,29 @@ export default function MapLayout() {
   };
 
   return (
-    <div className="h-screen w-full overflow-hidden" style={{ background: T.bg0, fontFamily: "'Share Tech Mono', monospace" }}>
-      <header
-        className="relative z-[910] h-[46px] border-b flex items-center px-2 md:px-3 gap-2"
-        style={{
+    <VoiceSessionProvider>
+      <div className="h-screen w-full overflow-hidden" style={{ background: T.bg0, fontFamily: "'Share Tech Mono', monospace" }}>
+        <header
+          className="relative z-[910] h-[46px] border-b flex items-center px-2 md:px-3 gap-2"
+          style={{
           borderColor: T.border,
           background: "linear-gradient(180deg, rgba(31,31,35,0.96) 0%, rgba(24,24,28,0.96) 100%)",
         }}
-      >
-        <button
-          type="button"
-          onClick={() => setMobileNavOpen((value) => !value)}
-          className="md:hidden inline-flex items-center justify-center border p-1"
-          style={{ borderColor: T.border, color: T.textDim }}
-          aria-label="Toggle navigation"
         >
-          {mobileNavOpen ? <X size={14} /> : <Menu size={14} />}
-        </button>
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen((value) => !value)}
+            className="md:hidden inline-flex items-center justify-center border p-1"
+            style={{ borderColor: T.border, color: T.textDim }}
+            aria-label="Toggle navigation"
+          >
+            {mobileNavOpen ? <X size={14} /> : <Menu size={14} />}
+          </button>
 
-        <div className="flex items-center gap-2 min-w-0">
-          <MapPinned size={12} style={{ color: activeCategory.color }} />
-          <span
-            style={{
+          <div className="flex items-center gap-2 min-w-0">
+            <MapPinned size={12} style={{ color: activeCategory.color }} />
+            <span
+              style={{
               color: activeCategory.color,
               fontFamily: "'Orbitron', monospace",
               fontSize: "10px",
@@ -357,23 +366,40 @@ export default function MapLayout() {
               textTransform: "uppercase",
               whiteSpace: "nowrap",
             }}
-          >
-            Dead Signal Workspace
-          </span>
-        </div>
+            >
+              Dead Signal Workspace
+            </span>
+          </div>
 
-        <div className="hidden md:flex ml-2">
-          <HeaderCommandPrompt currentPageName={activeTab?.label || activeCategory.label} />
-        </div>
+          <div className="hidden md:flex ml-2">
+            <HeaderCommandPrompt currentPageName={activeTab?.label || activeCategory.label} />
+          </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleLaunch}
-            disabled={!launchEnabled || launching}
-            title={launchTooltip}
-            className="inline-flex items-center gap-1.5 border px-2 py-1 transition-opacity"
-            style={{
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setRadioRackOpen((v) => !v)}
+              title="Radio Rack (voice comms)"
+              className="inline-flex items-center gap-1.5 border px-2 py-1 transition-colors"
+              style={{
+                borderColor: radioRackOpen ? "#00e8ff88" : T.border,
+                background: radioRackOpen ? "rgba(0,232,255,0.12)" : "rgba(24,24,28,0.86)",
+                color: radioRackOpen ? "#00e8ff" : T.textDim,
+                fontSize: "9px",
+                letterSpacing: "0.12em",
+                fontFamily: "'Orbitron', monospace",
+              }}
+            >
+              <Radio size={10} />
+              COMMS
+            </button>
+            <button
+              type="button"
+              onClick={handleLaunch}
+              disabled={!launchEnabled || launching}
+              title={launchTooltip}
+              className="inline-flex items-center gap-1.5 border px-2 py-1 transition-opacity"
+              style={{
               borderColor: launchEnabled ? `${T.cyan}88` : T.border,
               background: launchEnabled ? "rgba(0,232,255,0.12)" : "rgba(24,24,28,0.86)",
               color: launchEnabled ? T.cyan : T.textFaint,
@@ -382,45 +408,45 @@ export default function MapLayout() {
               letterSpacing: "0.12em",
               fontFamily: "'Orbitron', monospace",
             }}
-          >
-            <Rocket size={10} />
-            {launching ? "DEPLOYING..." : launchLabel}
-          </button>
-          <button
-            type="button"
-            onClick={() => setDrawerOpen((value) => !value)}
-            className="hidden md:inline-flex items-center border px-2 py-1 text-[9px]"
-            style={{ borderColor: T.border, color: T.textDim, letterSpacing: "0.1em" }}
-            title="Toggle detail drawer (Esc)"
-          >
-            {drawerOpen ? "HIDE DRAWER" : "SHOW DRAWER"}
-          </button>
-          <HeaderChronometer
-            animationEnabled={animationEnabled}
-            runtimeConfig={runtimeConfig}
-            appTimezone={timezone}
-          />
-        </div>
-      </header>
+            >
+              <Rocket size={10} />
+              {launching ? "DEPLOYING..." : launchLabel}
+            </button>
+            <button
+              type="button"
+              onClick={() => setDrawerOpen((value) => !value)}
+              className="hidden md:inline-flex items-center border px-2 py-1 text-[9px]"
+              style={{ borderColor: T.border, color: T.textDim, letterSpacing: "0.1em" }}
+              title="Toggle detail drawer (Esc)"
+            >
+              {drawerOpen ? "HIDE DRAWER" : "SHOW DRAWER"}
+            </button>
+            <HeaderChronometer
+              animationEnabled={animationEnabled}
+              runtimeConfig={runtimeConfig}
+              appTimezone={timezone}
+            />
+          </div>
+        </header>
 
-      <div className="relative h-[calc(100vh-46px)] w-full flex overflow-hidden">
-        <aside
-          className="relative z-[905] hidden md:flex flex-col border-r transition-[width] duration-200"
-          style={{
+        <div className="relative h-[calc(100vh-46px)] w-full flex overflow-hidden">
+          <aside
+            className="relative z-[905] hidden md:flex flex-col border-r transition-[width] duration-200"
+            style={{
             width: railExpanded ? "226px" : "72px",
             borderColor: T.border,
             background: "rgba(31,31,35,0.92)",
           }}
-          onMouseEnter={() => setRailExpanded(true)}
-          onMouseLeave={() => setRailExpanded(false)}
-        >
-          <div className="px-2 py-2 border-b" style={{ borderColor: T.border }}>
-            <span style={{ color: T.textFaint, fontSize: "8px", letterSpacing: "0.16em" }}>
-              {railExpanded ? "CATEGORIES" : "NAV"}
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto py-1">
-            {CATEGORY_NAV.map((entry) => {
+            onMouseEnter={() => setRailExpanded(true)}
+            onMouseLeave={() => setRailExpanded(false)}
+          >
+            <div className="px-2 py-2 border-b" style={{ borderColor: T.border }}>
+              <span style={{ color: T.textFaint, fontSize: "8px", letterSpacing: "0.16em" }}>
+                {railExpanded ? "CATEGORIES" : "NAV"}
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto py-1">
+              {CATEGORY_NAV.map((entry) => {
               const Icon = entry.icon;
               const active = activeCategory.id === entry.id;
               return (
@@ -447,32 +473,32 @@ export default function MapLayout() {
                 </button>
               );
             })}
-          </div>
-        </aside>
+            </div>
+          </aside>
 
-        <AnimatePresence>
-          {mobileNavOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[905] bg-black/70 md:hidden"
-                onClick={() => setMobileNavOpen(false)}
-              />
-              <motion.aside
-                initial={{ x: -260 }}
-                animate={{ x: 0 }}
-                exit={{ x: -260 }}
-                transition={{ duration: 0.2 }}
-                className="fixed left-0 top-[46px] bottom-0 z-[906] w-[240px] border-r md:hidden"
-                style={{ borderColor: T.border, background: "rgba(31,31,35,0.96)" }}
-              >
-                <div className="px-3 py-2 border-b" style={{ borderColor: T.border, color: T.textFaint, fontSize: "9px", letterSpacing: "0.15em" }}>
-                  CATEGORY NAV
-                </div>
-                <div className="py-1">
-                  {CATEGORY_NAV.map((entry) => {
+          <AnimatePresence>
+            {mobileNavOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[905] bg-black/70 md:hidden"
+                  onClick={() => setMobileNavOpen(false)}
+                />
+                <motion.aside
+                  initial={{ x: -260 }}
+                  animate={{ x: 0 }}
+                  exit={{ x: -260 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed left-0 top-[46px] bottom-0 z-[906] w-[240px] border-r md:hidden"
+                  style={{ borderColor: T.border, background: "rgba(31,31,35,0.96)" }}
+                >
+                  <div className="px-3 py-2 border-b" style={{ borderColor: T.border, color: T.textFaint, fontSize: "9px", letterSpacing: "0.15em" }}>
+                    CATEGORY NAV
+                  </div>
+                  <div className="py-1">
+                    {CATEGORY_NAV.map((entry) => {
                     const Icon = entry.icon;
                     const active = activeCategory.id === entry.id;
                     return (
@@ -499,22 +525,22 @@ export default function MapLayout() {
                       </button>
                     );
                   })}
-                </div>
-              </motion.aside>
-            </>
-          )}
-        </AnimatePresence>
+                  </div>
+                </motion.aside>
+              </>
+            )}
+          </AnimatePresence>
 
-        <div className="relative flex-1 overflow-hidden">
-          <GlobalOperationsMap
-            markers={mapLayers.markers}
-            selectedMarker={selectedMarker}
-            onMarkerSelect={handleMarkerSelect}
-          />
+          <div className="relative flex-1 overflow-hidden">
+            <GlobalOperationsMap
+              markers={mapLayers.markers}
+              selectedMarker={selectedMarker}
+              onMarkerSelect={handleMarkerSelect}
+            />
 
-          <div
-            className="pointer-events-none absolute left-2 top-2 border px-2 py-1"
-            style={{
+            <div
+              className="pointer-events-none absolute left-2 top-2 border px-2 py-1"
+              style={{
               borderColor: `${activeCategory.color}66`,
               background: "rgba(24,24,28,0.78)",
               color: activeCategory.color,
@@ -522,115 +548,139 @@ export default function MapLayout() {
               fontSize: "8px",
               letterSpacing: "0.16em",
             }}
-          >
-            {activeCategory.label}
-          </div>
+            >
+              {activeCategory.label}
+            </div>
 
-          <div
-            className="pointer-events-none absolute right-2 top-2 border px-2 py-1 hidden lg:block"
-            style={{ borderColor: `${T.border}bb`, background: "rgba(24,24,28,0.78)", color: T.textFaint, fontSize: "8px", letterSpacing: "0.12em" }}
-          >
-            SHORTCUTS: G MAP • M MISSIONS • R ROSTER • L LOGISTICS • S SYSTEMS • C COMMS • ESC CLOSE
-          </div>
+            <div
+              className="pointer-events-none absolute right-2 top-2 border px-2 py-1 hidden lg:block"
+              style={{ borderColor: `${T.border}bb`, background: "rgba(24,24,28,0.78)", color: T.textFaint, fontSize: "8px", letterSpacing: "0.12em" }}
+            >
+              SHORTCUTS: G MAP • M MISSIONS • R ROSTER • L LOGISTICS • S SYSTEMS • C COMMS • ESC CLOSE
+            </div>
 
-          <AnimatePresence>
-            {drawerOpen && (
-              <motion.aside
-                key="detail-drawer"
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ duration: 0.2 }}
-                className="absolute top-0 right-0 bottom-[46px] sm:bottom-[44px] z-[902] w-full sm:w-[86vw] md:w-[min(60vw,700px)] xl:w-[min(44vw,760px)] border-l shadow-2xl"
-                style={{
+            <AnimatePresence>
+              {drawerOpen && (
+                <motion.aside
+                  key="detail-drawer"
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-0 right-0 bottom-[46px] sm:bottom-[44px] z-[902] w-full sm:w-[86vw] md:w-[min(60vw,700px)] xl:w-[min(44vw,760px)] border-l shadow-2xl"
+                  style={{
                   borderColor: T.border,
                   background: "linear-gradient(180deg, rgba(28,28,32,0.96) 0%, rgba(24,24,28,0.96) 100%)",
                   backdropFilter: "blur(6px)",
                 }}
-              >
-                <div className="border-b px-3 py-2 flex items-center justify-between" style={{ borderColor: T.border }}>
-                  <div className="min-w-0">
-                    <div style={{ color: activeCategory.color, fontSize: "9px", letterSpacing: "0.18em", fontFamily: "'Orbitron', monospace" }}>
-                      {activeCategory.label}
+                >
+                  <div className="border-b px-3 py-2 flex items-center justify-between" style={{ borderColor: T.border }}>
+                    <div className="min-w-0">
+                      <div style={{ color: activeCategory.color, fontSize: "9px", letterSpacing: "0.18em", fontFamily: "'Orbitron', monospace" }}>
+                        {activeCategory.label}
+                      </div>
+                      <div style={{ color: T.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>
+                        MAP WORKSPACE / {activeTab?.label || "VIEW"}
+                      </div>
                     </div>
-                    <div style={{ color: T.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>
-                      MAP WORKSPACE / {activeTab?.label || "VIEW"}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDrawerOpen(false)}
+                      className="inline-flex items-center justify-center border p-1"
+                      style={{ borderColor: T.border, color: T.textDim }}
+                      aria-label="Close detail drawer"
+                    >
+                      <X size={12} />
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setDrawerOpen(false)}
-                    className="inline-flex items-center justify-center border p-1"
-                    style={{ borderColor: T.border, color: T.textDim }}
-                    aria-label="Close detail drawer"
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
 
-                <div className="border-b px-2 py-1.5 flex flex-wrap gap-1" style={{ borderColor: T.border }}>
-                  {activeTabs.map((tab) => (
-                    <NavLink
-                      key={tab.path}
-                      to={tab.path}
-                      className="px-2 py-1 border text-[9px] tracking-[0.12em] no-underline"
-                      style={({ isActive }) => ({
+                  <div className="border-b px-2 py-1.5 flex flex-wrap gap-1" style={{ borderColor: T.border }}>
+                    {activeTabs.map((tab) => (
+                      <NavLink
+                        key={tab.path}
+                        to={tab.path}
+                        className="px-2 py-1 border text-[9px] tracking-[0.12em] no-underline"
+                        style={({ isActive }) => ({
                         borderColor: isActive ? `${activeCategory.color}66` : T.border,
                         color: isActive ? activeCategory.color : T.textDim,
                         background: isActive ? `${activeCategory.color}14` : "transparent",
                         fontFamily: "'Orbitron', monospace",
                       })}
-                    >
-                      {tab.label}
-                    </NavLink>
-                  ))}
-                </div>
+                      >
+                        {tab.label}
+                      </NavLink>
+                    ))}
+                  </div>
 
-                <div className="h-[calc(100%-82px)] overflow-y-auto">
-                  <Outlet
-                    context={{
+                  <div className="h-[calc(100%-82px)] overflow-y-auto">
+                    <Outlet
+                      context={{
                       mapLayers,
                       selectedMarker,
                       setDrawerOpen,
                     }}
-                  />
-                </div>
-              </motion.aside>
-            )}
-          </AnimatePresence>
+                    />
+                  </div>
+                </motion.aside>
+              )}
+            </AnimatePresence>
 
-          <div className="absolute left-0 right-0 bottom-0 z-[903] px-2 pb-2 pointer-events-none">
-            <div
-              className="pointer-events-auto border px-3 py-1.5 flex items-center justify-between gap-3"
-              style={{
+            <AnimatePresence>
+              {radioRackOpen && (
+                <motion.div
+                  key="radio-rack-panel"
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ duration: 0.18 }}
+                  className="absolute top-0 right-0 bottom-[90px] z-[904] border-l shadow-2xl overflow-y-auto"
+                  style={{
+                    borderColor: "#00e8ff44",
+                    background: "rgba(18,18,22,0.97)",
+                    backdropFilter: "blur(8px)",
+                    width: "min(96vw, 940px)",
+                  }}
+                >
+                  <div
+                    className="flex items-center justify-between px-3 py-2 border-b"
+                    style={{ borderColor: "#2a1e10" }}
+                  >
+                    <span style={{ fontSize: 10, letterSpacing: "0.15em", color: "#00e8ff", fontFamily: "'Orbitron', monospace" }}>
+                      RADIO RACK
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setRadioRackOpen(false)}
+                      className="inline-flex items-center justify-center border p-1"
+                      style={{ borderColor: "#2a1e10", color: "#a79b8f" }}
+                      aria-label="Close radio rack"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                  <div className="p-3">
+                    <RadioRack />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="absolute left-0 right-0 bottom-0 z-[903] px-2 pb-2 pointer-events-none">
+              <div
+                className="pointer-events-auto border p-1 flex flex-col gap-1"
+                style={{
                 borderColor: T.border,
                 background: "rgba(24,24,28,0.9)",
               }}
-            >
-              <span style={{ color: T.textFaint, fontSize: "8px", letterSpacing: "0.14em" }}>
-                COMMS DOCK: reserve slot for live voice, dispatch, and notifications.
-              </span>
-              <div className="flex items-center gap-1">
-                <Link
-                  to="/community"
-                  className="border px-2 py-1 text-[8px] tracking-[0.12em] no-underline"
-                  style={{ borderColor: T.border, color: T.textDim }}
-                >
-                  OPEN COMMS
-                </Link>
-                <Link
-                  to="/systems/alerts"
-                  className="border px-2 py-1 text-[8px] tracking-[0.12em] no-underline"
-                  style={{ borderColor: `${T.red}55`, color: T.red }}
-                >
-                  ALERTS
-                </Link>
+              >
+                <AnnunciatorBar />
+                <CommsRail onOpenRadioRack={() => setRadioRackOpen((v) => !v)} />
               </div>
             </div>
           </div>
         </div>
+        <InAppNotifications />
       </div>
-      <InAppNotifications />
-    </div>
+    </VoiceSessionProvider>
   );
 }

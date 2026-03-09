@@ -92,6 +92,24 @@ export const AuthProvider = ({ children }) => {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
+
+      if (!currentUser.callsign) {
+        let callsign;
+        const randomNumber = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        if (currentUser.full_name) {
+          const nameParts = currentUser.full_name.split(' ');
+          const firstName = nameParts[0];
+          const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+          callsign = `${firstName.charAt(0)}${lastName.substring(0, 4)}-${randomNumber}`;
+        } else if (currentUser.email) {
+          const emailPrefix = currentUser.email.split('@')[0];
+          callsign = `${emailPrefix.substring(0, 10)}-${randomNumber}`;
+        } else {
+            callsign = `Operator-${randomNumber}`;
+        }
+        currentUser.callsign = callsign;
+      }
+
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);

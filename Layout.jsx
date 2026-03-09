@@ -128,6 +128,10 @@ const assignWindowLocation = (handle, uri) => {
   }
 };
 
+import { TrafficLogPanel } from "@/components/voice/TrafficLogPanel";
+import { CommsRail } from "@/components/voice/CommsRail";
+import { RadioRack } from "@/components/voice/RadioRack";
+
 export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [online, setOnline] = useState(() => (typeof navigator !== "undefined" ? navigator.onLine : true));
@@ -395,12 +399,12 @@ export default function Layout({ children, currentPageName }) {
 
         {mobileOpen && <div className="fixed inset-0 z-30 bg-black bg-opacity-80 md:hidden" onClick={() => setMobileOpen(false)} />}
 
-        <main className="flex-1 overflow-auto" style={{ background: "#27272a" }}>
+        <main className="flex-1 overflow-auto p-4" style={{ background: "#27272a" }}>
           {children}
         </main>
       </div>
       <InAppNotifications />
+      <CommsRail />
     </div>
   );
 }
-
