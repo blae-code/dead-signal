@@ -132,26 +132,121 @@ Coordinate parsing supports `Grid A-J + row` mission coordinates; unparseable mi
 
 ## LiveKit voice integration (v0.1)
 
-Implemented voice stack:
+Full multi-net tactical radio stack:
 
-- `functions/livekitToken.ts`: LiveKit JWT minting with room-level access checks and token issuance audit events.
-- `hooks/use-livekit.jsx`: app-wide provider + room lifecycle management (`Room({ adaptiveStream: true, dynacast: true })`, connect/disconnect, whisper room helper).
-- `components/voice/VoiceChannelPanel.jsx`: reusable in-app voice UI using LiveKit React components (`ControlBar`, `RoomAudioRenderer`, `ParticipantTile`, participant hooks).
+**Backend**
+- `functions/livekitToken.ts` — LiveKit JWT minting. Accepts `netId` or `roomName`. Resolves against static net registry first, then Base44 VoiceNet entity, with fallback. Token metadata includes net category, discipline mode, radio profile, and callsign.
 
-Current UI scaffolding locations:
+**Core voice hooks**
+- `hooks/voice/useVoiceSession.jsx` — `VoiceSessionProvider` + `useVoiceSession()`. Manages multi-room LiveKit connections, participant state, PTT mode, emergency state, traffic log. Wraps `MapLayout` exclusively.
+- `hooks/voice/usePushToTalk.js` — Keyboard (Space) + mouse PTT with hold/toggle modes.
+- `hooks/voice/useCallsign.js` — Resolves current user's callsign from `base44.auth.me()`.
+- `hooks/voice/useVoiceDevices.js` — Enumerates system audio input/output devices.
+- `hooks/voice/useVoicePermissions.js` — Role-based access checks: `canAccessNet`, `canTransmitOn`, `isNetControl`, `canOpenEmergency`.
 
-- Dashboard voice panel.
-- Mission Board voice panel.
-- Clan Roster voice panel and admin clan call broadcast action.
-- Server Monitor operations voice panel.
-- Community and Systems map-drawer overlays.
+**Voice library**
+- `lib/voice/nets.js` — Static `VOICE_NETS` registry (6 nets: command, squad-alpha, squad-bravo, logistics, emergency, proximity).
+- `lib/voice/voiceNetResolver.js` — `getNetById`, `getNetByRoomName`, `getNetsByCategory`, `resolveMemoryChannel`.
+- `lib/voice/voiceTransportAdapter.js` — Thin wrapper over `livekitRoomService`: connect, disconnect, mic enable, volume, status.
+- `lib/voice/livekitRoomService.js` — Multi-room LiveKit Room manager with connection registry.
+- `lib/voice/livekitTokenService.js` — Client-side token fetch via `base44.functions.invoke('livekitToken', ...)`.
+- `lib/voice/models.js` — Canonical domain types: `VoiceNet`, `RadioDeviceState`, `VoiceSessionState`, `VoiceParticipant`.
+- `lib/voice/constants.js` — `INITIAL_VOICE_SESSION_STATE`, `INITIAL_RADIO_DEVICE_STATE`.
+- `lib/voice/memory-channels.js` — M1–M6 memory channel presets.
 
-Token contract:
+**Voice UI components**
+- `components/voice/CommsRail.jsx` — Persistent bottom comms strip: TX net indicator, monitored net pills, active speaker, connection health LED, PTT button, emergency banner.
+- `components/voice/RadioRack.jsx` — Slide-in panel hosting 4 `RadioPanel` instances.
+- `components/voice/RadioPanel.jsx` — Single radio: frequency display, signal meter, volume/squelch sliders, memory buttons (M1–M6), mode buttons (MON/TX/SCN), TX/RX LEDs, profile badge.
+- `components/voice/AnnunciatorBar.jsx` — Severity-ordered alert strip (critical/warn/info) with severity icons. Alerts: NET DOWN, LINK DEGRADED, WEAK SIGNAL, TX LOCKED, SCAN ACTIVE/HOLD, MIC MUTED, EMERGENCY TRAFFIC, BRIDGE ACTIVE.
+- `components/voice/TrafficLogPanel.jsx` — Scrollable RX/TX/SYSTEM event log with filter buttons and auto-scroll.
+- `components/voice/DevicePanel.jsx` — Audio device selector (input/output).
 
+**Token contract**
 - Function: `livekitToken`
-- Input: `{ roomName: string, userId?: string }`
-- Access: authenticated users, with room-level role checks (mission/clan/operations policies).
+- Input: `{ netId?: string, roomName?: string, userId?: string }`
+- Access: authenticated users; room name derived from net registry.
 - Token TTL: 2 hours.
+- Response: `{ token, roomName, netId, netDisplayName, netCategory, disciplineMode, radioProfile, callsign }`
+
+---
+
+## v0.1 Release Notes
+
+**What's in v0.1**
+
+- Map-centric workspace shell (`MapLayout`) with animated detail drawer and RadioRack slide-in panel.
+- Full 6-net tactical voice system with LiveKit multi-room backend.
+- Persistent CommsRail (bottom) with PTT, TX indicator, net pills, speaker display, health LED.
+- 4-radio RadioRack with memory channels, signal meters, and instrument-panel styling.
+- AnnunciatorBar with severity icons and priority-sorted alerts wired to real voice state.
+- Terminal instrument aesthetic: Share Tech Mono + Orbitron fonts, LED CSS classes, scanline FX, CSS custom property range sliders.
+- Dashboard: animated mission rows with status accent strips, pulsing online roster dots, `StatusBadge` severity labels on server feed.
+- Missions: priority-accent left strips on rows, glow status dots, active voice room indicator.
+- Category nav rail with hotkeys (G/M/R/L/S/C/Esc), mobile slide-in nav, tab sub-navigation.
+- Backend: server power control, RCON governance, fleet multi-target, live data sync, alert automation.
+
+**Known limitations / Deferred to v0.2**
+
+- CommsConsole drawer (tabbed RADIO/NETS/LOG/DEVICES view) — deferred Phase 2.
+- Spatial audio (WebAudio PannerNode per participant) — deferred Phase 3.
+- Radio audio profiles (analog bandpass, encrypted, etc.) — deferred Phase 3.
+- Net bridge / soft routing — deferred Phase 3.
+- Emergency traffic full-overlay panel — deferred Phase 3.
+- FrequencyDial rotary control and signal simulation — deferred Phase 2.
+- VoiceMapOverlay (speaking rings on map markers) — deferred Phase 2.
+- PTTButton as standalone polished component — deferred Phase 2.
+- DirectContactPanel / whisper rooms — deferred Phase 2.
+- ParticipantVoiceList grouped by net — deferred Phase 2.
+- Voice diagnostics panel — deferred Phase 3.
+- Scan loop logic in `useRadioRack` — scan UI renders, scan cycle not implemented.
+
+---
+
+## Smoke-test checklist (v0.1 QA)
+
+**Environment**
+- [ ] `.env.local` created with all required variables (see above)
+- [ ] LiveKit server reachable at `VITE_LIVEKIT_URL`
+- [ ] Base44 app ID and backend URL correct
+
+**App shell**
+- [ ] App loads at `/ops` with map visible behind drawer
+- [ ] Detail drawer opens/closes (Esc to close, click category nav to reopen)
+- [ ] Category hotkeys work: G → `/ops`, M → `/ops/missions`, R → `/roster`, L → `/logistics`, S → `/systems`, C → `/community`
+- [ ] Header chronometer shows correct time in configured timezone
+- [ ] DEPLOY button opens game/server URLs in separate tabs (if configured)
+- [ ] Mobile: hamburger opens slide-in nav
+
+**Voice comms — CommsRail**
+- [ ] CommsRail visible at bottom of map shell
+- [ ] TX indicator shows active net name and frequency
+- [ ] PTT button responds on mouse hold (hold mode) and changes to "TX LIVE" state
+- [ ] Connection health LED shows correct state (green/amber/red)
+- [ ] AnnunciatorBar shows "MIC MUTED" when mic is muted
+- [ ] AnnunciatorBar shows severity icons (triangle/circle/info) on each alert pill
+
+**Voice comms — RadioRack**
+- [ ] COMMS button in header opens RadioRack slide-in panel
+- [ ] RadioRack shows 4 radio panels
+- [ ] Memory buttons M1–M6 visible on each radio
+- [ ] Volume and squelch sliders respond to drag
+- [ ] Clicking TX indicator in CommsRail also opens RadioRack
+
+**Dashboard**
+- [ ] COMMAND HQ loads with stat grid (active ops, operators, alerts, inventory)
+- [ ] Mission rows show left accent strip by status color
+- [ ] Online roster members show pulsing green dot
+- [ ] Server feed entries show colored StatusBadge (INFO/WARN/ALERT/CRITICAL)
+- [ ] RadioRack and TrafficLogPanel render in right column
+
+**Missions**
+- [ ] MISSION BOARD loads with status counter grid
+- [ ] Each counter box shows top accent hairline in status color
+- [ ] Mission rows show left priority accent strip
+- [ ] Expanding a mission row reveals briefing, coords, reward, deadline
+- [ ] Admin: NEW MISSION form opens and saves correctly
+- [ ] Voice room indicator shows "● VOICE" (green, glowing) when connected to that mission's LiveKit room
 
 **Publish your changes**
 

@@ -4,6 +4,7 @@
  * Priority: critical > warn > info. Max 6 alerts inline.
  */
 import React, { useMemo } from 'react';
+import { AlertTriangle, AlertCircle, Info } from 'lucide-react';
 import { useVoiceSession } from '@/hooks/voice/useVoiceSession';
 
 // ─── Alert definitions ─────────────────────────────────────────────────────────
@@ -69,8 +70,15 @@ const buildAlerts = (s, radioDevices) => {
 
 // ─── AnnunciatorItem ────────────────────────────────────────────────────────────
 
+const SEV_ICON = {
+  critical: AlertTriangle,
+  warn:     AlertCircle,
+  info:     Info,
+};
+
 function AnnunciatorItem({ label, sev, blink, tip }) {
   const style = SEV_STYLE[sev] ?? SEV_STYLE.info;
+  const Icon = SEV_ICON[sev] ?? Info;
   return (
     <div
       title={tip}
@@ -78,7 +86,8 @@ function AnnunciatorItem({ label, sev, blink, tip }) {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        padding: '1px 8px',
+        gap: 4,
+        padding: '1px 7px 1px 5px',
         border: `1px solid ${style.border}`,
         borderRadius: 2,
         background: style.bg,
@@ -92,6 +101,7 @@ function AnnunciatorItem({ label, sev, blink, tip }) {
         userSelect: 'none',
       }}
     >
+      <Icon size={9} strokeWidth={2.5} style={{ flexShrink: 0 }} />
       {label}
     </div>
   );

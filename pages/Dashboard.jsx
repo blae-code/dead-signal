@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Terminal, Package, Activity, Skull, Wrench, Zap } from "lucide-react";
-import { T, PageHeader, Panel, StatGrid } from "@/components/ui/TerminalCard";
+import { T, PageHeader, Panel, StatGrid, StatusBadge, GlowDot } from "@/components/ui/TerminalCard";
 import { RadioRack } from "@/components/voice/RadioRack";
 import { TrafficLogPanel } from "@/components/voice/TrafficLogPanel";
 import { createPageUrl } from "@/utils";
@@ -149,24 +149,15 @@ export default function Dashboard() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="flex items-center gap-3 px-3 py-2 border-b"
+                    className="relative flex items-center gap-3 px-3 py-2 border-b"
                     style={{ borderColor: T.border + "55" }}
                   >
-                    <span style={{ color: missionStatusColors[mission.status] || T.textDim, fontSize: "7px" }}>●</span>
-                    <span className="text-xs flex-1 truncate" style={{ color: T.text }}>
+                    <div style={{ position: "absolute", left: 0, top: "15%", bottom: "15%", width: "2px", background: missionStatusColors[mission.status] || T.textDim, boxShadow: `0 0 4px ${missionStatusColors[mission.status] || T.textDim}` }} />
+                    <span className="text-xs flex-1 truncate pl-1" style={{ color: T.text }}>
                       {mission.title}
                     </span>
-                    <span
-                      className="text-xs px-1.5 py-0.5 border"
-                      style={{
-                        borderColor: (missionStatusColors[mission.status] || T.textDim) + "66",
-                        color: missionStatusColors[mission.status] || T.textDim,
-                        fontSize: "9px",
-                      }}
-                    >
-                      {mission.priority}
-                    </span>
-<span className="text-xs" style={{ color: missionStatusColors[mission.status] || T.textDim, fontSize: "9px" }}>
+                    <StatusBadge label={mission.priority} color={missionStatusColors[mission.status] || T.textDim} />
+                    <span className="text-xs" style={{ color: missionStatusColors[mission.status] || T.textDim, fontSize: "9px" }}>
                       {mission.status}
                     </span>
                   </motion.div>
@@ -192,9 +183,9 @@ export default function Dashboard() {
               ) : (
                 events.slice(0, 6).map((event) => (
                   <div key={event.id} className="flex items-start gap-3 px-3 py-2 border-b" style={{ borderColor: T.border + "44" }}>
-                    <span className="text-xs flex-shrink-0 mt-0.5 px-1 border" style={{ color: SEV_COLORS[event.severity] || T.textDim, borderColor: (SEV_COLORS[event.severity] || T.textDim) + "44", fontSize: "8px" }}>
-                      {event.severity || "INFO"}
-                    </span>
+                    <div className="flex-shrink-0 mt-0.5">
+                      <StatusBadge label={event.severity || "INFO"} color={SEV_COLORS[event.severity] || T.textDim} />
+                    </div>
                     <span className="text-xs flex-1 truncate" style={{ color: T.textDim }}>
                       {event.message}
                     </span>
@@ -262,7 +253,7 @@ export default function Dashboard() {
               ) : (
                 members.slice(0, 8).map((member) => (
                   <div key={member.id} className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: T.border + "44" }}>
-                    <span style={{ color: member.status === activeMemberStatus ? T.green : T.textFaint, fontSize: "7px" }}>●</span>
+                    <GlowDot color={member.status === activeMemberStatus ? T.green : T.textGhost} size={5} pulse={member.status === activeMemberStatus} />
                     <span className="text-xs flex-1 truncate" style={{ color: T.text }}>
                       {member.callsign}
                     </span>

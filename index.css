@@ -591,6 +591,245 @@
   background: #484852;
 }
 
+/* ── Transmit / TX animation ───────────────────────────────────────────────── */
+@keyframes tx-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(255,32,32,0.5), inset 0 0 4px rgba(255,32,32,0.15); }
+  50%       { box-shadow: 0 0 18px rgba(255,32,32,0.9), inset 0 0 8px rgba(255,32,32,0.3); }
+}
+
+@keyframes tx-text-pulse {
+  0%, 100% { text-shadow: 0 0 6px rgba(255,32,32,0.6); opacity: 1; }
+  50%       { text-shadow: 0 0 14px rgba(255,32,32,1); opacity: 0.85; }
+}
+
+/* ── Scan sweep animation ─────────────────────────────────────────────────── */
+@keyframes scan-sweep {
+  0%   { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes scan-dot {
+  0%, 100% { opacity: 0.3; transform: scale(0.85); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+
+/* ── Signal / RX animation ────────────────────────────────────────────────── */
+@keyframes rx-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(57,255,20,0.4); }
+  50%       { box-shadow: 0 0 12px rgba(57,255,20,0.9); }
+}
+
+@keyframes signal-rise {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+
+/* ── Speaker pulse ────────────────────────────────────────────────────────── */
+@keyframes speaker-ring {
+  0%   { transform: scale(1);   opacity: 0.9; }
+  70%  { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* ── LED lamp flicker ─────────────────────────────────────────────────────── */
+@keyframes led-on {
+  0%, 90%, 100% { opacity: 1; }
+  92%           { opacity: 0.7; }
+  94%           { opacity: 1; }
+  96%           { opacity: 0.8; }
+}
+
+/* ── Frequency display scan line ──────────────────────────────────────────── */
+@keyframes freq-scanline {
+  0%   { top: 0; opacity: 0.06; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* ── Utility classes ──────────────────────────────────────────────────────── */
+
+.ds-tx-active {
+  animation: tx-pulse 0.9s ease-in-out infinite;
+}
+
+.ds-tx-text {
+  animation: tx-text-pulse 0.9s ease-in-out infinite;
+}
+
+.ds-rx-active {
+  animation: rx-glow 1.2s ease-in-out infinite;
+}
+
+.ds-scan-active {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--ds-cyan) 30%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: scan-sweep 1.6s linear infinite;
+}
+
+.ds-scan-dot {
+  animation: scan-dot 0.8s ease-in-out infinite;
+}
+
+.ds-led-on-green {
+  background: var(--ds-green) !important;
+  box-shadow: 0 0 5px var(--ds-green), 0 0 10px color-mix(in srgb, var(--ds-green) 40%, transparent);
+  animation: led-on 8s ease-in-out infinite;
+}
+
+.ds-led-on-amber {
+  background: var(--ds-amber) !important;
+  box-shadow: 0 0 5px var(--ds-amber), 0 0 10px color-mix(in srgb, var(--ds-amber) 40%, transparent);
+}
+
+.ds-led-on-red {
+  background: var(--ds-red) !important;
+  box-shadow: 0 0 5px var(--ds-red), 0 0 10px color-mix(in srgb, var(--ds-red) 40%, transparent);
+  animation: tx-pulse 0.9s ease-in-out infinite;
+}
+
+.ds-led-on-cyan {
+  background: var(--ds-cyan) !important;
+  box-shadow: 0 0 5px var(--ds-cyan), 0 0 10px color-mix(in srgb, var(--ds-cyan) 40%, transparent);
+}
+
+.ds-led-off {
+  background: #2a1e10 !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.7);
+}
+
+/* ── Frequency / segment display ─────────────────────────────────────────── */
+.ds-freq-display {
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.15em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 8px currentColor, 0 0 2px currentColor;
+  position: relative;
+  overflow: hidden;
+}
+
+.ds-freq-display::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: color-mix(in srgb, currentColor 25%, transparent);
+  animation: freq-scanline 3s linear infinite;
+  pointer-events: none;
+}
+
+/* ── Instrument panel chrome ─────────────────────────────────────────────── */
+.ds-instrument-panel {
+  background: linear-gradient(180deg, #1a1a1f 0%, #15151a 100%);
+  border: 1px solid #2a1e10;
+  box-shadow:
+    inset 0 1px 0 rgba(78,58,34,0.25),
+    inset 0 -1px 0 rgba(0,0,0,0.5),
+    0 4px 16px rgba(0,0,0,0.6);
+  position: relative;
+}
+
+.ds-instrument-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(78,58,34,0.6) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ── Range sliders ───────────────────────────────────────────────────────── */
+input[type='range'].ds-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  cursor: pointer;
+  outline: none !important;
+  padding: 0 !important;
+}
+
+input[type='range'].ds-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 0;
+  background: linear-gradient(to right, var(--range-fill-color, #00e8ff) var(--range-pct, 0%), #2a1e10 var(--range-pct, 0%));
+  border: 1px solid rgba(0,0,0,0.4);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.6);
+}
+
+input[type='range'].ds-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 18px;
+  margin-top: -7px;
+  background: linear-gradient(180deg, #4e3a28 0%, #2e2018 100%);
+  border: 1px solid rgba(78,58,34,0.9);
+  border-radius: 1px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.07);
+  cursor: grab;
+  transition: background 0.1s, box-shadow 0.1s;
+}
+
+input[type='range'].ds-range::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  background: linear-gradient(180deg, #6e5238 0%, #3e2a18 100%);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 6px var(--range-fill-color, #00e8ff);
+}
+
+input[type='range'].ds-range::-moz-range-track {
+  height: 4px;
+  border-radius: 0;
+  background: #2a1e10;
+  border: 1px solid rgba(0,0,0,0.4);
+}
+
+input[type='range'].ds-range::-moz-range-progress {
+  background: var(--range-fill-color, #00e8ff);
+  height: 4px;
+}
+
+input[type='range'].ds-range::-moz-range-thumb {
+  width: 12px;
+  height: 18px;
+  background: linear-gradient(180deg, #4e3a28 0%, #2e2018 100%);
+  border: 1px solid rgba(78,58,34,0.9);
+  border-radius: 1px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  cursor: grab;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+
+/* ── Speaker ring overlay (use with ::after on a relative container) ─────── */
+.ds-speaker-ring {
+  position: relative;
+}
+
+.ds-speaker-ring::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--ds-green);
+  animation: speaker-ring 1.4s ease-out infinite;
+  pointer-events: none;
+}
+
+/* ── Section divider ─────────────────────────────────────────────────────── */
+.ds-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--ds-border-base) 30%, var(--ds-border-accent) 50%, var(--ds-border-base) 70%, transparent 100%);
+  border: none;
+  margin: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Crosshair, Plus, Save, ChevronDown, ChevronUp } from "lucide-react";
-import { T, PageHeader, FormPanel, Field, ActionBtn, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
+import { T, PageHeader, FormPanel, Field, ActionBtn, inputStyle, selectStyle, accentLine, GlowDot } from "@/components/ui/TerminalCard";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import VoiceChannelPanel from "@/components/voice/VoiceChannelPanel";
 import { useVoiceSession } from "@/hooks/voice/useVoiceSession.jsx";
@@ -132,8 +132,9 @@ export default function Missions() {
 
       <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
         {STATUSES.map(s => (
-          <div key={s} className="border p-2.5 text-center" style={{ borderColor: T.border, background: T.bg1 }}>
-            <div className="text-base font-bold" style={{ color: STATUS_COLORS[s], fontFamily: "'Orbitron', monospace" }}>
+          <div key={s} className="relative border p-2.5 text-center overflow-hidden" style={{ borderColor: T.border, background: T.bg1 }}>
+            <div style={accentLine(STATUS_COLORS[s] || T.textFaint)} />
+            <div className="text-base font-bold" style={{ color: STATUS_COLORS[s], fontFamily: "'Orbitron', monospace", textShadow: `0 0 12px ${STATUS_COLORS[s]}88` }}>
               {missions.filter(m => m.status === s).length}
             </div>
             <div className="text-xs tracking-widest mt-0.5" style={{ color: T.textFaint, fontSize: "9px" }}>{s.toUpperCase()}</div>
@@ -190,18 +191,21 @@ export default function Missions() {
         {filtered.length === 0
           ? <div className="border px-3 py-6 text-xs text-center" style={{ borderColor: T.border, color: T.textFaint }}>// NO MISSIONS ON RECORD</div>
           : filtered.map(m => (
-            <div key={m.id} className="border" style={{ borderColor: expanded === m.id ? (STATUS_COLORS[m.status] + "88") : T.border, background: T.bg1 }}>
+            <div key={m.id} className="relative border overflow-hidden" style={{ borderColor: expanded === m.id ? (STATUS_COLORS[m.status] + "88") : T.border, background: T.bg1 }}>
+              {expanded === m.id && <div style={accentLine(STATUS_COLORS[m.status] || T.amber)} />}
               <div className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none" onClick={() => setExpanded(expanded === m.id ? null : m.id)}>
-                <span className="text-xs px-1.5 py-0.5 border" style={{ borderColor: PRIORITY_COLORS[m.priority] + "88", color: PRIORITY_COLORS[m.priority], fontSize: "9px", letterSpacing: "0.1em" }}>
+                <div style={{ position: "absolute", left: 0, top: "15%", bottom: "15%", width: "2px", background: PRIORITY_COLORS[m.priority] || T.textDim, boxShadow: `0 0 4px ${PRIORITY_COLORS[m.priority] || T.textDim}` }} />
+                <span className="text-xs px-1.5 py-0.5 border pl-2" style={{ borderColor: PRIORITY_COLORS[m.priority] + "88", color: PRIORITY_COLORS[m.priority], fontSize: "9px", letterSpacing: "0.1em" }}>
                   {m.priority?.toUpperCase()}
                 </span>
                 <span className="text-xs font-bold flex-1 truncate" style={{ color: T.text }}>{m.title}</span>
                 <span className="text-xs flex items-center gap-1 flex-shrink-0" style={{ color: STATUS_COLORS[m.status] }}>
-                  <span style={{ fontSize: "7px" }}>●</span>{m.status}
+                  <GlowDot color={STATUS_COLORS[m.status] || T.textFaint} size={5} />{m.status}
                 </span>
-                <span style={{ color: connectedRooms.includes(m.voice_room_name || buildMissionRoomName(m.id)) ? T.green : T.textFaint, fontSize: "8px", letterSpacing: "0.08em" }}>
-                  {connectedRooms.includes(m.voice_room_name || buildMissionRoomName(m.id)) ? "VOICE" : "IDLE"}
-                </span>
+                {connectedRooms.includes(m.voice_room_name || buildMissionRoomName(m.id))
+                  ? <span style={{ color: T.green, fontSize: "8px", letterSpacing: "0.08em", textShadow: `0 0 6px ${T.green}` }}>● VOICE</span>
+                  : <span style={{ color: T.textGhost, fontSize: "8px", letterSpacing: "0.08em" }}>IDLE</span>
+                }
                 {expanded === m.id
                   ? <ChevronUp size={11} style={{ color: T.textFaint, flexShrink: 0 }} />
                   : <ChevronDown size={11} style={{ color: T.textFaint, flexShrink: 0 }} />

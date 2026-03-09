@@ -339,11 +339,8 @@ export default function MapLayout() {
     <VoiceSessionProvider>
       <div className="h-screen w-full overflow-hidden" style={{ background: T.bg0, fontFamily: "'Share Tech Mono', monospace" }}>
         <header
-          className="relative z-[910] h-[46px] border-b flex items-center px-2 md:px-3 gap-2"
-          style={{
-          borderColor: T.border,
-          background: "linear-gradient(180deg, rgba(31,31,35,0.96) 0%, rgba(24,24,28,0.96) 100%)",
-        }}
+          className="ds-header-shell relative z-[910] h-[46px] border-b flex items-center px-2 md:px-3 gap-2"
+          style={{ borderColor: T.border }}
         >
           <button
             type="button"
@@ -541,13 +538,16 @@ export default function MapLayout() {
             <div
               className="pointer-events-none absolute left-2 top-2 border px-2 py-1"
               style={{
-              borderColor: `${activeCategory.color}66`,
-              background: "rgba(24,24,28,0.78)",
-              color: activeCategory.color,
-              fontFamily: "'Orbitron', monospace",
-              fontSize: "8px",
-              letterSpacing: "0.16em",
-            }}
+                borderColor: `${activeCategory.color}55`,
+                borderLeft: `2px solid ${activeCategory.color}`,
+                background: "rgba(18,18,22,0.88)",
+                color: activeCategory.color,
+                fontFamily: "'Orbitron', monospace",
+                fontSize: "8px",
+                letterSpacing: "0.16em",
+                boxShadow: `0 0 12px rgba(0,0,0,0.6), inset 0 0 8px ${activeCategory.color}08`,
+                textShadow: `0 0 8px ${activeCategory.color}88`,
+              }}
             >
               {activeCategory.label}
             </div>
@@ -665,13 +665,14 @@ export default function MapLayout() {
               )}
             </AnimatePresence>
 
-            <div className="absolute left-0 right-0 bottom-0 z-[903] px-2 pb-2 pointer-events-none">
+            <div className="absolute left-0 right-0 bottom-0 z-[903] pointer-events-none">
               <div
-                className="pointer-events-auto border p-1 flex flex-col gap-1"
+                className="pointer-events-auto flex flex-col"
                 style={{
-                borderColor: T.border,
-                background: "rgba(24,24,28,0.9)",
-              }}
+                  borderTop: "2px solid #ffaa00",
+                  background: "rgba(18,18,22,0.98)",
+                  boxShadow: "0 -4px 24px rgba(0,0,0,0.7), 0 -1px 0 rgba(255,170,0,0.15)",
+                }}
               >
                 <AnnunciatorBar />
                 <CommsRail onOpenRadioRack={() => setRadioRackOpen((v) => !v)} />

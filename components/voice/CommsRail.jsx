@@ -61,14 +61,17 @@ function TxIndicator({ netId, isTransmitting, onClick }) {
     >
       <Radio size={13} color={txActive ? '#ff2020' : color} />
       <div style={{ textAlign: 'left' }}>
-        <div style={{ fontSize: 9, color: txActive ? '#ff2020' : '#a79b8f', letterSpacing: '0.1em', fontFamily: 'Share Tech Mono, monospace' }}>
-          {txActive ? 'TRANSMITTING' : (net ? 'TX READY' : 'RADIO OFF')}
+        <div style={{ fontSize: 8, color: txActive ? '#ff2020' : '#776b5f', letterSpacing: '0.12em', fontFamily: 'Share Tech Mono, monospace' }}>
+          {txActive ? '● TRANSMITTING' : (net ? 'TX READY' : 'RADIO OFF')}
         </div>
-        <div style={{ fontSize: 11, color: txActive ? '#ff2020' : (net ? color : '#4e3a22'), fontFamily: 'Share Tech Mono, monospace', fontWeight: 700 }}>
+        <div
+          className={txActive ? 'ds-tx-text' : ''}
+          style={{ fontSize: 11, color: txActive ? '#ff2020' : (net ? color : '#4e3a22'), fontFamily: 'Share Tech Mono, monospace', fontWeight: 700, letterSpacing: '0.08em' }}
+        >
           {net ? net.displayName.toUpperCase() : '-- NO NET --'}
         </div>
         {net && (
-          <div style={{ fontSize: 9, color: '#776b5f', fontFamily: 'Share Tech Mono, monospace' }}>
+          <div style={{ fontSize: 8, color: '#4e3a22', fontFamily: 'Share Tech Mono, monospace', letterSpacing: '0.06em' }}>
             {net.frequencyLabel}
           </div>
         )}
@@ -128,9 +131,12 @@ function ActiveSpeakerDisplay({ activeSpeakers }) {
 function HealthDot({ health }) {
   const color = HEALTH_COLOR[health] ?? '#776b5f';
   const label = health?.toUpperCase() ?? 'UNKNOWN';
+  const ledCls = health === 'excellent' || health === 'good' ? 'ds-led-on-green'
+    : health === 'reconnecting' || health === 'poor' ? 'ds-led-on-amber'
+    : health === 'disconnected' ? 'ds-led-on-red' : 'ds-led-off';
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} title={`Connection: ${label}`}>
-      <Signal size={11} color={color} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }} title={`Connection: ${label}`}>
+      <div className={ledCls} style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0 }} />
       <span style={{ fontSize: 9, color, fontFamily: 'Share Tech Mono, monospace', letterSpacing: '0.06em' }}>{label}</span>
     </div>
   );
@@ -144,31 +150,30 @@ function PttButton({ isTransmitting, pttMode, onStart, onStop }) {
       onTouchStart={pttMode === 'hold' ? (e) => { e.preventDefault(); onStart(); } : undefined}
       onTouchEnd={pttMode === 'hold' ? (e) => { e.preventDefault(); onStop(); } : undefined}
       onClick={pttMode === 'toggle' ? (isTransmitting ? onStop : onStart) : undefined}
+      className={isTransmitting ? 'ds-tx-active' : ''}
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-        padding: '6px 16px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        padding: '5px 18px',
         border: `2px solid ${isTransmitting ? '#ff2020' : '#3e2c18'}`,
-        borderRadius: 4,
-        background: isTransmitting ? 'rgba(255,32,32,0.25)' : 'rgba(0,0,0,0.5)',
+        borderRadius: 3,
+        background: isTransmitting
+          ? 'linear-gradient(180deg, rgba(255,32,32,0.3) 0%, rgba(255,32,32,0.18) 100%)'
+          : 'linear-gradient(180deg, rgba(42,30,16,0.7) 0%, rgba(24,24,28,0.7) 100%)',
         cursor: 'pointer',
         fontFamily: 'Share Tech Mono, monospace',
-        fontSize: 12,
-        fontWeight: 700,
-        color: isTransmitting ? '#ff2020' : '#a79b8f',
-        letterSpacing: '0.12em',
+        fontSize: 11, fontWeight: 700,
+        color: isTransmitting ? '#ff2020' : '#776b5f',
+        letterSpacing: '0.14em',
         transform: isTransmitting ? 'scale(0.96)' : 'scale(1)',
-        transition: 'all 0.08s',
-        boxShadow: isTransmitting ? '0 0 16px rgba(255,32,32,0.6), inset 0 0 8px rgba(255,32,32,0.2)' : 'none',
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
-        minWidth: 80,
+        transition: 'transform 0.08s, border-color 0.08s, color 0.08s',
+        userSelect: 'none', WebkitUserSelect: 'none',
+        minWidth: 84,
       }}
     >
-      {isTransmitting ? <Mic size={13} color="#ff2020" /> : <MicOff size={13} color="#776b5f" />}
-      {isTransmitting ? 'TX LIVE' : 'PTT'}
+      {isTransmitting
+        ? <><Mic size={12} color="#ff2020" /> TX LIVE</>
+        : <><MicOff size={12} color="#4e3a22" /> PTT</>
+      }
     </button>
   );
 }
@@ -229,8 +234,7 @@ export function CommsRail({ onOpenRadioRack }) {
         gap: 10,
         padding: '0 14px',
         height: 52,
-        background: '#18181c',
-        borderTop: '1px solid #ffaa00',
+        background: 'transparent',
         flexShrink: 0,
         overflow: 'hidden',
       }}
