@@ -111,16 +111,19 @@ function MonitoredNetPill({ netId, isActiveTx }) {
 function ActiveSpeakerDisplay({ activeSpeakers }) {
   if (!activeSpeakers?.length) {
     return (
-      <div style={{ fontSize: 10, color: '#4e3a22', fontFamily: 'Share Tech Mono, monospace', letterSpacing: '0.08em', minWidth: 100 }}>
-        NET QUIET
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 100 }}>
+        <span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#2a1e10', border: '1px solid #3e2c18' }} />
+        <span style={{ fontSize: 9, color: '#3e2c18', fontFamily: 'Share Tech Mono, monospace', letterSpacing: '0.1em' }}>
+          NET QUIET
+        </span>
       </div>
     );
   }
   const speaker = activeSpeakers[0];
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 5, minWidth: 100 }}>
-      <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#39ff14', animation: 'glowDotPulse 1s ease-in-out infinite' }} />
-      <span style={{ fontSize: 11, color: '#39ff14', fontFamily: 'Share Tech Mono, monospace', fontWeight: 700, letterSpacing: '0.08em' }}>
+      <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#39ff14', boxShadow: '0 0 6px #39ff1488', animation: 'glowDotPulse 1s ease-in-out infinite' }} />
+      <span style={{ fontSize: 11, color: '#39ff14', fontFamily: 'Share Tech Mono, monospace', fontWeight: 700, letterSpacing: '0.08em', textShadow: '0 0 8px #39ff1466' }}>
         {(speaker.callsign || speaker.userId || 'UNKNOWN').toUpperCase()}
       </span>
     </div>
@@ -238,6 +241,24 @@ export function CommsRail({ onOpenRadioRack }) {
         overflow: 'hidden',
       }}
     >
+      {/* VOICE label anchor */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 2,
+        flexShrink: 0,
+      }}>
+        <Radio size={10} color="#ffaa0066" />
+        <span style={{ fontSize: 7, color: '#ffaa0055', fontFamily: 'Share Tech Mono, monospace', letterSpacing: '0.14em' }}>
+          VOICE
+        </span>
+      </div>
+
+      {/* Separator */}
+      <div style={{ width: 1, height: 32, background: '#3e2c18', flexShrink: 0 }} />
+
       {/* TX Indicator */}
       <TxIndicator
         netId={activeTxNetId}
@@ -246,7 +267,7 @@ export function CommsRail({ onOpenRadioRack }) {
       />
 
       {/* Separator */}
-      <div style={{ width: 1, height: 32, background: '#2a1e10', flexShrink: 0 }} />
+      <div style={{ width: 1, height: 32, background: '#3e2c18', flexShrink: 0 }} />
 
       {/* Monitored nets */}
       <div style={{ display: 'flex', gap: 5, alignItems: 'center', flex: 1, overflow: 'hidden' }}>
@@ -265,19 +286,19 @@ export function CommsRail({ onOpenRadioRack }) {
       </div>
 
       {/* Separator */}
-      <div style={{ width: 1, height: 32, background: '#2a1e10', flexShrink: 0 }} />
+      <div style={{ width: 1, height: 32, background: '#3e2c18', flexShrink: 0 }} />
 
       {/* Active speaker */}
       <ActiveSpeakerDisplay activeSpeakers={activeSpeakers} />
 
       {/* Separator */}
-      <div style={{ width: 1, height: 32, background: '#2a1e10', flexShrink: 0 }} />
+      <div style={{ width: 1, height: 32, background: '#3e2c18', flexShrink: 0 }} />
 
       {/* Connection health */}
       <HealthDot health={connectionHealth} />
 
       {/* Separator */}
-      <div style={{ width: 1, height: 32, background: '#2a1e10', flexShrink: 0 }} />
+      <div style={{ width: 1, height: 32, background: '#3e2c18', flexShrink: 0 }} />
 
       {/* PTT Button */}
       <PttButton

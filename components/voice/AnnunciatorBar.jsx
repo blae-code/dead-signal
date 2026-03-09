@@ -117,7 +117,27 @@ export function AnnunciatorBar() {
     [voiceSessionState, radioDevices],
   );
 
-  if (!alerts.length) return null;
+  if (!alerts.length) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '3px 12px',
+          background: '#0f0f12',
+          borderBottom: '1px solid #1c1c20',
+          minHeight: 24,
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#39ff14', opacity: 0.45 }} />
+        <span style={{ fontSize: 8, color: '#39ff1455', fontFamily: 'Share Tech Mono, monospace', letterSpacing: '0.2em' }}>
+          SYSTEMS NOMINAL
+        </span>
+      </div>
+    );
+  }
 
   const MAX_VISIBLE = 6;
   const visible = alerts.slice(0, MAX_VISIBLE);

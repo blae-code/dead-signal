@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { Link, useOutletContext, useSearchParams } from "react-router-dom";
+import { Users } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { Panel, StatGrid, T } from "@/components/ui/TerminalCard";
+import { Panel, StatGrid, T, GlowDot, StatusBadge, FilterPill, EmptyState, rowAccent } from "@/components/ui/TerminalCard";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
 
 const statusColor = (status) => {
@@ -71,16 +72,18 @@ export default function RosterHome() {
         ]}
       />
 
-      <Panel title="ROSTER FILTERS" titleColor={T.green}>
+      <Panel title="FILTER" titleColor={T.green}>
         <div className="px-3 py-2 flex flex-wrap gap-2">
           {[
             { label: "ALL", value: "all" },
             { label: "ACTIVE", value: "active" },
             { label: "ROLES", value: "roles" },
           ].map((entry) => (
-            <button
+            <FilterPill
               key={entry.value}
-              type="button"
+              label={entry.label}
+              active={view === entry.value}
+              color={T.green}
               onClick={() => {
                 if (entry.value === "all") {
                   setSearchParams({});
@@ -88,17 +91,7 @@ export default function RosterHome() {
                 }
                 setSearchParams({ view: entry.value });
               }}
-              className="border px-2 py-1 text-[9px]"
-              style={{
-                borderColor: view === entry.value ? `${T.green}66` : T.border,
-                color: view === entry.value ? T.green : T.textDim,
-                background: view === entry.value ? `${T.green}12` : "transparent",
-                letterSpacing: "0.12em",
-                fontFamily: "'Orbitron', monospace",
-              }}
-            >
-              {entry.label}
-            </button>
+            />
           ))}
         </div>
       </Panel>
@@ -107,9 +100,13 @@ export default function RosterHome() {
         <Panel title="ROLE DISTRIBUTION" titleColor={T.cyan}>
           <div className="p-3 space-y-1">
             {roleCounts.map(([role, count]) => (
-              <div key={role} className="flex items-center justify-between text-xs border-b pb-1" style={{ borderColor: `${T.border}55` }}>
-                <span style={{ color: T.text }}>{role}</span>
-                <span style={{ color: T.cyan }}>{count}</span>
+              <div
+                key={role}
+                className="relative flex items-center justify-between border-b pb-1"
+                style={{ borderColor: `${T.border}55` }}
+              >
+                <span style={{ color: T.text, fontSize: "10px" }}>{role}</span>
+                <span style={{ color: T.cyan, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>{count}</span>
               </div>
             ))}
           </div>
@@ -118,26 +115,42 @@ export default function RosterHome() {
 
       <Panel title="OPERATORS" titleColor={T.amber}>
         <div style={{ maxHeight: "58vh", overflowY: "auto" }}>
-          {filtered.map((member) => {
-            const online = normalizedLocations.has(String(member.callsign || "").toLowerCase());
-            return (
-              <Link
-                key={member.id}
-                to={`/roster/player/${member.id}`}
-                className="block px-3 py-2 border-b no-underline"
-                style={{ borderColor: `${T.border}66` }}
-              >
-                <div className="flex items-center gap-2">
-                  <span style={{ color: statusColor(member.status), fontSize: "9px" }}>●</span>
-                  <span style={{ color: T.text, fontSize: "11px", flex: 1 }}>{member.callsign || "UNKNOWN"}</span>
-                  <span style={{ color: T.textDim, fontSize: "9px" }}>{member.role || "Operator"}</span>
-                </div>
-                <div style={{ color: online ? T.green : T.textFaint, fontSize: "9px" }}>
-                  {online ? "LIVE POSITION AVAILABLE" : "NO LIVE LOCATION"} • STATUS {String(member.status || "Unknown").toUpperCase()}
-                </div>
-              </Link>
-            );
-          })}
+          {filtered.length === 0 ? (
+            <EmptyState icon={Users} message="NO OPERATORS FOUND" />
+          ) : (
+            filtered.map((member) => {
+              const online = normalizedLocations.has(String(member.callsign || "").toLowerCase());
+              const sc = statusColor(member.status);
+              return (
+                <Link
+                  key={member.id}
+                  to={`/roster/player/${member.id}`}
+                  className="relative block px-3 py-2 border-b no-underline"
+                  style={{ borderColor: `${T.border}66` }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = `${sc}08`; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                >
+                  <div style={rowAccent(sc)} />
+                  <div className="flex items-center gap-2 pl-2">
+                    <GlowDot color={sc} size={5} pulse={String(member.status || "").toLowerCase() === "active"} />
+                    <span style={{ color: T.text, fontSize: "11px", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {member.callsign || "UNKNOWN"}
+                    </span>
+                    <StatusBadge label={member.role || "Operator"} color={T.textDim} />
+                  </div>
+                  <div className="flex items-center gap-2 pl-2 mt-0.5">
+                    <GlowDot color={online ? T.green : T.textFaint} size={4} pulse={online} />
+                    <span style={{ color: online ? T.green : T.textFaint, fontSize: "9px" }}>
+                      {online ? "ACTIVE LOCATION" : "NO LOCATION"}
+                    </span>
+                    <span style={{ color: T.textFaint, fontSize: "9px", marginLeft: "auto" }}>
+                      {String(member.status || "Unknown").toUpperCase()}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })
+          )}
         </div>
       </Panel>
     </div>

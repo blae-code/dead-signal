@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Terminal, Package, Activity, Skull, Wrench, Zap } from "lucide-react";
-import { T, PageHeader, Panel, StatGrid, StatusBadge, GlowDot } from "@/components/ui/TerminalCard";
+import { T, PageHeader, Panel, StatGrid, StatusBadge, GlowDot, Chip, rowAccent } from "@/components/ui/TerminalCard";
 import { RadioRack } from "@/components/voice/RadioRack";
 import { TrafficLogPanel } from "@/components/voice/TrafficLogPanel";
 import { createPageUrl } from "@/utils";
@@ -143,25 +143,28 @@ export default function Dashboard() {
                   // NO ACTIVE MISSIONS
                 </div>
               ) : (
-                highlightedMissions.map((mission, index) => (
-                  <motion.div
-                    key={mission.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="relative flex items-center gap-3 px-3 py-2 border-b"
-                    style={{ borderColor: T.border + "55" }}
-                  >
-                    <div style={{ position: "absolute", left: 0, top: "15%", bottom: "15%", width: "2px", background: missionStatusColors[mission.status] || T.textDim, boxShadow: `0 0 4px ${missionStatusColors[mission.status] || T.textDim}` }} />
-                    <span className="text-xs flex-1 truncate pl-1" style={{ color: T.text }}>
-                      {mission.title}
-                    </span>
-                    <StatusBadge label={mission.priority} color={missionStatusColors[mission.status] || T.textDim} />
-                    <span className="text-xs" style={{ color: missionStatusColors[mission.status] || T.textDim, fontSize: "9px" }}>
-                      {mission.status}
-                    </span>
-                  </motion.div>
-                ))
+                highlightedMissions.map((mission, index) => {
+                  const accent = missionStatusColors[mission.status] || T.textDim;
+                  return (
+                    <motion.div
+                      key={mission.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="relative flex items-center gap-3 px-3 py-2 border-b"
+                      style={{ borderColor: T.border + "55" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = `${accent}08`; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                    >
+                      <div style={rowAccent(accent)} />
+                      <span className="text-xs flex-1 truncate pl-2" style={{ color: T.text }}>
+                        {mission.title}
+                      </span>
+                      <StatusBadge label={mission.priority} color={accent} />
+                      <GlowDot color={accent} size={5} />
+                    </motion.div>
+                  );
+                })
               )}
             </div>
           </Panel>
@@ -215,21 +218,29 @@ export default function Dashboard() {
                   // NO TRANSMISSIONS
                 </div>
               ) : (
-                announcements.slice(0, 3).map((announcement) => (
-                  <div key={announcement.id} className="px-3 py-2.5 border-b" style={{ borderColor: T.border + "44" }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs px-1.5 border" style={{ color: ANN_COLORS[announcement.type] || T.amber, borderColor: (ANN_COLORS[announcement.type] || T.amber) + "55", fontSize: "9px" }}>
-                        {announcement.type?.toUpperCase()}
-                      </span>
-                      <span className="text-xs font-bold truncate" style={{ color: T.text }}>
-                        {announcement.title}
-                      </span>
+                announcements.slice(0, 3).map((announcement) => {
+                  const ac = ANN_COLORS[announcement.type] || T.amber;
+                  return (
+                    <div
+                      key={announcement.id}
+                      className="relative px-3 py-2.5 border-b"
+                      style={{ borderColor: T.border + "44" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = `${ac}08`; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                    >
+                      <div style={rowAccent(ac)} />
+                      <div className="flex items-center gap-2 mb-1 pl-2">
+                        <Chip label={announcement.type || "GENERAL"} color={ac} />
+                        <span className="text-xs truncate" style={{ color: T.text, fontWeight: 600 }}>
+                          {announcement.title}
+                        </span>
+                      </div>
+                      <p className="text-xs truncate pl-2" style={{ color: T.textDim }}>
+                        {announcement.body}
+                      </p>
                     </div>
-                    <p className="text-xs truncate" style={{ color: T.textDim }}>
-                      {announcement.body}
-                    </p>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </Panel>
@@ -278,10 +289,12 @@ export default function Dashboard() {
                 <Link
                   key={page}
                   to={createPageUrl(page)}
-                  className="flex flex-col items-center justify-center gap-2 py-4 transition-opacity hover:opacity-80"
-                  style={{ background: T.bg1, textDecoration: "none" }}
+                  className="flex flex-col items-center justify-center gap-2 py-4 relative overflow-hidden"
+                  style={{ background: T.bg1, textDecoration: "none", transition: "background 0.18s" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = `${color}12`; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = T.bg1; }}
                 >
-                  <Icon size={16} style={{ color }} />
+                  <Icon size={16} style={{ color, filter: `drop-shadow(0 0 6px ${color}66)` }} />
                   <span className="text-xs tracking-widest text-center" style={{ color: T.textDim, fontSize: "9px", fontFamily: "'Orbitron', monospace" }}>
                     {label}
                   </span>

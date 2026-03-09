@@ -339,8 +339,11 @@ export default function MapLayout() {
     <VoiceSessionProvider>
       <div className="h-screen w-full overflow-hidden" style={{ background: T.bg0, fontFamily: "'Share Tech Mono', monospace" }}>
         <header
-          className="ds-header-shell relative z-[910] h-[46px] border-b flex items-center px-2 md:px-3 gap-2"
-          style={{ borderColor: T.border }}
+          className="ds-header-shell relative z-[910] h-[46px] flex items-center px-2 md:px-3 gap-2"
+          style={{
+            borderBottom: `1px solid ${activeCategory.color}44`,
+            boxShadow: `0 1px 0 ${activeCategory.color}18, 0 2px 16px rgba(0,0,0,0.6)`,
+          }}
         >
           <button
             type="button"
@@ -454,14 +457,22 @@ export default function MapLayout() {
                   className="w-full flex items-center gap-2 px-2.5 py-2 border-l-2 transition-colors"
                   style={{
                     borderLeftColor: active ? entry.color : "transparent",
-                    background: active ? "rgba(24,24,28,0.88)" : "transparent",
+                    background: active ? `${entry.color}0e` : "transparent",
                   }}
                   title={`${entry.label} (${entry.hotkey})`}
                 >
-                  <Icon size={14} style={{ color: active ? entry.color : T.textFaint, flexShrink: 0 }} />
+                  <Icon
+                    size={14}
+                    style={{
+                      color: active ? entry.color : T.textFaint,
+                      flexShrink: 0,
+                      filter: active ? `drop-shadow(0 0 4px ${entry.color}88)` : "none",
+                      transition: "filter 0.2s, color 0.2s",
+                    }}
+                  />
                   {railExpanded && (
                     <div className="flex items-center justify-between min-w-0 flex-1">
-                      <span style={{ color: active ? entry.color : T.textDim, fontSize: "10px", letterSpacing: "0.1em" }}>
+                      <span style={{ color: active ? entry.color : T.textDim, fontSize: "10px", letterSpacing: "0.1em", textShadow: active ? `0 0 8px ${entry.color}55` : "none" }}>
                         {entry.label}
                       </span>
                       <span style={{ color: T.textFaint, fontSize: "8px" }}>{entry.hotkey}</span>
@@ -574,13 +585,30 @@ export default function MapLayout() {
                   backdropFilter: "blur(6px)",
                 }}
                 >
-                  <div className="border-b px-3 py-2 flex items-center justify-between" style={{ borderColor: T.border }}>
-                    <div className="min-w-0">
-                      <div style={{ color: activeCategory.color, fontSize: "9px", letterSpacing: "0.18em", fontFamily: "'Orbitron', monospace" }}>
-                        {activeCategory.label}
-                      </div>
-                      <div style={{ color: T.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>
-                        MAP WORKSPACE / {activeTab?.label || "VIEW"}
+                  <div className="border-b px-3 py-2 flex items-center justify-between" style={{ borderColor: `${activeCategory.color}33`, background: `${activeCategory.color}08` }}>
+                    <div className="min-w-0 flex items-center gap-2.5">
+                      {(() => {
+                        const CatIcon = activeCategory.icon;
+                        return (
+                          <div style={{
+                            width: 22, height: 22,
+                            border: `1px solid ${activeCategory.color}44`,
+                            background: `${activeCategory.color}14`,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0,
+                            boxShadow: `0 0 8px ${activeCategory.color}22`,
+                          }}>
+                            <CatIcon size={10} style={{ color: activeCategory.color }} />
+                          </div>
+                        );
+                      })()}
+                      <div>
+                        <div style={{ color: activeCategory.color, fontSize: "9px", letterSpacing: "0.18em", fontFamily: "'Orbitron', monospace", textShadow: `0 0 10px ${activeCategory.color}55` }}>
+                          {activeCategory.label.toUpperCase()}
+                        </div>
+                        <div style={{ color: T.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>
+                          {activeTab?.label?.toUpperCase() || "OVERVIEW"}
+                        </div>
                       </div>
                     </div>
                     <button
@@ -594,18 +622,22 @@ export default function MapLayout() {
                     </button>
                   </div>
 
-                  <div className="border-b px-2 py-1.5 flex flex-wrap gap-1" style={{ borderColor: T.border }}>
+                  <div className="border-b px-2 py-1.5 flex flex-wrap gap-1" style={{ borderColor: T.border, background: T.bg3 }}>
                     {activeTabs.map((tab) => (
                       <NavLink
                         key={tab.path}
                         to={tab.path}
-                        className="px-2 py-1 border text-[9px] tracking-[0.12em] no-underline"
+                        className="px-2 py-1 text-[9px] tracking-[0.12em] no-underline relative"
                         style={({ isActive }) => ({
-                        borderColor: isActive ? `${activeCategory.color}66` : T.border,
-                        color: isActive ? activeCategory.color : T.textDim,
-                        background: isActive ? `${activeCategory.color}14` : "transparent",
-                        fontFamily: "'Orbitron', monospace",
-                      })}
+                          borderTop: `1px solid ${isActive ? `${activeCategory.color}55` : T.border}`,
+                          borderLeft: `1px solid ${isActive ? `${activeCategory.color}55` : T.border}`,
+                          borderRight: `1px solid ${isActive ? `${activeCategory.color}55` : T.border}`,
+                          borderBottom: `2px solid ${isActive ? activeCategory.color : "transparent"}`,
+                          color: isActive ? activeCategory.color : T.textDim,
+                          background: isActive ? `${activeCategory.color}14` : "transparent",
+                          fontFamily: "'Orbitron', monospace",
+                          textShadow: isActive ? `0 0 8px ${activeCategory.color}55` : "none",
+                        })}
                       >
                         {tab.label}
                       </NavLink>

@@ -32,6 +32,8 @@ export const T = {
   steel:   "#00e8ff",
   teal:    "#00c8a0",
   gold:    "#e8b800",
+  purple:  "#b060ff",
+  pink:    "#ff3090",
 
   // ── Semantic shortcuts
   online:  "#39ff14",
@@ -114,15 +116,19 @@ export function StatGrid({ stats }) {
             border: `1px solid ${color}33`,
             background: `linear-gradient(160deg, ${T.bg2} 0%, ${T.bg3} 100%)`,
             padding: "12px 8px 10px",
-            boxShadow: `inset 0 1px 0 rgba(78, 58, 34, 0.2), 0 4px 12px rgba(0, 0, 0, 0.7)`,
+            boxShadow: `inset 0 1px 0 rgba(78, 58, 34, 0.2), 0 4px 16px rgba(0, 0, 0, 0.8), inset 0 0 24px rgba(0,0,0,0.3)`,
             borderRadius: 0,
           }}
         >
           <div style={accentLine(color)} />
+          {/* Corner bracket TL */}
+          <div style={{ position: "absolute", top: 4, left: 4, width: 7, height: 7, borderTop: `1px solid ${color}55`, borderLeft: `1px solid ${color}55` }} />
+          {/* Corner bracket BR */}
+          <div style={{ position: "absolute", bottom: 4, right: 4, width: 7, height: 7, borderBottom: `1px solid ${color}33`, borderRight: `1px solid ${color}33` }} />
           {/* Corner glow */}
-          <div style={{ position: "absolute", top: 0, left: 0, width: 24, height: 24, background: `radial-gradient(circle at 0 0, ${color}18, transparent 70%)` }} />
+          <div style={{ position: "absolute", top: 0, left: 0, width: 32, height: 32, background: `radial-gradient(circle at 0 0, ${color}14, transparent 70%)` }} />
           <div style={{ color: T.textFaint, fontSize: "7.5px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em", marginBottom: "6px" }}>{label}</div>
-          <div style={{ color, fontFamily: "'Orbitron', monospace", fontSize: "22px", fontWeight: "bold", lineHeight: 1, textShadow: `0 0 16px ${color}77` }}>
+          <div style={{ color, fontFamily: "'Orbitron', monospace", fontSize: "22px", fontWeight: "bold", lineHeight: 1, textShadow: `0 0 20px ${color}99` }}>
             {value}
           </div>
           {sub && <div style={{ color: color + "88", fontSize: "7px", marginTop: "4px", letterSpacing: "0.1em" }}>{sub}</div>}
@@ -310,15 +316,63 @@ export function TableRow({ style, onClick, accentColor, children }) {
 }
 
 // ── Empty state ───────────────────────────────────────────────────────────────
-export function EmptyState({ message }) {
+export function EmptyState({ message, icon: Icon, sub }) {
   return (
     <div
       className="px-3 py-8 text-center"
-      style={{ color: T.textGhost, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em", background: T.bg3 }}
+      style={{ color: T.textGhost, background: T.bg3 }}
     >
-      // {message}
+      {Icon && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+          <Icon size={22} style={{ color: T.textGhost, opacity: 0.25 }} />
+        </div>
+      )}
+      <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>
+        // {message}
+      </div>
+      {sub && (
+        <div style={{ fontSize: "8px", color: T.textGhost, opacity: 0.6, marginTop: "5px", letterSpacing: "0.12em" }}>
+          {sub}
+        </div>
+      )}
     </div>
   );
+}
+
+// ── Chip / type tag ───────────────────────────────────────────────────────────
+export function Chip({ label, color = T.textFaint }) {
+  return (
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      color,
+      border: `1px solid ${color}44`,
+      background: `${color}12`,
+      fontSize: "7.5px",
+      fontFamily: "'Share Tech Mono', monospace",
+      letterSpacing: "0.1em",
+      padding: "1px 6px",
+      whiteSpace: "nowrap",
+      textTransform: "uppercase",
+      flexShrink: 0,
+    }}>
+      {label}
+    </span>
+  );
+}
+
+// ── Row accent strip helper ────────────────────────────────────────────────────
+export function rowAccent(color) {
+  return {
+    position: "absolute",
+    left: 0,
+    top: "12%",
+    bottom: "12%",
+    width: "2px",
+    background: color,
+    boxShadow: `0 0 6px ${color}88`,
+    pointerEvents: "none",
+  };
 }
 
 // ── Section divider ───────────────────────────────────────────────────────────
