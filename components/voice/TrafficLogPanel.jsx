@@ -2,7 +2,7 @@
  * DEAD SIGNAL — TrafficLogPanel
  * Radio operations traffic log. Shows timestamped events with direction, callsign, and net.
  */
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ArrowDownLeft, ArrowUpRight, Info, Radio, AlertTriangle, Link, Trash2 } from 'lucide-react';
 import { useVoiceSession } from '@/hooks/voice/useVoiceSession';
 import { voiceNetResolver } from '@/lib/voice/voiceNetResolver';
@@ -74,27 +74,20 @@ function LogEntry({ event }) {
 // ─── TrafficLogPanel ──────────────────────────────────────────────────────────
 
 export function TrafficLogPanel({ maxHeight = 300 }) {
-  const { voiceSessionState, addVoiceEvent } = useVoiceSession();
+  const { voiceSessionState } = useVoiceSession();
   const events = voiceSessionState?.recentVoiceEvents ?? [];
 
   const [filter, setFilter] = useState('ALL');
-  const bottomRef = useRef(null);
+  const [clearedAt, setClearedAt] = useState(0);
 
+  // Events are newest-first (prepended in useVoiceSession), so newest is always at top.
   const filtered = useMemo(() => {
-    if (filter === 'ALL') return events;
-    return events.filter(e => e.type?.toUpperCase() === filter || e.direction?.toUpperCase() === filter);
-  }, [events, filter]);
+    const base = clearedAt ? events.filter(e => (e.timestamp ?? 0) > clearedAt) : events;
+    if (filter === 'ALL') return base;
+    return base.filter(e => e.type?.toUpperCase() === filter || e.direction?.toUpperCase() === filter);
+  }, [events, filter, clearedAt]);
 
-  // Auto-scroll to newest (top, since events are newest-first)
-  useEffect(() => {
-    // Newest is at top (already correct in useVoiceSession — events prepended)
-  }, [events.length]);
-
-  const clearLog = () => {
-    // Clear by adding a clear sentinel — actual state reset through addVoiceEvent hack not possible
-    // We just filter out everything by using a local override
-    // For v0.1, we accept that clearing requires refactor; log rotates at 100 entries
-  };
+  const clearLog = () => setClearedAt(Date.now());
 
   return (
     <div
@@ -136,6 +129,17 @@ export function TrafficLogPanel({ maxHeight = 300 }) {
               {f}
             </button>
           ))}
+          <button
+            onClick={clearLog}
+            title="Clear log"
+            style={{
+              display: 'flex', alignItems: 'center', padding: '1px 5px', borderRadius: 2, cursor: 'pointer',
+              border: '1px solid #2a1e10', color: '#4e3a22', background: 'transparent',
+              fontFamily: 'Share Tech Mono, monospace', lineHeight: 1,
+            }}
+          >
+            <Trash2 size={8} />
+          </button>
         </div>
       </div>
 

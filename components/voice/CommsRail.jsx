@@ -8,11 +8,10 @@
  * - PTT button
  * - Emergency state
  */
-import React, { useCallback, useState } from 'react';
-import { Radio, Mic, MicOff, AlertTriangle, Signal, Zap } from 'lucide-react';
+import React from 'react';
+import { Radio, Mic, MicOff, AlertTriangle } from 'lucide-react';
 import { useVoiceSession } from '@/hooks/voice/useVoiceSession';
 import { usePushToTalk } from '@/hooks/voice/usePushToTalk';
-import { useCallsign } from '@/hooks/voice/useCallsign';
 import { voiceNetResolver } from '@/lib/voice/voiceNetResolver';
 
 // ─── Color helpers ─────────────────────────────────────────────────────────────

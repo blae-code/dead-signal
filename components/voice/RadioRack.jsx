@@ -35,7 +35,7 @@ export function RadioRack({ onClose }) {
   // Determine per-radio speaking state from activeSpeakers
   const speakingByNet = {};
   for (const s of activeSpeakers) {
-    if (s.speakingOnNetId) speakingByNet[s.speakingOnNetId] = true;
+    if (s.isSpeaking && s.netId) speakingByNet[s.netId] = true;
   }
 
   return (
@@ -112,7 +112,7 @@ export function RadioRack({ onClose }) {
       >
         {slots.map((radio) => {
           const isSpeaking = radio.tunedNetId ? Boolean(speakingByNet[radio.tunedNetId]) : false;
-          const speakerForNet = activeSpeakers.find(s => s.speakingOnNetId === radio.tunedNetId);
+          const speakerForNet = activeSpeakers.find(s => s.isSpeaking && s.netId === radio.tunedNetId);
           const signalStrength = speakerForNet?.signalStrength ?? 0;
 
           return (

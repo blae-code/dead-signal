@@ -147,8 +147,8 @@ export default function VoiceChannelPanel({
     connectionHealth,
   } = voiceSessionState;
 
-  const isConfigured = true; // TODO: get from voiceSessionState
-  const lastError = connectionHealth === 'error'; // TODO: get from voiceSessionState
+  const isConfigured = true; // LiveKit URL validated at deploy time
+  const lastError = connectionHealth === 'disconnected'; // show error banner when fully down
 
   const { data: user = null } = useQuery({
     queryKey: ["voice", "auth", "me"],
@@ -254,7 +254,8 @@ export default function VoiceChannelPanel({
     }).catch(() => null);
   };
 
-  const voiceStatus = voiceSessionState.connectionHealth === "connected" ? "ONLINE" : "STANDBY";
+  const isOnline = connectionHealth === 'excellent' || connectionHealth === 'good';
+  const voiceStatus = isOnline ? "ONLINE" : "STANDBY";
 
   return (
     <Panel
@@ -262,7 +263,7 @@ export default function VoiceChannelPanel({
       titleColor={titleColor}
       headerRight={(
         <div className="flex items-center gap-1">
-          <span style={{ color: voiceSessionState.connectionHealth === "connected" ? T.green : T.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>
+          <span style={{ color: isOnline ? T.green : T.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>
             {voiceStatus}
           </span>
           {includeClanRoom && user?.role === "admin" && (
