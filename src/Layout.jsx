@@ -416,6 +416,8 @@ export default function Layout({ children, currentPageName }) {
       </div>
       <InAppNotifications />
       <CommsRail />
+      {/* Ambient dot grid texture */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 9995, pointerEvents: "none", backgroundImage: "radial-gradient(circle, rgba(255, 170, 0, 0.038) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
       {/* CRT scanline overlay */}
       <div style={{ position: "fixed", inset: 0, zIndex: 9997, pointerEvents: "none", backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.065) 2px, rgba(0,0,0,0.065) 3px)", backgroundSize: "100% 3px" }} />
       {/* Vignette */}

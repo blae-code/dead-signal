@@ -47,6 +47,8 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import Dashboard from './pages/Dashboard';
+import ServerMonitor from './pages/ServerMonitor';
 import AIAgent from './pages/AIAgent';
 import Challenges from './pages/Challenges';
 import ClanBoard from './pages/ClanBoard';
@@ -71,9 +73,7 @@ import SquadVitalsMonitor from './pages/SquadVitalsMonitor';
 import SupplyChainManager from './pages/SupplyChainManager';
 import SurvivalPlanner from './pages/SurvivalPlanner';
 import TacticalMap from './pages/TacticalMap';
-import Dashboard from './pages/Dashboard';
 import Missions from './pages/Missions';
-import ServerMonitor from './pages/ServerMonitor';
 import AnnouncementsPanel from './pages/AnnouncementsPanel';
 import IntelPanel from './pages/IntelPanel';
 import VouchesPanel from './pages/VouchesPanel';
@@ -94,6 +94,8 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "Dashboard": Dashboard,
+    "ServerMonitor": ServerMonitor,
     "AIAgent": AIAgent,
     "Challenges": Challenges,
     "ClanBoard": ClanBoard,
@@ -118,9 +120,7 @@ export const PAGES = {
     "SupplyChainManager": SupplyChainManager,
     "SurvivalPlanner": SurvivalPlanner,
     "TacticalMap": TacticalMap,
-    "Dashboard": Dashboard,
     "Missions": Missions,
-    "ServerMonitor": ServerMonitor,
     "AnnouncementsPanel": AnnouncementsPanel,
     "IntelPanel": IntelPanel,
     "VouchesPanel": VouchesPanel,
