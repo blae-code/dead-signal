@@ -301,19 +301,26 @@ export default function Layout({ children, currentPageName }) {
         <nav
           className={`fixed md:relative z-40 h-full flex flex-col transition-transform duration-200 ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
           style={{
-            width: "210px",
-            background: "#1f1f23",
+            width: "220px",
+            background: "linear-gradient(180deg, #232327 0%, #1f1f23 100%)",
             borderRight: `1px solid ${C.border}`,
             minHeight: "calc(100vh - 41px)",
-            boxShadow: "inset 1px 0 2px rgba(78, 58, 34, 0.25)",
+            boxShadow: "inset -1px 0 0 rgba(255,170,0,0.06), 2px 0 16px rgba(0,0,0,0.6)",
           }}
         >
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="px-3 py-2 border-b flex items-center justify-between" style={{ borderColor: C.border, background: "rgba(28, 28, 32, 0.9)" }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="px-3 py-2.5 border-b flex items-center justify-between relative overflow-hidden" style={{ borderColor: C.border, background: "linear-gradient(135deg, rgba(36,36,40,0.98) 0%, rgba(28,28,32,0.98) 100%)" }}>
+            {/* top accent line */}
+            <div style={{ position:"absolute", top:0, left:0, right:0, height:"1px", background:"linear-gradient(90deg, transparent 0%, rgba(255,170,0,0.4) 40%, rgba(255,170,0,0.6) 50%, rgba(255,170,0,0.4) 60%, transparent 100%)" }} />
             <div className="flex items-center gap-2">
-              <Activity size={9} className={animationEnabled ? "layout-nav-dot-pulse" : undefined} style={{ color: "#39ff14" }} />
-              <span style={{ color: C.textDim, fontSize: "9px", letterSpacing: "0.2em", fontFamily: "'Orbitron', monospace" }}>SYS.NAV</span>
+              <div style={{ width:18, height:18, border:"1px solid rgba(57,255,20,0.3)", background:"rgba(57,255,20,0.08)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <Activity size={9} className={animationEnabled ? "layout-nav-dot-pulse" : undefined} style={{ color: "#39ff14" }} />
+              </div>
+              <span style={{ color: C.textDim, fontSize: "9px", letterSpacing: "0.22em", fontFamily: "'Orbitron', monospace" }}>SYS.NAV</span>
             </div>
-            <span style={{ color: C.textFaint, fontSize: "8px" }}>{moduleCount} MODULES</span>
+            <div style={{ display:"flex", alignItems:"center", gap:4, border:"1px solid rgba(42,30,16,0.8)", padding:"1px 6px", background:"rgba(24,24,28,0.6)" }}>
+              <span style={{ color: C.textFaint, fontSize: "8px", fontFamily:"'Orbitron', monospace", letterSpacing:"0.1em" }}>{moduleCount}</span>
+              <span style={{ color: C.textGhost || "#4a3f35", fontSize: "7px", letterSpacing:"0.08em" }}>MOD</span>
+            </div>
           </motion.div>
 
           <div className="flex-1 overflow-y-auto py-1">
@@ -324,51 +331,78 @@ export default function Layout({ children, currentPageName }) {
             )}
             {navSections.map((section, sectionIndex) => (
               <div key={section.label || `section-${sectionIndex}`}>
-                <div className="flex items-center gap-2 px-3 pt-3 pb-1">
-                  <span style={{ color: C.textDim, fontSize: "8px", letterSpacing: "0.2em" }}>{section.label}</span>
-                  <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.8 }} style={{ flex: 1, height: "1px", background: C.border, transformOrigin: "left" }} />
+                <div className="flex items-center gap-2 px-3 pt-4 pb-1.5">
+                  <span style={{ color: C.textFaint, fontSize: "7.5px", letterSpacing: "0.25em", fontFamily:"'Orbitron', monospace", opacity: 0.7 }}>{section.label}</span>
+                  <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.8 }} style={{ flex: 1, height: "1px", background: `linear-gradient(90deg, ${C.border}, transparent)`, transformOrigin: "left" }} />
                 </div>
 
                 {section.items.map(({ label, page, icon, code, color, dot }) => {
                   const active = currentPageName === page;
                   const IconComponent = iconByName[icon] || Terminal;
                   return (
-                    <motion.div key={page} whileHover={{ x: 2 }} transition={{ duration: 0.2 }}>
+                    <motion.div key={page} whileHover={{ x: 3 }} transition={{ duration: 0.15 }}>
                       <Link
                         to={createPageUrl(page)}
                         onClick={() => setMobileOpen(false)}
-                        className="layout-nav-item-hover flex items-center gap-2 px-3 py-2 text-xs relative"
+                        className="layout-nav-item-hover flex items-center gap-2.5 px-3 py-2.5 text-xs relative"
                         style={{
-                          background: active ? "#18181c" : "transparent",
+                          background: active
+                            ? `linear-gradient(90deg, ${color}12 0%, ${color}05 60%, transparent 100%)`
+                            : "transparent",
                           borderLeft: active ? `2px solid ${color}` : "2px solid transparent",
                           letterSpacing: "0.08em",
                           textDecoration: "none",
                           display: "flex",
                         }}
                       >
-                        <motion.div
-                          animate={animationEnabled && active ? { scale: [1, 1.2, 1] } : { scale: 1 }}
-                          transition={animationEnabled && active ? { duration: 2, repeat: Infinity } : undefined}
-                          style={{ width: "5px", height: "5px", borderRadius: "50%", flexShrink: 0, background: active ? dot : C.textFaint, boxShadow: active ? `0 0 6px ${dot}` : "none" }}
-                        />
-                        <IconComponent size={11} className="nav-icon" style={{ flexShrink: 0, color: active ? color : C.textFaint, opacity: active ? 1 : 0.5, transition: "color 0.15s, opacity 0.15s" }} />
-                        <span className="nav-label" style={{ flex: 1, color: active ? color : C.textDim, fontSize: "10px", transition: "color 0.15s" }}>
+                        {/* icon box */}
+                        <div style={{
+                          width: 22, height: 22, flexShrink: 0,
+                          border: `1px solid ${active ? color + "55" : C.border}`,
+                          background: active ? `${color}18` : "rgba(28,28,32,0.6)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          transition: "border-color 0.15s, background 0.15s",
+                          boxShadow: active ? `0 0 8px ${color}22, inset 0 0 8px ${color}0a` : "none",
+                        }}>
+                          <IconComponent size={11} className="nav-icon" style={{ color: active ? color : C.textFaint, opacity: active ? 1 : 0.55, transition: "color 0.15s, opacity 0.15s" }} />
+                        </div>
+
+                        <span className="nav-label" style={{ flex: 1, color: active ? color : C.textDim, fontSize: "10px", fontFamily: "'Share Tech Mono', monospace", transition: "color 0.15s", letterSpacing: "0.06em" }}>
                           {label}
                         </span>
-                        <span className="nav-code" style={{ color: active ? color : C.textFaint, fontSize: "8px", opacity: active ? 0.9 : 0, fontFamily: "'Orbitron', monospace", transition: "opacity 0.15s", letterSpacing: "0.05em" }}>
+
+                        {/* code badge */}
+                        <span className="nav-code" style={{
+                          color: active ? color : C.textFaint,
+                          fontSize: "7.5px",
+                          opacity: active ? 1 : 0,
+                          fontFamily: "'Orbitron', monospace",
+                          transition: "opacity 0.15s",
+                          letterSpacing: "0.05em",
+                          border: active ? `1px solid ${color}44` : "1px solid transparent",
+                          padding: "0px 4px",
+                          background: active ? `${color}10` : "transparent",
+                        }}>
                           {code}
                         </span>
-                        {active && <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at left, ${color}0d 0%, transparent 70%)`, pointerEvents: "none" }} />}
+
+                        {/* active status dot */}
+                        {active && (
+                          <motion.div
+                            animate={animationEnabled ? { scale: [1, 1.3, 1] } : { scale: 1 }}
+                            transition={animationEnabled ? { duration: 2, repeat: Infinity } : undefined}
+                            style={{ width: 5, height: 5, borderRadius: "50%", flexShrink: 0, background: dot, boxShadow: `0 0 6px ${dot}` }}
+                          />
+                        )}
+
+                        {active && <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at left, ${color}0a 0%, transparent 65%)`, pointerEvents: "none" }} />}
                         {active && (
                           <motion.div
                             layoutId="activeBar"
                             style={{
-                              position: "absolute",
-                              right: 0,
-                              top: "15%",
-                              bottom: "15%",
-                              width: "2px",
-                              background: `linear-gradient(180deg, transparent, ${color}, transparent)`,
+                              position: "absolute", right: 0, top: "10%", bottom: "10%", width: "2px",
+                              background: `linear-gradient(180deg, transparent, ${color}cc, transparent)`,
+                              boxShadow: `0 0 6px ${color}`,
                             }}
                           />
                         )}
@@ -380,29 +414,44 @@ export default function Layout({ children, currentPageName }) {
             ))}
           </div>
 
-          <motion.div className="border-t" style={{ borderColor: C.border, background: "linear-gradient(135deg, rgba(31, 31, 35, 0.92) 0%, rgba(24, 24, 28, 0.92) 100%)" }}>
-            <div className="px-3 pt-2 pb-1 flex items-center gap-2 border-b" style={{ borderColor: C.border }}>
-              <motion.div animate={animationEnabled && online ? { scale: [1, 1.1, 1] } : { scale: 1 }} transition={animationEnabled && online ? { duration: 2, repeat: Infinity } : undefined} style={{ width: "5px", height: "5px", borderRadius: "50%", background: online ? "#39ff14" : "#ff2020" }} />
-              <span style={{ color: online ? "#39ff14" : "#ff2020", fontSize: "8px", letterSpacing: "0.15em" }}>
-                {online ? "NET: ONLINE" : "NET: OFFLINE"}
-              </span>
+          <motion.div className="border-t relative overflow-hidden" style={{ borderColor: C.border, background: "linear-gradient(135deg, rgba(36,36,40,0.98) 0%, rgba(24,24,28,0.98) 100%)" }}>
+            {/* top accent */}
+            <div style={{ position:"absolute", top:0, left:0, right:0, height:"1px", background:"linear-gradient(90deg, transparent 0%, rgba(255,170,0,0.25) 50%, transparent 100%)" }} />
+
+            {/* net status bar */}
+            <div className="px-3 py-2 flex items-center gap-2 border-b" style={{ borderColor: C.border }}>
+              <div style={{ display:"flex", alignItems:"center", gap:6, flex:1 }}>
+                <motion.div
+                  animate={animationEnabled && online ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+                  transition={animationEnabled && online ? { duration: 2, repeat: Infinity } : undefined}
+                  style={{ width: 7, height: 7, borderRadius: "50%", background: online ? "#39ff14" : "#ff2020", boxShadow: online ? "0 0 6px #39ff14" : "0 0 6px #ff2020", flexShrink: 0 }}
+                />
+                <span style={{ color: online ? "#39ff14" : "#ff2020", fontSize: "8px", letterSpacing: "0.15em", fontFamily:"'Orbitron', monospace" }}>
+                  {online ? "NET: CONNECTED" : "NET: OFFLINE"}
+                </span>
+              </div>
             </div>
-            <div className="px-3 py-2 space-y-1">
-              <div className="flex items-center justify-between">
-                <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>BUILD</span>
-                <span style={{ color: C.textDim, fontSize: "8px", fontFamily: "'Orbitron', monospace" }}>{appBuild}</span>
+
+            {/* build / version row */}
+            <div className="px-3 py-2 grid grid-cols-2 gap-y-1.5 border-b" style={{ borderColor: C.border }}>
+              {[["BUILD", appBuild], ["VER", appVersion]].map(([lbl, val]) => (
+                <div key={lbl} className="flex items-center justify-between col-span-1">
+                  <span style={{ color: "#4a3f35", fontSize: "7.5px", letterSpacing: "0.12em" }}>{lbl}</span>
+                  <span style={{ color: C.textFaint, fontSize: "8px", fontFamily: "'Orbitron', monospace" }}>{val}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* branding */}
+            <div className="px-3 py-2.5 flex items-center gap-2">
+              <div style={{ width:18, height:18, border:`1px solid ${C.border}`, background:"rgba(24,24,28,0.8)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <Skull size={9} style={{ color: C.textFaint }} />
               </div>
-              <div className="flex items-center justify-between">
-                <span style={{ color: C.textFaint, fontSize: "8px", letterSpacing: "0.1em" }}>VER</span>
-                <span style={{ color: C.textDim, fontSize: "8px", fontFamily: "'Orbitron', monospace" }}>{appVersion}</span>
-              </div>
-              <div style={{ height: "1px", background: `linear-gradient(90deg, ${C.textFaint}44, transparent)`, margin: "4px 0" }} />
-              <div className="flex items-center gap-1">
-                <Skull size={8} style={{ color: C.textDim }} />
-                <span style={{ color: C.textDim, fontSize: "8px", letterSpacing: "0.12em" }}>DEAD SIGNAL PROTOCOL</span>
-              </div>
-              <div style={{ color: "#776b5f", fontSize: "7px", fontFamily: "'Share Tech Mono', monospace", letterSpacing: "0.08em", opacity: 0.4, marginTop: "2px" }}>
-                {`SYS:0x${Date.now().toString(16).toUpperCase().slice(-8)}`}
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ color: C.textDim, fontSize: "8px", letterSpacing: "0.14em", fontFamily:"'Orbitron', monospace", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>DEAD SIGNAL</div>
+                <div style={{ color: "#4a3f35", fontSize: "7px", letterSpacing: "0.08em", marginTop: 1 }}>
+                  {`SYS:0x${Date.now().toString(16).toUpperCase().slice(-8)}`}
+                </div>
               </div>
             </div>
           </motion.div>
