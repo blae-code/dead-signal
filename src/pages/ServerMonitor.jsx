@@ -226,7 +226,7 @@ export default function ServerMonitor() {
   const dismissBanner = (id) => setAlertBanners((prev) => prev.filter((entry) => entry.id !== id));
 
   return (
-    <div className="p-4 space-y-4 max-w-7xl mx-auto pb-96">
+    <div className="p-5 space-y-5 max-w-7xl mx-auto pb-96">
       <AnimatePresence>
         {alertBanners.map((banner) => (
           <motion.div
@@ -235,8 +235,8 @@ export default function ServerMonitor() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="flex items-center justify-between px-3 py-2 border text-xs"
-            style={{ borderColor: T.red, background: T.bg3, color: T.red }}
+            className="flex items-center justify-between px-4 py-2.5 border text-xs relative overflow-hidden"
+            style={{ borderColor: T.red + "88", background: `linear-gradient(90deg, ${T.red}18 0%, ${T.bg2} 100%)`, color: T.red }}
           >
             <span><AlertTriangle size={10} className="inline mr-2" />{banner.message}</span>
             <button onClick={() => dismissBanner(banner.id)}><X size={10} /></button>
@@ -246,12 +246,22 @@ export default function ServerMonitor() {
 
       <PageHeader icon={Cpu} title="SERVER MONITOR" color={T.green}>
         {statusLoading
-          ? <span className="text-xs px-2 py-0.5 border" style={{ color: T.textFaint, borderColor: T.border }}>● FETCHING...</span>
-          : <span className="text-xs px-2 py-0.5 border" style={{ color: status?.metric_available?.online ? (status?.online ? T.green : T.red) : T.textFaint, borderColor: status?.metric_available?.online ? (status?.online ? T.green + "66" : T.red + "66") : T.border }}>
-              {status?.metric_available?.online ? (status?.online ? "● ONLINE" : "● OFFLINE") : "● UNAVAILABLE"}
+          ? <span className="flex items-center gap-1.5 text-xs px-2.5 py-1 border" style={{ color: T.textFaint, borderColor: T.border, background: `${T.textFaint}08`, fontFamily: "'Orbitron', monospace", fontSize: "9px" }}>
+              <span className="ds-led-off" style={{ width:6, height:6, borderRadius:"50%", display:"inline-block" }} />POLLING...
+            </span>
+          : <span className="flex items-center gap-1.5 text-xs px-2.5 py-1 border" style={{
+                color: status?.metric_available?.online ? (status?.online ? T.green : T.red) : T.textFaint,
+                borderColor: status?.metric_available?.online ? (status?.online ? T.green + "55" : T.red + "55") : T.border,
+                background: status?.metric_available?.online ? (status?.online ? `${T.green}10` : `${T.red}10`) : "transparent",
+                fontFamily: "'Orbitron', monospace", fontSize: "9px",
+                boxShadow: status?.online ? `0 0 8px ${T.green}22` : "none",
+              }}>
+              <span className={status?.online ? "ds-led-on-green" : "ds-led-on-red"} style={{ width:6, height:6, borderRadius:"50%", display:"inline-block" }} />
+              {status?.metric_available?.online ? (status?.online ? "ONLINE" : "OFFLINE") : "UNAVAILABLE"}
             </span>
         }
-        <button onClick={() => refetchStatus()} className="p-1 hover:opacity-70 transition-opacity" title="Refresh">
+        <button onClick={() => refetchStatus()} className="p-1.5 border hover:opacity-70 transition-opacity" title="Refresh"
+          style={{ borderColor: T.border, background: `${T.textFaint}08` }}>
           <RefreshCw size={11} style={{ color: T.textDim }} />
         </button>
       </PageHeader>
@@ -264,26 +274,22 @@ export default function ServerMonitor() {
       />
 
       <motion.div
-        className="grid grid-cols-2 md:grid-cols-4 gap-3"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
         {[
           {
-            label: "STATE",
-            value: statusLoading
-              ? "..."
-              : (status?.metric_available?.state ? (status?.state?.toUpperCase() || "UNAVAILABLE") : "UNAVAILABLE"),
+            label: "SERVER STATE",
+            value: statusLoading ? "..." : (status?.metric_available?.state ? (status?.state?.toUpperCase() || "UNAVAILABLE") : "UNAVAILABLE"),
             icon: Wifi,
             color: status?.metric_available?.state ? (status?.online ? T.green : T.red) : T.textFaint,
             isUptime: false,
           },
           {
             label: "UPTIME",
-            value: statusLoading
-              ? "..."
-              : (status?.metric_available?.uptime ? (status?.uptime || "UNAVAILABLE") : "UNAVAILABLE"),
+            value: statusLoading ? "..." : (status?.metric_available?.uptime ? (status?.uptime || "UNAVAILABLE") : "UNAVAILABLE"),
             icon: Clock,
             color: status?.metric_available?.uptime ? T.amber : T.textFaint,
             isUptime: true,
@@ -291,13 +297,22 @@ export default function ServerMonitor() {
         ].map(({ label, value, icon: Icon, color, isUptime }) => (
           <motion.div
             key={label}
-            className="border p-3"
-            style={{ borderColor: T.border, background: T.bg1 }}
-            whileHover={{ borderColor: color + "66", transition: { duration: 0.2 } }}
+            className="relative overflow-hidden border p-4"
+            style={{
+              borderColor: color + "44",
+              background: `linear-gradient(135deg, ${T.bg2} 0%, ${T.bg3} 100%)`,
+              boxShadow: `inset 0 1px 0 rgba(78,58,34,0.2), 0 4px 12px rgba(0,0,0,0.5)`,
+            }}
+            whileHover={{ borderColor: color + "88", transition: { duration: 0.2 } }}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <Icon size={10} style={{ color: T.textFaint }} />
-              <span className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</span>
+            <div style={accentLine(color)} />
+            <div style={{ position: "absolute", top: 4, left: 4, width: 7, height: 7, borderTop: `1px solid ${color}55`, borderLeft: `1px solid ${color}55` }} />
+            <div style={{ position: "absolute", bottom: 4, right: 4, width: 7, height: 7, borderBottom: `1px solid ${color}33`, borderRight: `1px solid ${color}33` }} />
+            <div className="flex items-center gap-2 mb-2">
+              <div style={{ width:20, height:20, border:`1px solid ${color}44`, background:`${color}12`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <Icon size={10} style={{ color }} />
+              </div>
+              <span style={{ color: T.textFaint, fontSize: "8px", fontFamily:"'Orbitron', monospace", letterSpacing:"0.2em" }}>{label}</span>
             </div>
             {isUptime ? (
               <LiveUptime initialUptime={value} statusLoading={statusLoading} />
@@ -313,19 +328,21 @@ export default function ServerMonitor() {
       <PerformanceCharts status={status} />
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-        <div className="flex items-center gap-2 mb-3 cursor-pointer" onClick={() => setShowForecast((prev) => !prev)}>
-          <span
-            className="text-xs font-bold tracking-widest px-2 py-1 border"
-            style={{
-              color: showForecast ? T.cyan : T.textFaint,
-              borderColor: showForecast ? T.cyan : T.border,
-              fontFamily: "'Orbitron', monospace",
-              fontSize: "10px",
-            }}
-          >
-            {showForecast ? "▼" : "▶"} FORECAST
-          </span>
-        </div>
+        <button
+          className="flex items-center gap-3 w-full text-left relative overflow-hidden border px-4 py-2.5 transition-all"
+          style={{
+            borderColor: showForecast ? T.cyan + "55" : T.border,
+            background: showForecast ? `linear-gradient(90deg, ${T.cyan}12 0%, ${T.bg2} 100%)` : T.bg2,
+          }}
+          onClick={() => setShowForecast((prev) => !prev)}
+        >
+          {showForecast && <div style={accentLine(T.cyan)} />}
+          <div style={{ width:18, height:18, border:`1px solid ${showForecast ? T.cyan+"55" : T.border}`, background:`${showForecast ? T.cyan : T.textFaint}12`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <span style={{ color: showForecast ? T.cyan : T.textFaint, fontSize:"10px", lineHeight:1 }}>{showForecast ? "▼" : "▶"}</span>
+          </div>
+          <span style={{ color: showForecast ? T.cyan : T.textFaint, fontFamily:"'Orbitron', monospace", fontSize:"9px", letterSpacing:"0.2em" }}>PERFORMANCE FORECAST</span>
+          <span style={{ marginLeft:"auto", color: T.textFaint, fontSize:"8px" }}>{showForecast ? "COLLAPSE" : "EXPAND"}</span>
+        </button>
         <AnimatePresence>
           {showForecast && (
             <motion.div
