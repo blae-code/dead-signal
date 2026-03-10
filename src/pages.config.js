@@ -47,21 +47,22 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import ClanRoster from './pages/ClanRoster';
 import Dashboard from './pages/Dashboard';
+import Intel from './pages/Intel';
+import Inventory from './pages/Inventory';
+import Missions from './pages/Missions';
 import ServerMonitor from './pages/ServerMonitor';
 import AIAgent from './pages/AIAgent';
 import Challenges from './pages/Challenges';
 import ClanBoard from './pages/ClanBoard';
 import ClanCalendar from './pages/ClanCalendar';
 import ClanMap from './pages/ClanMap';
-import ClanRoster from './pages/ClanRoster';
 import ClanTreasury from './pages/ClanTreasury';
 import ClanVoting from './pages/ClanVoting';
 import ClanWiki from './pages/ClanWiki';
 import DeathMap from './pages/DeathMap';
 import EngineeringOps from './pages/EngineeringOps';
-import Intel from './pages/Intel';
-import Inventory from './pages/Inventory';
 import LoadoutPlanner from './pages/LoadoutPlanner';
 import LootSharing from './pages/LootSharing';
 import LootTracker from './pages/LootTracker';
@@ -73,11 +74,10 @@ import SquadVitalsMonitor from './pages/SquadVitalsMonitor';
 import SupplyChainManager from './pages/SupplyChainManager';
 import SurvivalPlanner from './pages/SurvivalPlanner';
 import TacticalMap from './pages/TacticalMap';
-import Missions from './pages/Missions';
 import AnnouncementsPanel from './pages/AnnouncementsPanel';
+import CommunityHome from './pages/CommunityHome';
 import IntelPanel from './pages/IntelPanel';
 import VouchesPanel from './pages/VouchesPanel';
-import CommunityHome from './pages/CommunityHome';
 import EngineeringPanel from './pages/EngineeringPanel';
 import InventoryPanel from './pages/InventoryPanel';
 import LogisticsHome from './pages/LogisticsHome';
@@ -94,21 +94,22 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "ClanRoster": ClanRoster,
     "Dashboard": Dashboard,
+    "Intel": Intel,
+    "Inventory": Inventory,
+    "Missions": Missions,
     "ServerMonitor": ServerMonitor,
     "AIAgent": AIAgent,
     "Challenges": Challenges,
     "ClanBoard": ClanBoard,
     "ClanCalendar": ClanCalendar,
     "ClanMap": ClanMap,
-    "ClanRoster": ClanRoster,
     "ClanTreasury": ClanTreasury,
     "ClanVoting": ClanVoting,
     "ClanWiki": ClanWiki,
     "DeathMap": DeathMap,
     "EngineeringOps": EngineeringOps,
-    "Intel": Intel,
-    "Inventory": Inventory,
     "LoadoutPlanner": LoadoutPlanner,
     "LootSharing": LootSharing,
     "LootTracker": LootTracker,
@@ -120,11 +121,10 @@ export const PAGES = {
     "SupplyChainManager": SupplyChainManager,
     "SurvivalPlanner": SurvivalPlanner,
     "TacticalMap": TacticalMap,
-    "Missions": Missions,
     "AnnouncementsPanel": AnnouncementsPanel,
+    "CommunityHome": CommunityHome,
     "IntelPanel": IntelPanel,
     "VouchesPanel": VouchesPanel,
-    "CommunityHome": CommunityHome,
     "EngineeringPanel": EngineeringPanel,
     "InventoryPanel": InventoryPanel,
     "LogisticsHome": LogisticsHome,

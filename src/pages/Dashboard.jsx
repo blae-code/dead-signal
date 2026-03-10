@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Terminal, Package, Activity, Skull, Wrench, Zap } from "lucide-react";
-import { T, PageHeader, Panel, StatGrid, StatusBadge, GlowDot, Chip, rowAccent } from "@/components/ui/TerminalCard";
+import { T, PageHeader, Panel, StatGrid, StatusBadge, GlowDot, Chip, rowAccent, accentLine } from "@/components/ui/TerminalCard";
 import { RadioRack } from "@/components/voice/RadioRack";
 import { TrafficLogPanel } from "@/components/voice/TrafficLogPanel";
 import { createPageUrl } from "@/utils";
@@ -101,11 +101,6 @@ export default function Dashboard() {
     return { totals, max };
   }, [items, trackedInventoryCategories]);
 
-  const panelVariants = {
-    hidden: { opacity: 0, y: 16 },
-    visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.35, ease: "easeOut" } }),
-  };
-
   return (
     <div className="p-4 space-y-4 max-w-7xl mx-auto">
       <PageHeader icon={Terminal} title="COMMAND HQ" color={T.amber}>
@@ -119,18 +114,16 @@ export default function Dashboard() {
         </div>
       )}
 
-      <motion.div variants={panelVariants} custom={0} initial="hidden" animate="visible">
-        <StatGrid
-          stats={[
-            { label: "ACTIVE OPS", value: activeMissions, color: T.green },
-            { label: "OPERATORS ONLINE", value: activeMembers, color: T.purple },
-            { label: "ALERTS", value: criticalEvents, color: criticalEvents > 0 ? T.red : T.textDim },
-            { label: "TOTAL INVENTORY", value: totalItems, color: T.cyan },
-          ]}
-        />
-      </motion.div>
+      <StatGrid
+        stats={[
+          { label: "ACTIVE OPS", value: activeMissions, color: T.green },
+          { label: "OPERATORS ONLINE", value: activeMembers, color: T.purple },
+          { label: "ALERTS", value: criticalEvents, color: criticalEvents > 0 ? T.red : T.textDim },
+          { label: "TOTAL INVENTORY", value: totalItems, color: T.cyan },
+        ]}
+      />
 
-      <motion.div variants={panelVariants} custom={1} initial="hidden" animate="visible" className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
           <Panel
             title="ACTIVE MISSIONS"
@@ -143,8 +136,8 @@ export default function Dashboard() {
           >
             <div>
               {highlightedMissions.length === 0 ? (
-                <div className="px-3 py-6 text-center" style={{ color: T.textFaint }}>
-                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ BLACKOUT — ZERO ACTIVE SIGNALS</div>
+                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
+                  // NO ACTIVE MISSIONS
                 </div>
               ) : (
                 highlightedMissions.map((mission, index) => {
@@ -184,8 +177,8 @@ export default function Dashboard() {
           >
             <div>
               {events.length === 0 ? (
-                <div className="px-3 py-6 text-center" style={{ color: T.textFaint }}>
-                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ NET QUIET — NO SERVER TRAFFIC</div>
+                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
+                  // NO RECENT EVENTS
                 </div>
               ) : (
                 events.slice(0, 6).map((event) => (
@@ -218,8 +211,8 @@ export default function Dashboard() {
           >
             <div>
               {announcements.length === 0 ? (
-                <div className="px-3 py-6 text-center" style={{ color: T.textFaint }}>
-                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ COMM SILENCE — AWAITING BROADCAST</div>
+                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
+                  // NO TRANSMISSIONS
                 </div>
               ) : (
                 announcements.slice(0, 3).map((announcement) => {
@@ -262,8 +255,8 @@ export default function Dashboard() {
           >
             <div>
               {members.length === 0 ? (
-                <div className="px-3 py-6 text-center" style={{ color: T.textFaint }}>
-                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ ROSTER EMPTY — NO OPERATORS ENLISTED</div>
+                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
+                  // NO OPERATORS
                 </div>
               ) : (
                 members.slice(0, 8).map((member) => {
@@ -358,7 +351,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

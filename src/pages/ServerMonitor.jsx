@@ -12,7 +12,7 @@ import LiveUptime from "../components/server/LiveUptime";
 import ServerMetricsWidget from "../components/server/ServerMetricsWidget";
 import ServerInsightsWidget from "../components/server/ServerInsightsWidget";
 import LiveHealthBar from "../components/server/LiveHealthBar";
-import { T, PageHeader } from "@/components/ui/TerminalCard";
+import { T, PageHeader, accentLine } from "@/components/ui/TerminalCard";
 import { useLiveTelemetry } from "@/hooks/use-live-telemetry";
 import { invokeFunctionOrFallback } from "@/api/function-invoke";
 
@@ -235,15 +235,10 @@ export default function ServerMonitor() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="flex items-center justify-between px-3 py-2 border text-xs relative overflow-hidden"
-            style={{
-              borderColor: T.red,
-              background: `linear-gradient(90deg, rgba(255,32,32,0.14) 0%, ${T.bg3} 55%)`,
-              color: T.red,
-              boxShadow: "0 0 20px rgba(255, 32, 32, 0.22), inset 0 0 20px rgba(255, 32, 32, 0.04)",
-            }}
+            className="flex items-center justify-between px-3 py-2 border text-xs"
+            style={{ borderColor: T.red, background: T.bg3, color: T.red }}
           >
-            <span><AlertTriangle size={10} className="inline mr-2 threat-blink" />{banner.message}</span>
+            <span><AlertTriangle size={10} className="inline mr-2" />{banner.message}</span>
             <button onClick={() => dismissBanner(banner.id)}><X size={10} /></button>
           </motion.div>
         ))}
