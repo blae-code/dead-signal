@@ -15,14 +15,10 @@ export default function InAppNotifications() {
 
   useEffect(() => {
     const loadRecent = async () => {
-      try {
-        const all = await base44.entities.ServerEvent.list("-created_date", 20);
-        const filtered = all.filter(e => ["CRITICAL", "ALERT", "WARN"].includes(e.severity));
-        setEvents(filtered);
-        setUnread(filtered.filter(e => !dismissed.includes(e.id)));
-      } catch (err) {
-        // Silently ignore rate limit / network errors for notifications
-      }
+      const all = await base44.entities.ServerEvent.list("-created_date", 20);
+      const filtered = all.filter(e => ["CRITICAL", "ALERT", "WARN"].includes(e.severity));
+      setEvents(filtered);
+      setUnread(filtered.filter(e => !dismissed.includes(e.id)));
     };
     loadRecent();
 
