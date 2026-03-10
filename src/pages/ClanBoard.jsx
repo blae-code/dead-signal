@@ -97,71 +97,94 @@ export default function ClanBoard() {
 
       <div className="flex flex-1 overflow-hidden px-4 pb-4 gap-3">
         {/* Channel sidebar */}
-        <div className="flex flex-col gap-1 w-32 flex-shrink-0">
-          <div style={{ color: T.textFaint, fontSize: "9px", letterSpacing: "0.15em", marginBottom: 4 }}>// CHANNELS</div>
-          {CHANNELS.map(c => (
-            <button key={c} onClick={() => setChannel(c)}
-              className="text-left px-2 py-2 border text-xs transition-colors"
-              style={{
-                borderColor: channel === c ? CHAN_COLORS[c] : T.border,
-                color: channel === c ? CHAN_COLORS[c] : T.textDim,
-                background: channel === c ? CHAN_COLORS[c] + "11" : "transparent",
-                fontFamily: "'Share Tech Mono', monospace"
-              }}>
-              # {c}
-            </button>
-          ))}
+        <div className="flex flex-col gap-1 w-36 flex-shrink-0">
+          <div style={{ color: T.textFaint, fontSize: "8px", letterSpacing: "0.2em", fontFamily: "'Orbitron', monospace", marginBottom: 6, paddingLeft: 2 }}>// CHANNELS</div>
+          {CHANNELS.map(c => {
+            const cc = CHAN_COLORS[c] || T.textDim;
+            const active = channel === c;
+            return (
+              <button key={c} onClick={() => setChannel(c)}
+                className="relative text-left px-2 py-2 overflow-hidden transition-all"
+                style={{
+                  border: `1px solid ${active ? cc + "66" : T.borderHi}`,
+                  color: active ? cc : T.textDim,
+                  background: active ? `linear-gradient(90deg, ${cc}14, transparent)` : "transparent",
+                  fontFamily: "'Share Tech Mono', monospace",
+                  fontSize: "11px",
+                  boxShadow: active ? `inset 0 0 12px ${cc}08` : "none",
+                }}>
+                {active && <div style={accentLine(cc)} />}
+                {active && <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "2px", background: cc, boxShadow: `0 0 6px ${cc}` }} />}
+                <span className="pl-2"># {c}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Main chat area */}
-        <div className="flex flex-col flex-1 border" style={{ borderColor: T.border, background: T.bg1 }}>
+        <div className="flex flex-col flex-1 relative overflow-hidden" style={{
+          border: `1px solid ${T.borderHi}`,
+          background: `linear-gradient(180deg, ${T.bg3} 0%, ${T.bg1} 100%)`,
+          boxShadow: "inset 0 0 40px rgba(0,0,0,0.4)",
+        }}>
           {/* Channel header */}
-          <div className="px-3 py-2 border-b flex items-center gap-2" style={{ borderColor: T.border }}>
-            <span style={{ color: CHAN_COLORS[channel], fontSize: "10px", fontFamily: "'Orbitron', monospace" }}>#{channel.toUpperCase()}</span>
-            <span style={{ color: T.textFaint, fontSize: "9px" }}>— {chanMsgs.length} messages</span>
+          <div className="relative px-3 py-2.5 border-b flex items-center gap-3 overflow-hidden" style={{ borderColor: T.border, background: T.bg2 }}>
+            <div style={accentLine(CHAN_COLORS[channel] || T.textDim)} />
+            <div style={{ width: "3px", height: "12px", background: CHAN_COLORS[channel] || T.textDim, boxShadow: `0 0 5px ${CHAN_COLORS[channel] || T.textDim}` }} />
+            <span style={{ color: CHAN_COLORS[channel] || T.amber, fontSize: "10px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em", textShadow: `0 0 8px ${CHAN_COLORS[channel] || T.amber}55` }}>
+              #{channel.toUpperCase()}
+            </span>
+            <span style={{ color: T.textFaint, fontSize: "9px" }}>— {chanMsgs.length} MSG</span>
           </div>
 
           {/* Pinned messages */}
           {pinned.length > 0 && (
-            <div className="border-b px-3 py-2" style={{ borderColor: T.amber + "44", background: T.amber + "08" }}>
-              <div style={{ color: T.amber, fontSize: "9px", marginBottom: 4 }}>📌 PINNED</div>
+            <div className="border-b px-3 py-2 relative overflow-hidden" style={{ borderColor: T.amber + "44", background: T.amber + "08" }}>
+              <div style={accentLine(T.amber)} />
+              <div style={{ color: T.amber, fontSize: "8px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.15em", marginBottom: 4 }}>▲ PINNED TRANSMISSIONS</div>
               {pinned.map(m => (
-                <div key={m.id} style={{ color: T.textDim, fontSize: "11px" }}>
-                  <span style={{ color: T.amber }}>[{m.author_callsign}]</span> {m.body}
+                <div key={m.id} style={{ color: T.textDim, fontSize: "11px", lineHeight: 1.5 }}>
+                  <span style={{ color: T.amber, fontFamily: "'Orbitron', monospace", fontSize: "9px" }}>[{m.author_callsign}]</span>
+                  <span style={{ marginLeft: 6 }}>{m.body}</span>
                 </div>
               ))}
             </div>
           )}
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
+          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
             {regular.length === 0 && (
-              <div style={{ color: T.textFaint, fontSize: "10px", textAlign: "center", marginTop: 40 }}>
-                // CHANNEL EMPTY — BE THE FIRST TO TRANSMIT
+              <div style={{ color: T.textFaint, fontSize: "9px", textAlign: "center", marginTop: 40, fontFamily: "'Orbitron', monospace", letterSpacing: "0.15em" }}>
+                ▸ CHANNEL EMPTY — BE THE FIRST TO TRANSMIT
               </div>
             )}
             {regular.map(m => {
               const isOwn = m.author_email === user?.email;
               const ts = m.created_date ? new Date(m.created_date).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }) : "";
+              const nameColor = isOwn ? T.cyan : T.amber;
               return (
-                <div key={m.id} className="group flex items-start gap-2">
+                <div key={m.id} className="group flex items-start gap-2 relative">
                   <div className="flex-1">
-                    <div className="flex items-baseline gap-2 mb-0.5">
-                      <span style={{ color: isOwn ? T.cyan : T.amber, fontSize: "10px", fontWeight: "bold" }}>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span style={{ color: nameColor, fontSize: "10px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.08em", textShadow: `0 0 6px ${nameColor}66` }}>
                         {m.author_callsign || m.author_email}
                       </span>
-                      <span style={{ color: T.textFaint, fontSize: "9px" }}>{ts}</span>
+                      <span style={{ color: T.textFaint + "88", fontSize: "9px" }}>{ts}</span>
                     </div>
-                    <div style={{ color: T.text, fontSize: "12px", lineHeight: 1.5 }}>{m.body}</div>
+                    <div style={{ color: T.text, fontSize: "12px", lineHeight: 1.6, fontFamily: "'Share Tech Mono', monospace", paddingLeft: 2, borderLeft: `1px solid ${nameColor}22` }}>
+                      {m.body}
+                    </div>
                   </div>
-                  <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                  <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity flex-shrink-0">
                     {isAdmin && (
-                      <button onClick={() => handlePin(m)} className="p-1 hover:opacity-70">
+                      <button onClick={() => handlePin(m)} className="p-1 border hover:opacity-70"
+                        style={{ borderColor: m.pinned ? T.amber + "55" : T.border, background: m.pinned ? T.amber + "0d" : "transparent" }}>
                         <Pin size={9} style={{ color: m.pinned ? T.amber : T.textFaint }} />
                       </button>
                     )}
                     {(isOwn || isAdmin) && (
-                      <button onClick={() => handleDelete(m.id)} className="p-1 hover:opacity-70">
+                      <button onClick={() => handleDelete(m.id)} className="p-1 border hover:opacity-70"
+                        style={{ borderColor: T.red + "33", background: T.red + "08" }}>
                         <Trash2 size={9} style={{ color: T.red + "88" }} />
                       </button>
                     )}
@@ -173,10 +196,11 @@ export default function ClanBoard() {
           </div>
 
           {/* Input */}
-          <div className="border-t flex items-center gap-2 px-3 py-2" style={{ borderColor: T.border }}>
+          <div className="border-t flex items-center gap-2 px-3 py-2" style={{ borderColor: T.border, background: T.bg2 }}>
+            <span style={{ color: T.green, fontSize: "12px", fontFamily: "'Share Tech Mono', monospace" }}>›</span>
             <input
-              className="flex-1 border p-2 text-xs"
-              style={{ borderColor: T.border, background: "transparent", color: T.text, fontFamily: "'Share Tech Mono', monospace" }}
+              className="flex-1 bg-transparent text-xs py-1 outline-none"
+              style={{ color: T.text, fontFamily: "'Share Tech Mono', monospace", letterSpacing: "0.04em" }}
               placeholder={`Transmit to #${channel}...`}
               value={input}
               onChange={e => setInput(e.target.value)}

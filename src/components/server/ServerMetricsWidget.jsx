@@ -71,9 +71,9 @@ function NetworkWidget({ rxMetric, txMetric }) {
   const txMB = txMetric.available && typeof txMetric.value === "number" ? txMetric.value / 1024 : null;
 
   return (
-    <div className="border p-4 relative overflow-hidden" style={{ borderColor: T.border, background: T.bg1, boxShadow: `inset 0 0 1px ${T.cyan}22` }}>
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: T.cyan, opacity: 0.3 }} />
-      <div className="text-xs font-bold tracking-widest mb-3" style={{ color: T.textFaint, fontSize: "10px", fontFamily: "'Orbitron', monospace" }}>
+    <div className="relative overflow-hidden p-4" style={{ border: `1px solid ${T.borderHi}`, background: `linear-gradient(160deg, ${T.bg2} 0%, ${T.bg3} 100%)`, boxShadow: `inset 0 1px 0 rgba(78,58,34,0.2), 0 4px 16px rgba(0,0,0,0.7), inset 0 0 20px ${T.cyan}05` }}>
+      <div style={accentLine(T.cyan)} />
+      <div style={{ color: T.textFaint, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em", marginBottom: 12 }}>
         NETWORK
       </div>
       <div className="grid grid-cols-2 gap-3 text-center">
@@ -116,22 +116,24 @@ export default function ServerMetricsWidget({ status }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-      <motion.div className="border p-4 relative flex justify-center items-center" style={{ borderColor: T.border, background: T.bg1 }} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
+      <motion.div className="relative overflow-hidden p-4 flex justify-center items-center" style={{ border: `1px solid ${T.borderHi}`, background: `linear-gradient(160deg, ${T.bg2} 0%, ${T.bg3} 100%)`, boxShadow: "inset 0 1px 0 rgba(78,58,34,0.2), 0 4px 16px rgba(0,0,0,0.7)" }} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
         <div className="absolute inset-0 flex items-center justify-center">
           <RadialGauge value={typeof cpuMetric.value === "number" ? cpuMetric.value : null} max={100} color={getColor(Number(cpuMetric.value || 0))} label="CPU" available={cpuMetric.available} />
         </div>
       </motion.div>
 
-      <motion.div className="border p-4" style={{ borderColor: T.border, background: T.bg1 }} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.1 }}>
-        <div className="text-xs font-bold tracking-widest mb-3" style={{ color: T.textFaint, fontSize: "10px" }}>RAM USAGE</div>
+      <motion.div className="relative overflow-hidden p-4" style={{ border: `1px solid ${T.borderHi}`, background: `linear-gradient(160deg, ${T.bg2} 0%, ${T.bg3} 100%)`, boxShadow: "inset 0 1px 0 rgba(78,58,34,0.2), 0 4px 16px rgba(0,0,0,0.7)" }} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.1 }}>
+        <div style={accentLine(ramPercent !== null ? (ramPercent > 80 ? T.red : ramPercent > 60 ? T.amber : T.green) : T.textFaint)} />
+        <div className="text-xs font-bold tracking-widest mb-3" style={{ color: T.textFaint, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>RAM USAGE</div>
         <BarIndicator label="Used" value={typeof ramMetric.value === "number" ? ramMetric.value : null} max={32768} color={ramPercent === null ? T.textFaint : getColor(ramPercent)} available={ramMetric.available} />
         <div className="text-xs mt-2" style={{ color: ramPercent === null ? T.textFaint : getColor(ramPercent) }}>
           {ramPercent === null ? "UNAVAILABLE" : `${ramPercent.toFixed(1)}%`}
         </div>
       </motion.div>
 
-      <motion.div className="border p-4" style={{ borderColor: T.border, background: T.bg1 }} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
-        <div className="text-xs font-bold tracking-widest mb-3" style={{ color: T.textFaint, fontSize: "10px" }}>DISK USAGE</div>
+      <motion.div className="relative overflow-hidden p-4" style={{ border: `1px solid ${T.borderHi}`, background: `linear-gradient(160deg, ${T.bg2} 0%, ${T.bg3} 100%)`, boxShadow: "inset 0 1px 0 rgba(78,58,34,0.2), 0 4px 16px rgba(0,0,0,0.7)" }} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
+        <div style={accentLine(diskPercent !== null ? (diskPercent > 80 ? T.red : diskPercent > 60 ? T.amber : T.green) : T.textFaint)} />
+        <div className="text-xs font-bold tracking-widest mb-3" style={{ color: T.textFaint, fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>DISK USAGE</div>
         <BarIndicator label="Used" value={typeof diskMetric.value === "number" ? diskMetric.value : null} max={1048576} color={diskPercent === null ? T.textFaint : getColor(diskPercent)} available={diskMetric.available} />
         <div className="text-xs mt-2" style={{ color: diskPercent === null ? T.textFaint : getColor(diskPercent) }}>
           {diskPercent === null ? "UNAVAILABLE" : `${diskPercent.toFixed(1)}%`}

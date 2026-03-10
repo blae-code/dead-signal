@@ -35,7 +35,14 @@ export default function LiveHealthBar({ status, statusLoading, lastPolled, downt
     : null;
 
   return (
-    <div className="border" style={{ borderColor: online === true ? T.green + "44" : T.red + "44", background: "rgba(0,0,0,0.4)" }}>
+    <div className="relative overflow-hidden" style={{
+      border: `1px solid ${online === true ? T.green + "55" : T.borderHi}`,
+      background: `linear-gradient(135deg, ${T.bg2} 0%, ${T.bg3} 100%)`,
+      boxShadow: online === true
+        ? `inset 0 1px 0 ${T.green}11, 0 4px 12px rgba(0,0,0,0.7)`
+        : "inset 0 1px 0 rgba(78,58,34,0.15), 0 4px 12px rgba(0,0,0,0.7)",
+    }}>
+      <div style={accentLine(online === true ? T.green : T.red)} />
       <AnimatePresence>
         {downtimeAlert && (
           <motion.div

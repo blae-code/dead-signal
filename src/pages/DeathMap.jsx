@@ -93,21 +93,11 @@ export default function DeathMap() {
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-2">
-        <div className="border p-3 text-center" style={{ borderColor: T.border, background: T.bg1 }}>
-          <div style={{ color: T.textFaint, fontSize: "9px" }}>TOTAL DEATHS</div>
-          <div style={{ color: T.red, fontFamily: "'Orbitron', monospace", fontSize: "20px" }}>{deaths.length}</div>
-        </div>
-        <div className="border p-3 text-center" style={{ borderColor: T.border, background: T.bg1 }}>
-          <div style={{ color: T.textFaint, fontSize: "9px" }}>GEAR RECOVERED</div>
-          <div style={{ color: T.green, fontFamily: "'Orbitron', monospace", fontSize: "20px" }}>{deaths.filter(d => d.recovered).length}</div>
-        </div>
-        <div className="border p-3 text-center" style={{ borderColor: T.border, background: T.bg1 }}>
-          <div style={{ color: T.textFaint, fontSize: "9px" }}>GEAR LOST</div>
-          <div style={{ color: T.amber, fontFamily: "'Orbitron', monospace", fontSize: "20px" }}>{deaths.filter(d => !d.recovered).length}</div>
-        </div>
-      </div>
+      <StatGrid stats={[
+        { label: "TOTAL DEATHS",   value: deaths.length,                              color: T.red },
+        { label: "GEAR RECOVERED", value: deaths.filter(d => d.recovered).length,     color: T.green },
+        { label: "GEAR LOST",      value: deaths.filter(d => !d.recovered).length,    color: T.amber },
+      ]} />
 
       {/* Map */}
       <Panel title={placing ? "// CLICK ON MAP TO MARK DEATH LOCATION" : "// DEATH LOCATIONS"} titleColor={placing ? T.amber : T.red}>
@@ -177,29 +167,29 @@ export default function DeathMap() {
         <FormPanel title="LOG DEATH" titleColor={T.red} onClose={() => setShowForm(false)}>
           <div className="grid grid-cols-2 gap-3">
             <Field label="CAUSE OF DEATH">
-              <select className="w-full border p-2 text-xs" style={{ borderColor: T.border, background: T.bg1, color: T.text }}
+              <select className="w-full border p-2 text-xs outline-none" style={selectStyle}
                 value={form.cause} onChange={e => setForm({...form, cause: e.target.value})}>
                 {CAUSES.map(c => <option key={c}>{c}</option>)}
               </select>
             </Field>
             <Field label="LOCATION NAME">
-              <input className="w-full border p-2 text-xs" style={{ borderColor: T.border, background: T.bg1, color: T.text }}
+              <input className="w-full border p-2 text-xs bg-transparent outline-none" style={inputStyle}
                 value={form.location_name} onChange={e => setForm({...form, location_name: e.target.value})} placeholder="e.g. Airfield" />
             </Field>
             <Field label="X COORD">
-              <input type="number" className="w-full border p-2 text-xs" style={{ borderColor: T.border, background: T.bg1, color: T.text }}
+              <input type="number" className="w-full border p-2 text-xs bg-transparent outline-none" style={inputStyle}
                 value={form.x} onChange={e => setForm({...form, x: e.target.value})} />
             </Field>
             <Field label="Y COORD">
-              <input type="number" className="w-full border p-2 text-xs" style={{ borderColor: T.border, background: T.bg1, color: T.text }}
+              <input type="number" className="w-full border p-2 text-xs bg-transparent outline-none" style={inputStyle}
                 value={form.y} onChange={e => setForm({...form, y: e.target.value})} />
             </Field>
             <Field label="GEAR LOST">
-              <input className="w-full border p-2 text-xs" style={{ borderColor: T.border, background: T.bg1, color: T.text }}
+              <input className="w-full border p-2 text-xs bg-transparent outline-none" style={inputStyle}
                 value={form.gear_lost} onChange={e => setForm({...form, gear_lost: e.target.value})} placeholder="e.g. M4, 200 rounds" />
             </Field>
             <Field label="NOTES">
-              <input className="w-full border p-2 text-xs" style={{ borderColor: T.border, background: T.bg1, color: T.text }}
+              <input className="w-full border p-2 text-xs bg-transparent outline-none" style={inputStyle}
                 value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Optional" />
             </Field>
           </div>
@@ -210,31 +200,42 @@ export default function DeathMap() {
         </FormPanel>
       )}
 
-      {/* Death list */}
       <Panel title={`DEATH LOG (${deaths.length})`} titleColor={T.red}>
-        {deaths.length === 0 ? <EmptyState message="NO DEATHS LOGGED — STAY ALIVE OPERATOR" /> :
-          deaths.map(d => (
-            <div key={d.id} className="flex items-center justify-between px-3 py-2 border-b"
-              style={{ borderColor: T.border + "66" }}>
-              <div className="flex items-center gap-3">
-                <Skull size={10} style={{ color: d.recovered ? T.green : T.red }} />
-                <div>
-                  <div style={{ color: T.text, fontSize: "11px" }}>{d.location_name || `Grid (${d.x}, ${d.y})`}</div>
-                  <div style={{ color: causeColors.current[d.cause] || T.textDim, fontSize: "9px" }}>{d.cause} · {d.created_date?.slice(0,10)}</div>
-                  {d.gear_lost && <div style={{ color: T.textFaint, fontSize: "9px" }}>Lost: {d.gear_lost}</div>}
+        {deaths.length === 0 ? (
+          <div className="px-3 py-8 text-center relative overflow-hidden" style={{ background: T.bg3 }}>
+            <div style={accentLine(T.textFaint)} />
+            <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em", color: T.textFaint }}>▸ NO DEATHS LOGGED — STAY ALIVE OPERATOR</div>
+          </div>
+        ) : deaths.map(d => (
+          <div key={d.id} className="relative flex items-center justify-between px-3 py-2.5 border-b"
+            style={{ borderColor: T.border + "55" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
+            <div style={{ position: "absolute", left: 0, top: "15%", bottom: "15%", width: "2px", background: d.recovered ? T.green : T.red, boxShadow: `0 0 4px ${d.recovered ? T.green : T.red}88` }} />
+            <div className="flex items-center gap-3 pl-2">
+              <Skull size={10} style={{ color: d.recovered ? T.green : T.red, filter: `drop-shadow(0 0 3px ${d.recovered ? T.green : T.red}88)` }} />
+              <div>
+                <div style={{ color: T.text, fontSize: "11px", fontFamily: "'Share Tech Mono', monospace" }}>{d.location_name || `Grid (${d.x}, ${d.y})`}</div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span style={{ color: causeColors.current[d.cause] || T.textDim, fontSize: "8px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.1em", border: `1px solid ${causeColors.current[d.cause] || T.border}44`, padding: "0 4px", background: `${causeColors.current[d.cause] || T.textDim}0d` }}>{d.cause}</span>
+                  <span style={{ color: T.textFaint, fontSize: "9px" }}>{d.created_date?.slice(0,10)}</span>
                 </div>
-              </div>
-              <div className="flex gap-1">
-                <button onClick={() => handleRecover(d)} className="p-1 hover:opacity-80" title="Toggle recovered">
-                  <CheckCircle size={10} style={{ color: d.recovered ? T.green : T.textFaint }} />
-                </button>
-                <button onClick={() => handleDelete(d.id)} className="p-1 hover:opacity-80">
-                  <Trash2 size={10} style={{ color: T.red + "88" }} />
-                </button>
+                {d.gear_lost && <div style={{ color: T.textFaint, fontSize: "9px", marginTop: 2 }}>LOST: {d.gear_lost}</div>}
               </div>
             </div>
-          ))
-        }
+            <div className="flex gap-1">
+              <button onClick={() => handleRecover(d)} className="p-1 border transition-opacity hover:opacity-70"
+                style={{ borderColor: d.recovered ? T.green + "55" : T.border, background: d.recovered ? T.green + "0d" : "transparent" }}
+                title="Toggle recovered">
+                <CheckCircle size={10} style={{ color: d.recovered ? T.green : T.textFaint }} />
+              </button>
+              <button onClick={() => handleDelete(d.id)} className="p-1 border transition-opacity hover:opacity-70"
+                style={{ borderColor: T.red + "33", background: T.red + "08" }}>
+                <Trash2 size={10} style={{ color: T.red + "99" }} />
+              </button>
+            </div>
+          </div>
+        ))}
       </Panel>
     </div>
   );
