@@ -114,26 +114,46 @@ export default function AIAgent() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
         {modes.map((entry) => {
           const Icon = iconMap[entry.icon] || Zap;
+          const active = mode === entry.id;
           return (
             <button
               key={entry.id}
               onClick={() => setMode(entry.id)}
-              className="border p-2.5 text-left transition-all hover:opacity-90"
-              style={{ borderColor: mode === entry.id ? entry.color : T.border, background: mode === entry.id ? entry.color + "0d" : T.bg1 }}
+              className="relative overflow-hidden text-left transition-all"
+              style={{
+                border: `1px solid ${active ? entry.color + "88" : T.borderHi}`,
+                background: active
+                  ? `linear-gradient(135deg, ${entry.color}12 0%, ${T.bg3} 100%)`
+                  : `linear-gradient(135deg, ${T.bg2} 0%, ${T.bg3} 100%)`,
+                padding: "10px",
+                boxShadow: active
+                  ? `inset 0 1px 0 ${entry.color}22, 0 4px 16px rgba(0,0,0,0.8), 0 0 20px ${entry.color}11`
+                  : "inset 0 1px 0 rgba(78,58,34,0.15), 0 2px 8px rgba(0,0,0,0.6)",
+              }}
             >
-              <div className="flex items-center gap-1.5 mb-1">
-                <Icon size={11} style={{ color: entry.color }} />
-                <span className="font-bold tracking-wider" style={{ color: entry.color, fontFamily: "'Orbitron', monospace", fontSize: "9px" }}>
+              <div style={accentLine(active ? entry.color : T.borderHi)} />
+              {active && (
+                <div style={{ position: "absolute", top: 4, left: 4, width: 6, height: 6, borderTop: `1px solid ${entry.color}55`, borderLeft: `1px solid ${entry.color}55` }} />
+              )}
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Icon size={11} style={{ color: entry.color, filter: active ? `drop-shadow(0 0 4px ${entry.color}88)` : "none" }} />
+                <span style={{ color: active ? entry.color : T.textDim, fontFamily: "'Orbitron', monospace", fontSize: "9px", letterSpacing: "0.15em", textShadow: active ? `0 0 8px ${entry.color}66` : "none" }}>
                   {entry.label}
                 </span>
               </div>
-              <div style={{ color: T.textFaint, fontSize: "9px", lineHeight: 1.4 }}>{entry.desc}</div>
+              <div style={{ color: active ? T.textDim : T.textFaint, fontSize: "9px", lineHeight: 1.4 }}>{entry.desc}</div>
             </button>
           );
         })}
       </div>
 
-      <div className="flex-1 border overflow-y-auto p-4 space-y-4 mb-3" style={{ borderColor: T.border, background: T.bg1, minHeight: "300px", maxHeight: "50vh" }}>
+      <div className="flex-1 relative overflow-y-auto p-4 space-y-4 mb-3" style={{
+        border: `1px solid ${T.borderHi}`,
+        background: `linear-gradient(180deg, ${T.bg3} 0%, ${T.bg1} 100%)`,
+        minHeight: "300px",
+        maxHeight: "50vh",
+        boxShadow: `inset 0 0 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(78,58,34,0.2)`,
+      }}>
         {messages.map((message, index) => (
           <div key={index} className={`text-xs ${message.role === "user" ? "pl-3 border-l-2" : ""}`} style={{ borderColor: currentMode?.color || T.border }}>
             {message.role === "user" && (

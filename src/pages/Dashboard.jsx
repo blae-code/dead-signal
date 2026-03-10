@@ -296,13 +296,28 @@ export default function Dashboard() {
                 <Link
                   key={page}
                   to={createPageUrl(page)}
-                  className="flex flex-col items-center justify-center gap-2 py-4 relative overflow-hidden"
-                  style={{ background: T.bg1, textDecoration: "none", transition: "background 0.18s" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = `${color}12`; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = T.bg1; }}
+                  className="flex flex-col items-center justify-center gap-2 py-5 relative overflow-hidden"
+                  style={{ background: T.bg1, textDecoration: "none", transition: "background 0.2s, box-shadow 0.2s" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = `${color}12`;
+                    e.currentTarget.style.boxShadow = `inset 0 0 20px ${color}0a`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = T.bg1;
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
                 >
-                  <Icon size={16} style={{ color, filter: `drop-shadow(0 0 6px ${color}66)` }} />
-                  <span className="text-xs tracking-widest text-center" style={{ color: T.textDim, fontSize: "9px", fontFamily: "'Orbitron', monospace" }}>
+                  <div style={accentLine(color)} />
+                  <div style={{
+                    width: 32, height: 32,
+                    border: `1px solid ${color}33`,
+                    background: `radial-gradient(circle, ${color}18 0%, transparent 70%)`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: `0 0 12px ${color}22`,
+                  }}>
+                    <Icon size={14} style={{ color, filter: `drop-shadow(0 0 5px ${color}88)` }} />
+                  </div>
+                  <span style={{ color: T.textDim, fontSize: "8.5px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.12em", textAlign: "center" }}>
                     {label}
                   </span>
                 </Link>

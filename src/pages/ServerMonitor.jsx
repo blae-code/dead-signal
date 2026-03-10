@@ -235,8 +235,13 @@ export default function ServerMonitor() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="flex items-center justify-between px-3 py-2 border text-xs"
-            style={{ borderColor: T.red, background: T.bg3, color: T.red }}
+            className="flex items-center justify-between px-3 py-2 border text-xs relative overflow-hidden"
+            style={{
+              borderColor: T.red + "99",
+              background: `linear-gradient(90deg, ${T.red}18 0%, ${T.bg3} 100%)`,
+              color: T.red,
+              boxShadow: `0 0 20px ${T.red}22`,
+            }}
           >
             <span><AlertTriangle size={10} className="inline mr-2" />{banner.message}</span>
             <button onClick={() => dismissBanner(banner.id)}><X size={10} /></button>
@@ -291,13 +296,21 @@ export default function ServerMonitor() {
         ].map(({ label, value, icon: Icon, color, isUptime }) => (
           <motion.div
             key={label}
-            className="border p-3"
-            style={{ borderColor: T.border, background: T.bg1 }}
-            whileHover={{ borderColor: color + "66", transition: { duration: 0.2 } }}
+            className="relative overflow-hidden"
+            style={{
+              border: `1px solid ${color}44`,
+              background: `linear-gradient(160deg, ${T.bg2} 0%, ${T.bg3} 100%)`,
+              padding: "12px",
+              boxShadow: `inset 0 1px 0 rgba(78,58,34,0.2), 0 4px 16px rgba(0,0,0,0.8), inset 0 0 24px rgba(0,0,0,0.3)`,
+            }}
+            whileHover={{ borderColor: color + "77", transition: { duration: 0.2 } }}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <Icon size={10} style={{ color: T.textFaint }} />
-              <span className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</span>
+            <div style={accentLine(color)} />
+            <div style={{ position: "absolute", top: 4, left: 4, width: 6, height: 6, borderTop: `1px solid ${color}44`, borderLeft: `1px solid ${color}44` }} />
+            <div style={{ position: "absolute", bottom: 4, right: 4, width: 6, height: 6, borderBottom: `1px solid ${color}22`, borderRight: `1px solid ${color}22` }} />
+            <div className="flex items-center gap-2 mb-2">
+              <Icon size={10} style={{ color: color + "99" }} />
+              <span style={{ color: T.textFaint, fontSize: "8px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.18em" }}>{label}</span>
             </div>
             {isUptime ? (
               <LiveUptime initialUptime={value} statusLoading={statusLoading} />
