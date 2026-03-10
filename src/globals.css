@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dead Signal Dark Theme — default :root */
+    --background: 240 3.7% 15.9%;
+    --foreground: 30 33% 90%;
+    --card: 240 5% 11%;
+    --card-foreground: 30 33% 90%;
+    --popover: 240 5% 11%;
+    --popover-foreground: 30 33% 90%;
+    --primary: 38 100% 50%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 30 33% 90%;
+    --muted: 240 3.7% 13%;
+    --muted-foreground: 30 12% 62%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 30 33% 90%;
+    --destructive: 0 84.2% 56%;
+    --destructive-foreground: 30 33% 90%;
+    --border: 30 43% 12%;
+    --input: 240 5% 11%;
+    --ring: 38 100% 50%;
+    --radius: 0rem;
+    --chart-1: 38 100% 50%;
+    --chart-2: 173 100% 50%;
+    --chart-3: 0 84% 56%;
+    --chart-4: 187 100% 50%;
+    --chart-5: 270 70% 68%;
+    --sidebar-background: 240 5% 11%;
+    --sidebar-foreground: 30 33% 82%;
+    --sidebar-primary: 38 100% 50%;
+    --sidebar-primary-foreground: 240 5.9% 10%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 30 33% 82%;
+    --sidebar-border: 30 43% 12%;
+    --sidebar-ring: 38 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Share Tech Mono', monospace;
+    background: #27272a;
+  }
+}
+
+/* ── Scrollbars ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #18181c; }
+::-webkit-scrollbar-thumb { background: #3e2c18; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: #ffaa0066; }
+* { scrollbar-width: thin; scrollbar-color: #3e2c18 #18181c; }
+
+/* ── Keyframes ─────────────────────────────────────────────────────────────── */
+@keyframes glowDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.45; transform: scale(1.35); }
+}
+
+@keyframes threatBlink {
+  0%, 100% { opacity: 1; }
+  45%       { opacity: 1; }
+  50%       { opacity: 0.15; }
+  55%       { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes txTextPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+@keyframes ledPulseGreen {
+  0%, 100% { box-shadow: 0 0 5px #39ff14, 0 0 10px #39ff1466; background: #39ff14; }
+  50%       { box-shadow: 0 0 2px #39ff14, 0 0 5px #39ff1433;  background: #39ff1488; }
+}
+
+@keyframes ledPulseAmber {
+  0%, 100% { box-shadow: 0 0 5px #ffaa00, 0 0 10px #ffaa0066; background: #ffaa00; }
+  50%       { box-shadow: 0 0 2px #ffaa00, 0 0 5px #ffaa0033;  background: #ffaa0088; }
+}
+
+@keyframes ledPulseRed {
+  0%, 100% { box-shadow: 0 0 5px #ff2020, 0 0 10px #ff202066; background: #ff2020; }
+  50%       { box-shadow: 0 0 2px #ff2020, 0 0 5px #ff202033;  background: #ff202088; }
+}
+
+@keyframes navScanPulse {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* ── LED utility classes ───────────────────────────────────────────────────── */
+.ds-led-on-green { background: #39ff14; animation: ledPulseGreen 2.5s ease-in-out infinite; }
+.ds-led-on-amber { background: #ffaa00; animation: ledPulseAmber 2.5s ease-in-out infinite; }
+.ds-led-on-red   { background: #ff2020; animation: ledPulseRed 1.2s ease-in-out infinite; }
+.ds-led-off      { background: #2a1e10; box-shadow: none; }
+
+/* ── TX / PTT states ───────────────────────────────────────────────────────── */
+.ds-tx-text   { animation: txTextPulse 0.8s ease-in-out infinite; }
+.ds-tx-active { box-shadow: 0 0 20px rgba(255, 32, 32, 0.65) !important; }
+
+/* ── Threat blink ──────────────────────────────────────────────────────────── */
+.threat-blink { animation: threatBlink 1.2s ease-in-out infinite; }
+
+/* ── Header shell ──────────────────────────────────────────────────────────── */
+.ds-header-shell {
+  background: linear-gradient(180deg, #1c1c20 0%, #18181c 100%);
+  box-shadow: 0 1px 0 #2a1e10, 0 2px 16px rgba(0, 0, 0, 0.7);
+}
+.ds-header-segment {
+  border: 1px solid #2a1e10;
+  background: linear-gradient(135deg, rgba(28, 28, 32, 0.9) 0%, rgba(24, 24, 28, 0.9) 100%);
+}
+
+/* ── Nav item hover ────────────────────────────────────────────────────────── */
+.layout-nav-item-hover:hover .nav-icon  { opacity: 1 !important; }
+.layout-nav-item-hover:hover .nav-label { color: #d0bfa6 !important; }
+.layout-nav-item-hover:hover .nav-code  { opacity: 0.65 !important; }
+.layout-nav-item-hover:hover            { background: rgba(255, 255, 255, 0.025) !important; }
+
+/* ── Header scan + nav dot animations ─────────────────────────────────────── */
+.layout-header-scan   { animation: navScanPulse 4s linear infinite; }
+.layout-nav-dot-pulse { animation: glowDotPulse 2s ease-in-out infinite; }
+
+/* ── Progress bar ──────────────────────────────────────────────────────────── */
+.progress-bar-terminal {
+  height: 3px;
+  background: #1c1c20;
+  border: 1px solid #2a1e10;
+  overflow: hidden;
+  position: relative;
+}
+.progress-bar-terminal-fill {
+  height: 100%;
+  transition: width 0.6s ease;
+  position: relative;
+}
+.progress-bar-terminal-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 20px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25));
+}
+
+/* ── Shimmer skeleton ──────────────────────────────────────────────────────── */
+.ds-shimmer {
+  background: linear-gradient(90deg, #1c1c20 25%, #2a2a2e 50%, #1c1c20 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite;
+}
+
+/* ── Action button ─────────────────────────────────────────────────────────── */
+.ds-action-btn:hover:not(:disabled) {
+  opacity: 0.82;
+  filter: brightness(1.2);
+}
+.ds-action-btn:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* ── Form input focus ──────────────────────────────────────────────────────── */
+.ds-input:focus,
+.ds-input:focus-visible {
+  border-color: #ffaa0077 !important;
+  box-shadow: 0 0 0 1px #ffaa0033, inset 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+  outline: none !important;
+}
+
+/* ── Mobile: hide scrollbar chrome on rails ──────────────────────────────── */
+.ds-scroll-x-hidden::-webkit-scrollbar { display: none; }
