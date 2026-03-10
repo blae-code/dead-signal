@@ -495,7 +495,6 @@ export default function Layout({ children, currentPageName }) {
           {children}
         </main>
       </div>
-      <InAppNotifications />
       <CommsRail />
       {/* Ambient dot grid texture */}
       <div style={{ position: "fixed", inset: 0, zIndex: 9995, pointerEvents: "none", backgroundImage: "radial-gradient(circle, rgba(255, 170, 0, 0.038) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
