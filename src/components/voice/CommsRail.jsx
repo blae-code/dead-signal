@@ -39,38 +39,48 @@ function TxIndicator({ netId, isTransmitting, onClick }) {
   const net = netId ? voiceNetResolver.getNetById(netId) : null;
   const color = net ? (CATEGORY_COLOR[net.category] ?? '#00e8ff') : '#776b5f';
   const txActive = isTransmitting;
+  const lcdGreen = '#00e060';
+  const lcdDim   = '#014a1a';
+  const bgLcd    = '#030c04';
 
   return (
     <button
       onClick={onClick}
       title="Click to open Radio Rack"
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '4px 10px',
-        border: `1px solid ${txActive ? '#ff2020' : color}`,
-        borderRadius: 3,
-        background: txActive ? 'rgba(255,32,32,0.15)' : 'rgba(0,0,0,0.4)',
-        cursor: 'pointer',
-        minWidth: 140,
-        transition: 'all 0.15s',
-        boxShadow: txActive ? '0 0 8px rgba(255,32,32,0.5)' : 'none',
+        display: 'flex', alignItems: 'center', gap: 0,
+        border: `1px solid ${txActive ? '#ff202077' : '#2a1e10'}`,
+        background: 'rgba(0,0,0,0.5)',
+        cursor: 'pointer', minWidth: 170,
+        transition: 'all 0.15s', padding: 0, overflow: 'hidden',
+        boxShadow: txActive ? '0 0 12px rgba(255,32,32,0.35)' : 'none',
+        position: 'relative',
       }}
     >
-      <Radio size={13} color={txActive ? '#ff2020' : color} />
-      <div style={{ textAlign: 'left' }}>
-        <div style={{ fontSize: 8, color: txActive ? '#ff2020' : '#776b5f', letterSpacing: '0.12em', fontFamily: 'Share Tech Mono, monospace' }}>
-          {txActive ? '● TRANSMITTING' : (net ? 'TX READY' : 'RADIO OFF')}
+      {/* Icon cell */}
+      <div style={{ padding: '4px 8px', borderRight: '1px solid #2a1e10', display: 'flex', alignItems: 'center', background: txActive ? 'rgba(255,32,32,0.12)' : 'rgba(0,0,0,0.35)', flexShrink: 0 }}>
+        <Radio size={12} color={txActive ? '#ff2020' : color} />
+      </div>
+      {/* LCD cell */}
+      <div style={{ flex: 1, background: bgLcd, padding: '4px 8px', position: 'relative', overflow: 'hidden' }}>
+        {/* LCD scanlines */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,80,10,0.07) 2px, rgba(0,80,10,0.07) 3px)', pointerEvents: 'none' }} />
+        <div style={{ fontSize: 7, color: txActive ? '#ff6060aa' : (net ? lcdGreen + '88' : lcdDim), fontFamily: 'Orbitron, monospace', letterSpacing: '0.12em' }}>
+          {txActive ? '● TX' : (net ? 'TX READY' : 'NO NET')}
         </div>
         <div
           className={txActive ? 'ds-tx-text' : ''}
-          style={{ fontSize: 11, color: txActive ? '#ff2020' : (net ? color : '#4e3a22'), fontFamily: 'Share Tech Mono, monospace', fontWeight: 700, letterSpacing: '0.08em' }}
+          style={{
+            fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', lineHeight: 1.1,
+            color: txActive ? '#ff8080' : (net ? lcdGreen : lcdDim),
+            fontFamily: 'Share Tech Mono, monospace',
+            textShadow: net && !txActive ? `0 0 8px ${lcdGreen}77` : (txActive ? '0 0 8px rgba(255,32,32,0.6)' : 'none'),
+          }}
         >
           {net ? net.displayName.toUpperCase() : '-- NO NET --'}
         </div>
         {net && (
-          <div style={{ fontSize: 8, color: '#4e3a22', fontFamily: 'Share Tech Mono, monospace', letterSpacing: '0.06em' }}>
+          <div style={{ fontSize: 8, color: txActive ? '#ff606066' : lcdGreen + '66', fontFamily: 'Share Tech Mono, monospace', letterSpacing: '0.06em' }}>
             {net.frequencyLabel}
           </div>
         )}
@@ -155,26 +165,31 @@ function PttButton({ isTransmitting, pttMode, onStart, onStop }) {
       className={isTransmitting ? 'ds-tx-active' : ''}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-        padding: '5px 18px',
+        padding: '5px 20px',
         border: `2px solid ${isTransmitting ? '#ff2020' : '#3e2c18'}`,
-        borderRadius: 3,
         background: isTransmitting
-          ? 'linear-gradient(180deg, rgba(255,32,32,0.3) 0%, rgba(255,32,32,0.18) 100%)'
-          : 'linear-gradient(180deg, rgba(42,30,16,0.7) 0%, rgba(24,24,28,0.7) 100%)',
+          ? 'linear-gradient(180deg, rgba(255,32,32,0.35) 0%, rgba(200,0,0,0.2) 100%)'
+          : 'linear-gradient(180deg, #2e2e38 0%, #1a1a20 100%)',
         cursor: 'pointer',
-        fontFamily: 'Share Tech Mono, monospace',
-        fontSize: 11, fontWeight: 700,
+        fontFamily: 'Orbitron, monospace',
+        fontSize: 10, fontWeight: 700,
         color: isTransmitting ? '#ff2020' : '#776b5f',
-        letterSpacing: '0.14em',
-        transform: isTransmitting ? 'scale(0.96)' : 'scale(1)',
+        letterSpacing: '0.16em',
+        transform: isTransmitting ? 'scale(0.95)' : 'scale(1)',
         transition: 'transform 0.08s, border-color 0.08s, color 0.08s',
         userSelect: 'none', WebkitUserSelect: 'none',
-        minWidth: 84,
+        minWidth: 90,
+        boxShadow: isTransmitting
+          ? 'inset 0 2px 4px rgba(0,0,0,0.5), 0 0 14px rgba(255,32,32,0.5)'
+          : 'inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.5)',
+        textShadow: isTransmitting ? '0 0 8px #ff202099' : 'none',
+        position: 'relative', overflow: 'hidden',
       }}
     >
+      {isTransmitting && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,32,32,0.8), transparent)' }} />}
       {isTransmitting
-        ? <><Mic size={12} color="#ff2020" /> TX LIVE</>
-        : <><MicOff size={12} color="#4e3a22" /> PTT</>
+        ? <><Mic size={11} color="#ff2020" style={{ filter: 'drop-shadow(0 0 4px #ff2020)' }} /> TX LIVE</>
+        : <><MicOff size={11} color="#4e3a22" /> PTT</>
       }
     </button>
   );
@@ -186,22 +201,20 @@ function EmergencyBanner({ emergencyState }) {
     <div
       className="threat-blink"
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '3px 10px',
-        border: '1px solid #ff2020',
-        borderRadius: 3,
-        background: 'rgba(255,32,32,0.2)',
-        fontSize: 10,
-        fontFamily: 'Share Tech Mono, monospace',
-        fontWeight: 700,
-        color: '#ff2020',
-        letterSpacing: '0.1em',
+        display: 'flex', alignItems: 'center', gap: 6,
+        padding: '4px 12px',
+        border: '2px solid #ff2020',
+        background: 'rgba(255,32,32,0.18)',
+        fontSize: 9, fontFamily: 'Orbitron, monospace', fontWeight: 700,
+        color: '#ff2020', letterSpacing: '0.14em',
+        boxShadow: '0 0 12px rgba(255,32,32,0.5), inset 0 0 8px rgba(255,32,32,0.08)',
+        textShadow: '0 0 8px #ff202099',
+        position: 'relative', overflow: 'hidden',
       }}
     >
-      <AlertTriangle size={12} />
-      EMERGENCY TRAFFIC
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, #ff202099, transparent)' }} />
+      <AlertTriangle size={12} style={{ filter: 'drop-shadow(0 0 4px #ff2020)' }} />
+      PRIORITY ALERT
     </div>
   );
 }
@@ -238,9 +251,7 @@ export function CommsRail({ onOpenRadioRack }) {
         height: 52,
         background: 'transparent',
         flexShrink: 0,
-        overflowX: 'auto',
-        overflowY: 'hidden',
-        scrollbarWidth: 'none',
+        overflow: 'hidden',
       }}
     >
       {/* VOICE label anchor */}
@@ -272,7 +283,7 @@ export function CommsRail({ onOpenRadioRack }) {
       <div style={{ width: 1, height: 32, background: '#3e2c18', flexShrink: 0 }} />
 
       {/* Monitored nets */}
-      <div style={{ display: 'flex', gap: 5, alignItems: 'center', flex: 1, overflowX: 'auto', overflowY: 'hidden', scrollbarWidth: 'none' }}>
+      <div style={{ display: 'flex', gap: 5, alignItems: 'center', flex: 1, overflow: 'hidden' }}>
         {monitoredPills.map(netId => (
           <MonitoredNetPill
             key={netId}
