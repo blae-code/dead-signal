@@ -242,7 +242,7 @@ export default function Layout({ children, currentPageName }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#27272a", fontFamily: "'Share Tech Mono', monospace" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#2d2d32", fontFamily: "'Share Tech Mono', monospace" }}>
       <header className="ds-header-shell border-b flex items-center justify-between px-4 py-2 z-50 relative overflow-hidden" style={{ borderColor: C.border }}>
         <div className={animationEnabled ? "layout-header-scan" : undefined} style={{ position: "absolute", inset: 0, pointerEvents: "none", background: `linear-gradient(90deg, transparent 0%, ${C.scan} 50%, transparent 100%)`, backgroundSize: "200% 100%" }} />
 
@@ -410,7 +410,7 @@ export default function Layout({ children, currentPageName }) {
 
         {mobileOpen && <div className="fixed inset-0 z-30 bg-black bg-opacity-80 md:hidden" onClick={() => setMobileOpen(false)} />}
 
-        <main className="flex-1 overflow-auto p-4" style={{ background: "#27272a" }}>
+        <main className="flex-1 overflow-auto p-5" style={{ background: "#2d2d32" }}>
           {children}
         </main>
       </div>
