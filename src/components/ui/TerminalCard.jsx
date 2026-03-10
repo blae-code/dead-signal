@@ -6,10 +6,10 @@
 // ── Extended palette ──────────────────────────────────────────────────────────
 export const T = {
   // ── Backgrounds (strict dark zinc)
-  bg0:  "#2d2d32",  // page background
-  bg1:  "#252529",  // card/elevated surface
-  bg2:  "#2a2a2e",  // secondary surface
-  bg3:  "#1f1f23",  // deep background/input
+  bg0:  "#353538",  // page background
+  bg1:  "#2a2a30",  // card/elevated surface
+  bg2:  "#2d2d34",  // secondary surface
+  bg3:  "#252528",  // deep background/input
 
   // ── Borders
   border:   "#2a1e10",
