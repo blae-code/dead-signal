@@ -24,6 +24,7 @@ export default function MapSidebar({ pins, playerLocs, myCallsign, routePoints, 
   const now = nowMs ?? Date.now();
   const activeLocs = playerLocs;
 
+
   return (
     <div className="space-y-3">
       {/* Route builder */}
@@ -47,13 +48,21 @@ export default function MapSidebar({ pins, playerLocs, myCallsign, routePoints, 
       {activeLocs.length > 0 && (
         <Panel title={`ONLINE (${activeLocs.length})`} titleColor={T.cyan}>
           <div className="overflow-y-auto" style={{ maxHeight: "110px" }}>
-            {activeLocs.map(loc => (
-              <div key={loc.id} className="flex items-center gap-2 px-3 py-1.5 border-b" style={{ borderColor: T.border + "44" }}>
-                <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: loc.player_callsign === myCallsign ? T.green : T.cyan, boxShadow: `0 0 4px ${T.cyan}`, flexShrink: 0 }} />
-                <span className="text-xs flex-1 truncate" style={{ color: loc.player_callsign === myCallsign ? T.green : T.text }}>{loc.player_callsign}</span>
-                {loc.in_vehicle && <span style={{ color: T.amber, fontSize: "8px" }}>VEH</span>}
-              </div>
-            ))}
+            {activeLocs.map(loc => {
+              const isMe = loc.player_callsign === myCallsign;
+              const dotColor = isMe ? T.green : T.cyan;
+              const elapsed = Math.floor((now - new Date(loc.timestamp).getTime()) / 1000);
+              const timeStr = elapsed < 60 ? `${elapsed}s` : `${Math.floor(elapsed / 60)}m`;
+              return (
+                <div key={loc.id} className="relative flex items-center gap-2 px-3 py-1.5 border-b" style={{ borderColor: T.border + "44" }}>
+                  <div style={{ position:"absolute", left:0, top:"10%", bottom:"10%", width:"2px", background: dotColor, boxShadow:`0 0 4px ${dotColor}` }} />
+                  <div style={{ width:"7px", height:"7px", borderRadius:"50%", background:dotColor, boxShadow:`0 0 6px ${dotColor}`, flexShrink:0, animation:"glowDotPulse 2s ease-in-out infinite" }} />
+                  <span className="text-xs flex-1 truncate" style={{ color: isMe ? T.green : T.text, fontSize:"10px" }}>{loc.player_callsign}</span>
+                  {loc.in_vehicle && <span style={{ color:T.amber, fontSize:"7px", border:`1px solid ${T.amber}55`, padding:"0 3px", background:`${T.amber}10` }}>VEH</span>}
+                  <span style={{ color:T.textGhost, fontSize:"7px", fontFamily:"'Orbitron', monospace" }}>{timeStr}</span>
+                </div>
+              );
+            })}
           </div>
         </Panel>
       )}
@@ -65,14 +74,23 @@ export default function MapSidebar({ pins, playerLocs, myCallsign, routePoints, 
             ? <EmptyState message="NO PINS" />
             : pins.map(pin => {
                 const isStale = pin.expires_at && new Date(pin.expires_at).getTime() < now;
+                const pinColor = PIN_COLORS[pin.type] || T.textDim;
+                const statusColor = STATUS_COLORS[pin.status] || T.textFaint;
+                const grid = (pin.x != null && pin.y != null) ? toGridLabel(pin.x, pin.y) : null;
                 return (
                   <button key={pin.id} onClick={() => onPinClick(pin)}
-                    className="w-full text-left px-3 py-2 border-b flex items-center gap-2 hover:bg-white hover:bg-opacity-5 transition-colors"
-                    style={{ borderColor: T.border + "55", opacity: isStale ? 0.5 : 1 }}>
-                    <span style={{ color: PIN_COLORS[pin.type], fontSize: "11px" }}>{PIN_ICONS[pin.type]}</span>
-                    <span className="text-xs flex-1 truncate" style={{ color: isStale ? T.textFaint : T.text }}>{pin.title}</span>
-                    {isStale && <span style={{ color: T.red, fontSize: "7px" }}>STALE</span>}
-                    <span style={{ color: STATUS_COLORS[pin.status], fontSize: "7px" }}>●</span>
+                    className="w-full text-left px-3 py-2 border-b relative flex items-center gap-2 transition-colors"
+                    style={{ borderColor: T.border + "44", opacity: isStale ? 0.45 : 1, background:"transparent" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                  >
+                    {/* Left accent */}
+                    <div style={{ position:"absolute", left:0, top:"10%", bottom:"10%", width:"2px", background:pinColor, boxShadow:`0 0 4px ${pinColor}88` }} />
+                    <span style={{ color:pinColor, fontSize:"11px", flexShrink:0, filter:`drop-shadow(0 0 3px ${pinColor})` }}>{PIN_ICONS[pin.type]}</span>
+                    <span className="flex-1 truncate" style={{ color:isStale ? T.textFaint : T.text, fontSize:"10px" }}>{pin.title}</span>
+                    {grid && <span style={{ color:T.textGhost, fontSize:"7px", fontFamily:"'Orbitron', monospace", border:`1px solid ${T.border}`, padding:"0 3px", flexShrink:0 }}>{grid}</span>}
+                    {isStale && <span style={{ color:T.red, fontSize:"7px", border:`1px solid ${T.red}44`, padding:"0 3px" }}>STALE</span>}
+                    <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:statusColor, boxShadow:`0 0 4px ${statusColor}`, flexShrink:0 }} />
                   </button>
                 );
               })
