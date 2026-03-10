@@ -117,7 +117,7 @@ export function PageHeader({ icon: Icon, title, color = T.amber, children }) {
 // ── Stat card grid ────────────────────────────────────────────────────────────
 export function StatGrid({ stats }) {
   return (
-    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}>
+    <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))" }}>
       {stats.map(({ label, value, color = T.amber, sub }) => (
         <div
           key={label}

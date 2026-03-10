@@ -133,6 +133,7 @@ import { CommsRail } from "@/components/voice/CommsRail";
 import { RadioRack } from "@/components/voice/RadioRack";
 
 export default function Layout({ children, currentPageName }) {
+  useEffect(() => { document.title = "DEAD SIGNAL PROTOCOL"; }, []);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [online, setOnline] = useState(() => (typeof navigator !== "undefined" ? navigator.onLine : true));
   const [launching, setLaunching] = useState(false);
