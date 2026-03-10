@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Package, Plus, Trash2, Save } from "lucide-react";
+import { Package, Plus, Trash2, Save, Boxes, Weight, LayoutGrid, MapPin, Edit2 } from "lucide-react";
 import { T, PageHeader, Panel, FormPanel, Field, FilterPill, ActionBtn, TableHeader, TableRow, EmptyState, inputStyle, selectStyle, StatGrid } from "@/components/ui/TerminalCard";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
@@ -95,20 +95,12 @@ export default function Inventory() {
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {[
-          { label: "TOTAL ITEMS",   value: totalItems,                                      color: T.green },
-          { label: "TOTAL WEIGHT",  value: `${totalWeight.toFixed(1)}kg`,                  color: T.amber },
-          { label: "CATEGORIES",    value: Object.values(byCategory).filter(v => v > 0).length, color: T.cyan },
-          { label: "LOCATION",      value: filterLoc === ALL_FILTER ? "ALL" : filterLoc.toUpperCase(), color: T.textDim },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="border p-2.5" style={{ borderColor: T.border, background: T.bg1 }}>
-            <div className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</div>
-            <div className="text-sm font-bold mt-1" style={{ color }}>{value}</div>
-          </div>
-        ))}
-      </div>
+      <StatGrid stats={[
+        { label: "TOTAL ITEMS",  value: totalItems,                                          color: T.green,   sub: "units in store" },
+        { label: "TOTAL WEIGHT", value: `${totalWeight.toFixed(1)}kg`,                      color: T.amber,   sub: "carry load" },
+        { label: "CATEGORIES",   value: Object.values(byCategory).filter(v => v > 0).length, color: T.cyan,   sub: "active types" },
+        { label: "LOCATION",     value: filterLoc === ALL_FILTER ? "ALL" : filterLoc.toUpperCase().slice(0,8), color: T.textDim, sub: "active filter" },
+      ]} />
 
       {/* Category filter pills */}
       <div className="flex flex-wrap gap-1.5">
@@ -176,19 +168,33 @@ export default function Inventory() {
         <TableHeader columns={["ITEM", "CAT", "QTY", "COND", "LOC", "WEIGHT", ""]}
           style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr 56px" }} />
         {filtered.length === 0
-          ? <EmptyState message="INVENTORY EMPTY" />
+          ? (
+            <div className="px-3 py-8 text-center" style={{ background: T.bg3 }}>
+              <Package size={22} style={{ color: T.textGhost, opacity: 0.2, margin: "0 auto 10px" }} />
+              <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em", color: T.textFaint }}>▸ INVENTORY EMPTY</div>
+            </div>
+          )
           : filtered.map(item => (
-            <TableRow key={item.id} style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr 56px" }}>
-              <span className="text-xs font-bold truncate" style={{ color: T.text }}>{item.item_name}</span>
-              <span className="text-xs" style={{ color: CAT_COLORS[item.category] || T.textDim }}>{item.category}</span>
-              <span className="text-xs" style={{ color: T.text }}>×{item.quantity}</span>
-              <span className="text-xs" style={{ color: COND_COLORS[item.condition] }}>{item.condition}</span>
+            <TableRow key={item.id} style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr 56px" }}
+              accentColor={CAT_COLORS[item.category]}>
+              <span className="text-xs font-bold truncate pl-3" style={{ color: T.text, fontFamily:"'Share Tech Mono', monospace" }}>{item.item_name}</span>
+              <span className="inline-flex items-center text-xs" style={{ color: CAT_COLORS[item.category] || T.textDim }}>
+                <span style={{ border:`1px solid ${CAT_COLORS[item.category] || T.border}44`, padding:"0 4px", background:`${CAT_COLORS[item.category] || T.textDim}0d`, fontSize:"8px", fontFamily:"'Orbitron', monospace", letterSpacing:"0.08em" }}>{item.category}</span>
+              </span>
+              <span className="text-xs font-bold" style={{ color: T.text, fontFamily:"'Orbitron', monospace" }}>×{item.quantity}</span>
+              <span className="text-xs" style={{ color: COND_COLORS[item.condition], fontFamily:"'Orbitron', monospace", fontSize:"9px" }}>{item.condition}</span>
               <span className="text-xs" style={{ color: T.textDim }}>{item.location}</span>
               <span className="text-xs" style={{ color: T.textFaint }}>{((item.weight || 0) * (item.quantity || 1)).toFixed(1)}kg</span>
               {isAdmin && (
-              <div className="flex justify-end gap-1">
-                <button onClick={() => handleEdit(item)} className="p-1 hover:opacity-80"><Package size={10} style={{ color: T.textDim }} /></button>
-                <button onClick={() => handleDelete(item.id)} className="p-1 hover:opacity-80"><Trash2 size={10} style={{ color: T.red + "88" }} /></button>
+              <div className="flex justify-end gap-0.5">
+                <button onClick={() => handleEdit(item)} className="p-1 border hover:opacity-80 transition-opacity"
+                  style={{ borderColor: T.border, background: `${T.textDim}08` }}>
+                  <Edit2 size={9} style={{ color: T.textDim }} />
+                </button>
+                <button onClick={() => handleDelete(item.id)} className="p-1 border hover:opacity-80 transition-opacity"
+                  style={{ borderColor: T.red+"22", background: `${T.red}08` }}>
+                  <Trash2 size={9} style={{ color: T.red + "88" }} />
+                </button>
               </div>
               )}
             </TableRow>

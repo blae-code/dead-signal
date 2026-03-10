@@ -173,67 +173,91 @@ export default function ClanRoster() {
 
       <Panel>
         <TableHeader columns={["CALLSIGN", "ROLE", "STATUS", "K/D", "HRS", ""]}
-          style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 80px" }} />
+          style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 88px" }} />
         {members.length === 0
-          ? <EmptyState message="NO OPERATORS ENLISTED" />
-          : members.map(m => (
-            <TableRow key={m.id} style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 80px" }}
-              onClick={() => setSelected(selected?.id === m.id ? null : m)}>
-              <span className="text-xs font-bold" style={{ color: T.text }}>{m.callsign}</span>
-              <span className="text-xs" style={{ color: ROLE_COLORS[m.role] || T.textDim }}>{m.role}</span>
-              <span className="text-xs flex items-center gap-1" style={{ color: STATUS_COLORS[m.status] }}>
-                <span style={{ fontSize: "7px" }}>●</span>{m.status}
-              </span>
-              <span className="text-xs" style={{ color: T.textDim }}>{m.deaths > 0 ? (m.kills / m.deaths).toFixed(1) : m.kills}</span>
-              <span className="text-xs" style={{ color: T.textFaint }}>{m.playtime_hours || 0}h</span>
-              <div className="flex justify-end gap-1">
-                <Link to={createPageUrl(`PlayerProfile?id=${m.id}`)} onClick={e => e.stopPropagation()}
-                  className="p-1 hover:opacity-80" title="View Profile" style={{ textDecoration: "none" }}>
-                  <ExternalLink size={10} style={{ color: T.cyan }} />
-                </Link>
-                {isAdmin && <>
-                  <button onClick={e => { e.stopPropagation(); handleEdit(m); }} className="p-1 hover:opacity-80">
-                    <Edit2 size={10} style={{ color: T.textDim }} />
-                  </button>
-                  <button onClick={e => { e.stopPropagation(); handleDelete(m.id); }} className="p-1 hover:opacity-80">
-                    <Trash2 size={10} style={{ color: T.red + "88" }} />
-                  </button>
-                </>}
-              </div>
-            </TableRow>
-          ))
+          ? (
+            <div className="px-3 py-8 text-center" style={{ background: T.bg3 }}>
+              <Users size={22} style={{ color: T.textGhost, opacity: 0.2, margin: "0 auto 10px" }} />
+              <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em", color: T.textFaint }}>▸ NO OPERATORS ENLISTED</div>
+            </div>
+          )
+          : members.map(m => {
+            const rc = ROLE_COLORS[m.role] || T.textDim;
+            const sc = STATUS_COLORS[m.status] || T.textFaint;
+            return (
+              <TableRow key={m.id} style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 88px" }}
+                accentColor={sc}
+                onClick={() => setSelected(selected?.id === m.id ? null : m)}>
+                <span className="text-xs font-bold pl-3 flex items-center gap-2" style={{ color: T.text, fontFamily:"'Share Tech Mono', monospace" }}>
+                  <span style={{ width:6, height:6, borderRadius:"50%", background: sc, boxShadow:`0 0 5px ${sc}`, flexShrink:0 }} />
+                  {m.callsign}
+                </span>
+                <span className="text-xs" style={{ color: rc }}>
+                  <span style={{ border:`1px solid ${rc}33`, padding:"0 4px", background:`${rc}0d`, fontSize:"8px", fontFamily:"'Orbitron', monospace" }}>{m.role}</span>
+                </span>
+                <span className="text-xs flex items-center gap-1.5" style={{ color: sc, fontFamily:"'Orbitron', monospace", fontSize:"9px" }}>
+                  <span style={{ width:5, height:5, borderRadius:"50%", background: sc, boxShadow:`0 0 4px ${sc}` }} />{m.status}
+                </span>
+                <span className="text-xs font-bold" style={{ color: T.textDim, fontFamily:"'Orbitron', monospace" }}>
+                  {m.deaths > 0 ? (m.kills / m.deaths).toFixed(1) : m.kills}
+                </span>
+                <span className="text-xs" style={{ color: T.textFaint }}>{m.playtime_hours || 0}h</span>
+                <div className="flex justify-end gap-0.5">
+                  <Link to={createPageUrl(`PlayerProfile?id=${m.id}`)} onClick={e => e.stopPropagation()}
+                    className="p-1 border hover:opacity-80 transition-opacity" title="View Profile"
+                    style={{ textDecoration: "none", borderColor: T.cyan + "33", background: `${T.cyan}08` }}>
+                    <ExternalLink size={9} style={{ color: T.cyan }} />
+                  </Link>
+                  {isAdmin && <>
+                    <button onClick={e => { e.stopPropagation(); handleEdit(m); }} className="p-1 border hover:opacity-80 transition-opacity"
+                      style={{ borderColor: T.border, background: `${T.textDim}08` }}>
+                      <Edit2 size={9} style={{ color: T.textDim }} />
+                    </button>
+                    <button onClick={e => { e.stopPropagation(); handleDelete(m.id); }} className="p-1 border hover:opacity-80 transition-opacity"
+                      style={{ borderColor: T.red+"22", background: `${T.red}08` }}>
+                      <Trash2 size={9} style={{ color: T.red + "88" }} />
+                    </button>
+                  </>}
+                </div>
+              </TableRow>
+            );
+          })
         }
       </Panel>
 
       {selected && (
         <Panel accentBorder={ROLE_COLORS[selected.role]}>
-          <div className="p-4 space-y-3">
-            <div className="flex items-center gap-2 pb-2 border-b" style={{ borderColor: T.border }}>
-              <Shield size={12} style={{ color: ROLE_COLORS[selected.role] }} />
-              <span className="text-xs font-bold tracking-widest" style={{ color: ROLE_COLORS[selected.role], fontFamily: "'Orbitron', monospace", fontSize: "10px" }}>
-                DOSSIER // {selected.callsign}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { l: "ROLE",      v: selected.role,                                          c: ROLE_COLORS[selected.role] },
-                { l: "STATUS",    v: selected.status,                                        c: STATUS_COLORS[selected.status] },
-                { l: "KILLS",     v: selected.kills || 0,                                    c: T.red },
-                { l: "DEATHS",    v: selected.deaths || 0,                                   c: T.amber },
-                { l: "K/D RATIO", v: selected.deaths > 0 ? (selected.kills / selected.deaths).toFixed(2) : (selected.kills || 0), c: T.green },
-                { l: "PLAYTIME",  v: `${selected.playtime_hours || 0}h`,                    c: T.cyan },
-                { l: "STEAM ID",  v: selected.steam_id || "—",                               c: T.textDim },
-                { l: "ENLISTED",  v: new Date(selected.created_date).toLocaleDateString(),  c: T.textDim },
-              ].map(({ l, v, c }) => (
-                <div key={l}>
-                  <div className="text-xs tracking-widest mb-1" style={{ color: T.textFaint, fontSize: "9px" }}>{l}</div>
-                  <div className="text-xs font-bold" style={{ color: c }}>{v}</div>
+          <div className="p-4 space-y-4">
+            {/* Dossier header */}
+            <div className="relative flex items-center gap-3 pb-3 border-b overflow-hidden" style={{ borderColor: T.border }}>
+              <div style={{ width:36, height:36, border:`1px solid ${ROLE_COLORS[selected.role]}55`, background:`${ROLE_COLORS[selected.role]}12`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <Shield size={16} style={{ color: ROLE_COLORS[selected.role] }} />
+              </div>
+              <div>
+                <div style={{ color: ROLE_COLORS[selected.role], fontFamily:"'Orbitron', monospace", fontSize:"12px", fontWeight:"bold", letterSpacing:"0.2em", textShadow:`0 0 12px ${ROLE_COLORS[selected.role]}66` }}>
+                  {selected.callsign}
                 </div>
-              ))}
+                <div style={{ color: T.textFaint, fontSize:"8px", letterSpacing:"0.15em" }}>OPERATOR DOSSIER</div>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <span style={{ color: STATUS_COLORS[selected.status], border:`1px solid ${STATUS_COLORS[selected.status]}55`, background:`${STATUS_COLORS[selected.status]}12`, padding:"2px 8px", fontSize:"8px", fontFamily:"'Orbitron', monospace" }}>
+                  {selected.status}
+                </span>
+              </div>
+            </div>
+            <StatGrid stats={[
+              { l: "KILLS",    value: selected.kills || 0,   color: T.red,   label: "KILLS" },
+              { l: "DEATHS",   value: selected.deaths || 0,  color: T.amber, label: "DEATHS" },
+              { l: "K/D",      value: selected.deaths > 0 ? (selected.kills / selected.deaths).toFixed(2) : (selected.kills || 0), color: T.green, label: "K/D RATIO" },
+              { l: "PLAYTIME", value: `${selected.playtime_hours || 0}h`, color: T.cyan, label: "PLAYTIME" },
+            ]} />
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div><div style={{ color: T.textFaint, fontSize:"8px", fontFamily:"'Orbitron', monospace", letterSpacing:"0.15em", marginBottom:2 }}>STEAM ID</div><div style={{ color: T.textDim }}>{selected.steam_id || "—"}</div></div>
+              <div><div style={{ color: T.textFaint, fontSize:"8px", fontFamily:"'Orbitron', monospace", letterSpacing:"0.15em", marginBottom:2 }}>ENLISTED</div><div style={{ color: T.textDim }}>{new Date(selected.created_date).toLocaleDateString()}</div></div>
             </div>
             {selected.notes && (
-              <div className="pt-2 border-t text-xs" style={{ borderColor: T.border, color: T.textDim }}>
-                <span style={{ color: T.textFaint }}>// NOTES: </span>{selected.notes}
+              <div className="px-3 py-2 border-l-2 text-xs" style={{ borderLeftColor: ROLE_COLORS[selected.role] + "55", background:`${ROLE_COLORS[selected.role]}06`, color: T.textDim }}>
+                <span style={{ color: T.textFaint, fontFamily:"'Orbitron', monospace", fontSize:"8px", letterSpacing:"0.1em" }}>NOTES // </span>{selected.notes}
               </div>
             )}
           </div>

@@ -131,17 +131,12 @@ export default function Missions() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
-        {STATUSES.map(s => (
-          <div key={s} className="relative border p-2.5 text-center overflow-hidden" style={{ borderColor: T.border, background: T.bg1 }}>
-            <div style={accentLine(STATUS_COLORS[s] || T.textFaint)} />
-            <div className="text-base font-bold" style={{ color: STATUS_COLORS[s], fontFamily: "'Orbitron', monospace", textShadow: `0 0 12px ${STATUS_COLORS[s]}88` }}>
-              {missions.filter(m => m.status === s).length}
-            </div>
-            <div className="text-xs tracking-widest mt-0.5" style={{ color: T.textFaint, fontSize: "9px" }}>{s.toUpperCase()}</div>
-          </div>
-        ))}
-      </div>
+      <StatGrid stats={STATUSES.map(s => ({
+        label: s.toUpperCase(),
+        value: missions.filter(m => m.status === s).length,
+        color: STATUS_COLORS[s] || T.textFaint,
+        sub: `${Math.round((missions.filter(m => m.status === s).length / Math.max(missions.length, 1)) * 100)}%`,
+      }))} />
 
       {showForm && isAdmin && (
         <FormPanel title={editing ? "EDIT MISSION" : "NEW MISSION BRIEFING"} titleColor={T.red} onClose={() => { setShowForm(false); setEditing(null); }}>
@@ -190,60 +185,129 @@ export default function Missions() {
 
       <div className="space-y-2">
         {filtered.length === 0
-          ? <div className="border px-3 py-6 text-xs text-center" style={{ borderColor: T.border, color: T.textFaint }}>// NO MISSIONS ON RECORD</div>
-          : filtered.map(m => (
-            <div key={m.id} className="relative border overflow-hidden" style={{ borderColor: expanded === m.id ? (STATUS_COLORS[m.status] + "88") : T.border, background: T.bg1 }}>
-              {expanded === m.id && <div style={accentLine(STATUS_COLORS[m.status] || T.amber)} />}
-              <div className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none" onClick={() => setExpanded(expanded === m.id ? null : m.id)}>
-                <div style={{ position: "absolute", left: 0, top: "15%", bottom: "15%", width: "2px", background: PRIORITY_COLORS[m.priority] || T.textDim, boxShadow: `0 0 4px ${PRIORITY_COLORS[m.priority] || T.textDim}` }} />
-                <span className="text-xs px-1.5 py-0.5 border pl-2" style={{ borderColor: PRIORITY_COLORS[m.priority] + "88", color: PRIORITY_COLORS[m.priority], fontSize: "9px", letterSpacing: "0.1em" }}>
-                  {m.priority?.toUpperCase()}
-                </span>
-                <span className="text-xs font-bold flex-1 truncate" style={{ color: T.text }}>{m.title}</span>
-                <span className="text-xs flex items-center gap-1 flex-shrink-0" style={{ color: STATUS_COLORS[m.status] }}>
-                  <GlowDot color={STATUS_COLORS[m.status] || T.textFaint} size={5} />{m.status}
-                </span>
-                {connectedRooms.includes(m.voice_room_name || buildMissionRoomName(m.id))
-                  ? <span style={{ color: T.green, fontSize: "8px", letterSpacing: "0.08em", textShadow: `0 0 6px ${T.green}` }}>● VOICE</span>
-                  : <span style={{ color: T.textGhost, fontSize: "8px", letterSpacing: "0.08em" }}>IDLE</span>
-                }
-                {expanded === m.id
-                  ? <ChevronUp size={11} style={{ color: T.textFaint, flexShrink: 0 }} />
-                  : <ChevronDown size={11} style={{ color: T.textFaint, flexShrink: 0 }} />
-                }
-              </div>
-
-              {expanded === m.id && (
-                <div className="px-3 pb-3 space-y-3 border-t" style={{ borderColor: T.border }}>
-                  <p className="text-xs mt-2 leading-relaxed" style={{ color: T.textDim }}>{m.briefing}</p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                    {m.objective_coords && <div><span style={{ color: T.textFaint }}>COORDS: </span><span style={{ color: T.cyan }}>{m.objective_coords}</span></div>}
-                    {m.reward          && <div><span style={{ color: T.textFaint }}>REWARD: </span><span style={{ color: T.amber }}>{m.reward}</span></div>}
-                    {m.deadline        && <div><span style={{ color: T.textFaint }}>DEADLINE: </span><span style={{ color: T.red }}>{new Date(m.deadline).toLocaleDateString()}</span></div>}
-                  </div>
-                  {isAdmin && (
-                  <div className="flex flex-wrap gap-1 pt-2 border-t" style={{ borderColor: T.border }}>
-                    {STATUSES.map(s => (
-                      <button key={s} onClick={() => handleStatusChange(m.id, s)}
-                        className="text-xs px-2 py-0.5 border transition-colors"
-                        style={{ borderColor: m.status === s ? STATUS_COLORS[s] : T.border, color: m.status === s ? STATUS_COLORS[s] : T.textFaint }}>
-                        {s}
-                      </button>
-                    ))}
-                    <button onClick={() => { setForm({ ...m }); setEditing(m.id); setShowForm(true); setExpanded(null); }}
-                      className="text-xs px-2 py-0.5 border ml-auto" style={{ borderColor: T.border, color: T.textDim }}>
-                      EDIT
-                    </button>
-                    <button onClick={() => handleDelete(m.id)} className="text-xs px-2 py-0.5 border"
-                      style={{ borderColor: T.red + "44", color: T.red + "88" }}>
-                      DELETE
-                    </button>
-                  </div>
-                  )}
-                </div>
-              )}
+          ? (
+            <div className="border px-3 py-8 text-center relative overflow-hidden" style={{ borderColor: T.border, background: T.bg3 }}>
+              <div style={accentLine(T.textFaint)} />
+              <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em", color: T.textFaint }}>▸ NO MISSIONS ON RECORD</div>
             </div>
-          ))
+          )
+          : filtered.map(m => {
+            const statusColor = STATUS_COLORS[m.status] || T.textFaint;
+            const priorityColor = PRIORITY_COLORS[m.priority] || T.textDim;
+            const isExpanded = expanded === m.id;
+            return (
+              <div key={m.id} className="relative overflow-hidden transition-all"
+                style={{
+                  border: `1px solid ${isExpanded ? statusColor + "66" : T.borderHi}`,
+                  background: isExpanded
+                    ? `linear-gradient(135deg, ${T.bg2} 0%, ${T.bg3} 100%)`
+                    : T.bg1,
+                  boxShadow: isExpanded ? `inset 0 0 30px ${statusColor}06, 0 4px 16px rgba(0,0,0,0.5)` : "none",
+                }}>
+                {isExpanded && <div style={accentLine(statusColor)} />}
+                {/* priority bar */}
+                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "3px", background: priorityColor, boxShadow: `0 0 6px ${priorityColor}88` }} />
+
+                <div className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none" onClick={() => setExpanded(isExpanded ? null : m.id)}>
+                  {/* Priority badge */}
+                  <span className="flex-shrink-0 px-1.5 py-0.5 border text-center" style={{
+                    borderColor: priorityColor + "77",
+                    color: priorityColor,
+                    background: `${priorityColor}12`,
+                    fontSize: "8px",
+                    fontFamily: "'Orbitron', monospace",
+                    letterSpacing: "0.08em",
+                    minWidth: 48,
+                    boxShadow: `0 0 6px ${priorityColor}22`,
+                  }}>
+                    {m.priority?.toUpperCase()}
+                  </span>
+
+                  {/* Title */}
+                  <span className="flex-1 truncate" style={{ color: T.text, fontSize: "12px", fontFamily: "'Share Tech Mono', monospace" }}>{m.title}</span>
+
+                  {/* Status */}
+                  <span className="flex items-center gap-1.5 flex-shrink-0 px-2 py-0.5 border" style={{
+                    borderColor: statusColor + "55",
+                    color: statusColor,
+                    background: `${statusColor}0d`,
+                    fontSize: "9px",
+                    fontFamily: "'Orbitron', monospace",
+                  }}>
+                    <GlowDot color={statusColor} size={5} pulse={m.status === "Active"} />{m.status}
+                  </span>
+
+                  {/* Voice indicator */}
+                  {connectedRooms.includes(m.voice_room_name || buildMissionRoomName(m.id))
+                    ? <span className="flex-shrink-0" style={{ color: T.green, fontSize: "8px", letterSpacing: "0.1em", fontFamily:"'Orbitron', monospace", textShadow: `0 0 6px ${T.green}` }}>◉ LIVE</span>
+                    : <span className="flex-shrink-0" style={{ color: T.textGhost, fontSize: "8px" }}>◌ IDLE</span>
+                  }
+
+                  {isExpanded
+                    ? <ChevronUp size={12} style={{ color: statusColor, flexShrink: 0 }} />
+                    : <ChevronDown size={12} style={{ color: T.textFaint, flexShrink: 0 }} />
+                  }
+                </div>
+
+                {isExpanded && (
+                  <div className="px-4 pb-4 space-y-3 border-t" style={{ borderColor: T.border }}>
+                    {m.briefing && (
+                      <p className="text-xs mt-3 leading-relaxed px-3 py-2 border-l-2" style={{ color: T.textDim, borderLeftColor: statusColor + "55", background: `${statusColor}06` }}>{m.briefing}</p>
+                    )}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs mt-2">
+                      {m.objective_coords && (
+                        <div className="border px-2 py-1.5" style={{ borderColor: T.cyan + "33", background: T.cyan + "08" }}>
+                          <div style={{ color: T.textFaint, fontSize: "7px", fontFamily:"'Orbitron', monospace", letterSpacing:"0.15em", marginBottom:2 }}>COORDINATES</div>
+                          <span style={{ color: T.cyan, fontFamily:"'Orbitron', monospace", fontSize:"11px" }}>{m.objective_coords}</span>
+                        </div>
+                      )}
+                      {m.reward && (
+                        <div className="border px-2 py-1.5" style={{ borderColor: T.amber + "33", background: T.amber + "08" }}>
+                          <div style={{ color: T.textFaint, fontSize: "7px", fontFamily:"'Orbitron', monospace", letterSpacing:"0.15em", marginBottom:2 }}>REWARD</div>
+                          <span style={{ color: T.amber, fontSize:"11px" }}>{m.reward}</span>
+                        </div>
+                      )}
+                      {m.deadline && (
+                        <div className="border px-2 py-1.5" style={{ borderColor: T.red + "33", background: T.red + "08" }}>
+                          <div style={{ color: T.textFaint, fontSize: "7px", fontFamily:"'Orbitron', monospace", letterSpacing:"0.15em", marginBottom:2 }}>DEADLINE</div>
+                          <span style={{ color: T.red, fontSize:"11px" }}>{new Date(m.deadline).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                    </div>
+                    {isAdmin && (
+                      <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t" style={{ borderColor: T.border }}>
+                        <span style={{ color: T.textFaint, fontSize:"8px", fontFamily:"'Orbitron', monospace", letterSpacing:"0.12em", marginRight:4 }}>SET STATUS:</span>
+                        {STATUSES.map(s => (
+                          <button key={s} onClick={() => handleStatusChange(m.id, s)}
+                            className="text-xs px-2 py-0.5 border transition-all"
+                            style={{
+                              borderColor: m.status === s ? STATUS_COLORS[s] + "88" : T.border,
+                              color: m.status === s ? STATUS_COLORS[s] : T.textFaint,
+                              background: m.status === s ? `${STATUS_COLORS[s]}14` : "transparent",
+                              fontFamily:"'Orbitron', monospace",
+                              fontSize:"8px",
+                              boxShadow: m.status === s ? `0 0 6px ${STATUS_COLORS[s]}22` : "none",
+                            }}>
+                            {s}
+                          </button>
+                        ))}
+                        <div className="flex gap-1 ml-auto">
+                          <button onClick={() => { setForm({ ...m }); setEditing(m.id); setShowForm(true); setExpanded(null); }}
+                            className="text-xs px-2 py-0.5 border" style={{ borderColor: T.border, color: T.textDim }}>
+                            EDIT
+                          </button>
+                          <button onClick={() => handleDelete(m.id)} className="text-xs px-2 py-0.5 border"
+                            style={{ borderColor: T.red + "44", color: T.red + "88", background: T.red + "08" }}>
+                            DELETE
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })
         }
       </div>
 
