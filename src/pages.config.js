@@ -47,8 +47,100 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AIAgent from './pages/AIAgent';
+import Challenges from './pages/Challenges';
+import ClanBoard from './pages/ClanBoard';
+import ClanCalendar from './pages/ClanCalendar';
+import ClanMap from './pages/ClanMap';
+import ClanRoster from './pages/ClanRoster';
+import ClanTreasury from './pages/ClanTreasury';
+import ClanVoting from './pages/ClanVoting';
+import ClanWiki from './pages/ClanWiki';
+import DeathMap from './pages/DeathMap';
+import EngineeringOps from './pages/EngineeringOps';
+import Intel from './pages/Intel';
+import Inventory from './pages/Inventory';
+import LoadoutPlanner from './pages/LoadoutPlanner';
+import LootSharing from './pages/LootSharing';
+import LootTracker from './pages/LootTracker';
+import MyStats from './pages/MyStats';
+import PlayerProfile from './pages/PlayerProfile';
+import PostMissionAnalysis from './pages/PostMissionAnalysis';
+import ResourceTradingHub from './pages/ResourceTradingHub';
+import SquadVitalsMonitor from './pages/SquadVitalsMonitor';
+import SupplyChainManager from './pages/SupplyChainManager';
+import SurvivalPlanner from './pages/SurvivalPlanner';
+import TacticalMap from './pages/TacticalMap';
+import Dashboard from './pages/Dashboard';
+import Missions from './pages/Missions';
+import ServerMonitor from './pages/ServerMonitor';
+import AnnouncementsPanel from './pages/AnnouncementsPanel';
+import IntelPanel from './pages/IntelPanel';
+import VouchesPanel from './pages/VouchesPanel';
+import CommunityHome from './pages/CommunityHome';
+import EngineeringPanel from './pages/EngineeringPanel';
+import InventoryPanel from './pages/InventoryPanel';
+import LogisticsHome from './pages/LogisticsHome';
+import MissionDetailPanel from './pages/MissionDetailPanel';
+import MissionsPanel from './pages/MissionsPanel';
+import OperationsHome from './pages/OperationsHome';
+import PlayerDrawer from './pages/PlayerDrawer';
+import RosterHome from './pages/RosterHome';
+import AlertsPanel from './pages/AlertsPanel';
+import AutomationPanel from './pages/AutomationPanel';
+import ServerPanel from './pages/ServerPanel';
+import SystemsHome from './pages/SystemsHome';
+import __Layout from './Layout.jsx';
 
-export const pagesConfig = {
-	Pages: {}
+
+export const PAGES = {
+    "AIAgent": AIAgent,
+    "Challenges": Challenges,
+    "ClanBoard": ClanBoard,
+    "ClanCalendar": ClanCalendar,
+    "ClanMap": ClanMap,
+    "ClanRoster": ClanRoster,
+    "ClanTreasury": ClanTreasury,
+    "ClanVoting": ClanVoting,
+    "ClanWiki": ClanWiki,
+    "DeathMap": DeathMap,
+    "EngineeringOps": EngineeringOps,
+    "Intel": Intel,
+    "Inventory": Inventory,
+    "LoadoutPlanner": LoadoutPlanner,
+    "LootSharing": LootSharing,
+    "LootTracker": LootTracker,
+    "MyStats": MyStats,
+    "PlayerProfile": PlayerProfile,
+    "PostMissionAnalysis": PostMissionAnalysis,
+    "ResourceTradingHub": ResourceTradingHub,
+    "SquadVitalsMonitor": SquadVitalsMonitor,
+    "SupplyChainManager": SupplyChainManager,
+    "SurvivalPlanner": SurvivalPlanner,
+    "TacticalMap": TacticalMap,
+    "Dashboard": Dashboard,
+    "Missions": Missions,
+    "ServerMonitor": ServerMonitor,
+    "AnnouncementsPanel": AnnouncementsPanel,
+    "IntelPanel": IntelPanel,
+    "VouchesPanel": VouchesPanel,
+    "CommunityHome": CommunityHome,
+    "EngineeringPanel": EngineeringPanel,
+    "InventoryPanel": InventoryPanel,
+    "LogisticsHome": LogisticsHome,
+    "MissionDetailPanel": MissionDetailPanel,
+    "MissionsPanel": MissionsPanel,
+    "OperationsHome": OperationsHome,
+    "PlayerDrawer": PlayerDrawer,
+    "RosterHome": RosterHome,
+    "AlertsPanel": AlertsPanel,
+    "AutomationPanel": AutomationPanel,
+    "ServerPanel": ServerPanel,
+    "SystemsHome": SystemsHome,
 }
 
+export const pagesConfig = {
+    mainPage: "ServerMonitor",
+    Pages: PAGES,
+    Layout: __Layout,
+};
