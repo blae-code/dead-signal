@@ -5,7 +5,6 @@ import { base44 } from "@/api/base44Client";
 import { EmptyState, Panel, StatGrid, StatusBadge, T, rowAccent } from "@/components/ui/TerminalCard";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
 import { invokeFunctionOrFallback } from "@/api/function-invoke";
-import VoiceChannelPanel from "@/components/voice/VoiceChannelPanel";
 
 const SEV_COLOR = {
   critical: T.red,
@@ -127,13 +126,6 @@ export default function SystemsHome() {
         )}
       </Panel>
 
-      <VoiceChannelPanel
-        title="ON-CALL VOICE"
-        titleColor={T.cyan}
-        includeMissionRooms={false}
-        includeClanRoom={false}
-        includeOpsRoom={true}
-      />
     </div>
   );
 }

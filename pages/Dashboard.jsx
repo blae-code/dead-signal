@@ -10,13 +10,10 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
-import { CORE, ENTITY_COLORS, PAGE_PALETTES } from "@/components/ColorSystem";
 
-
-const PAGE = PAGE_PALETTES.Dashboard;
-const SEV_COLORS = { INFO: T.textDim, WARN: CORE.warning, ALERT: CORE.warning, CRITICAL: CORE.critical };
-const ANN_COLORS = { Emergency: CORE.critical, Intel: CORE.info, Ops: CORE.warning, General: CORE.operational, Maintenance: CORE.standby };
-const SNAPSHOT_PALETTE = [ENTITY_COLORS.InventoryItem || CORE.info, ENTITY_COLORS.ResourceListing || CORE.operational, ENTITY_COLORS.SupplyCacheLocation || CORE.info, ENTITY_COLORS.TradeOffer || CORE.olive];
+const SEV_COLORS = { INFO: T.textDim, WARN: T.orange, ALERT: T.orange, CRITICAL: T.red };
+const ANN_COLORS = { Emergency: T.red, Intel: T.cyan, Ops: T.orange, General: T.green, Maintenance: T.amber };
+const SNAPSHOT_PALETTE = [T.teal, T.teal, T.cyan, T.teal];
 
 const pickByToken = (values, token) =>
   values.find((value) => typeof value === "string" && value.toLowerCase() === token) || "";
@@ -106,7 +103,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 space-y-4 max-w-7xl mx-auto">
-      <PageHeader icon={Terminal} title="COMMAND HQ" color={PAGE.primary}>
+      <PageHeader icon={Terminal} title="COMMAND HQ" color={T.amber}>
         <span className="text-xs" style={{ color: T.textFaint, fontSize: "9px", letterSpacing: "0.15em" }}>
           {user ? `OPERATOR: ${user.full_name || user.email}` : "AUTHENTICATING..."}
         </span>
@@ -119,10 +116,10 @@ export default function Dashboard() {
 
       <StatGrid
         stats={[
-          { label: "ACTIVE OPS", value: activeMissions, color: PAGE.secondary },
-          { label: "OPERATORS ONLINE", value: activeMembers, color: PAGE.accent },
-          { label: "ALERTS", value: criticalEvents, color: criticalEvents > 0 ? CORE.critical : T.textDim },
-          { label: "TOTAL INVENTORY", value: totalItems, color: PAGE.info },
+          { label: "ACTIVE OPS", value: activeMissions, color: T.green },
+          { label: "OPERATORS ONLINE", value: activeMembers, color: T.purple },
+          { label: "ALERTS", value: criticalEvents, color: criticalEvents > 0 ? T.red : T.textDim },
+          { label: "TOTAL INVENTORY", value: totalItems, color: T.cyan },
         ]}
       />
 
@@ -130,7 +127,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2 space-y-4">
           <Panel
             title="ACTIVE MISSIONS"
-            titleColor={ENTITY_COLORS.Mission}
+            titleColor={T.orange}
             headerRight={
               <Link to={createPageUrl("Missions")} className="text-xs" style={{ color: T.textFaint, fontSize: "9px", letterSpacing: "0.1em", textDecoration: "none" }}>
                 VIEW ALL →
@@ -171,7 +168,7 @@ export default function Dashboard() {
 
           <Panel
             title="SERVER FEED"
-            titleColor={ENTITY_COLORS.ServerEvent}
+            titleColor={T.orange}
             headerRight={
               <Link to={createPageUrl("ServerMonitor")} className="text-xs" style={{ color: T.textFaint, fontSize: "9px", textDecoration: "none" }}>
                 MONITOR →
@@ -205,7 +202,7 @@ export default function Dashboard() {
 
           <Panel
             title="LATEST INTEL"
-            titleColor={ENTITY_COLORS.IntelSummary}
+            titleColor={T.teal}
             headerRight={
               <Link to={createPageUrl("Intel")} className="text-xs" style={{ color: T.textFaint, fontSize: "9px", textDecoration: "none" }}>
                 FULL FEED →
@@ -249,7 +246,7 @@ export default function Dashboard() {
         <div className="space-y-4">
           <Panel
             title="ROSTER STATUS"
-            titleColor={ENTITY_COLORS.ClanMember}
+            titleColor={T.green}
             headerRight={
               <Link to={createPageUrl("ClanRoster")} className="text-xs" style={{ color: T.textFaint, fontSize: "9px", textDecoration: "none" }}>
                 FULL ROSTER →
@@ -262,17 +259,27 @@ export default function Dashboard() {
                   // NO OPERATORS
                 </div>
               ) : (
-                members.slice(0, 8).map((member) => (
-                  <div key={member.id} className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: T.border + "44" }}>
-                    <GlowDot color={member.status === activeMemberStatus ? T.green : T.textGhost} size={5} pulse={member.status === activeMemberStatus} />
-                    <span className="text-xs flex-1 truncate" style={{ color: T.text }}>
-                      {member.callsign}
-                    </span>
-                    <span className="text-xs" style={{ color: T.textDim, fontSize: "9px" }}>
-                      {member.role}
-                    </span>
-                  </div>
-                ))
+                members.slice(0, 8).map((member) => {
+                  const mc = member.status === activeMemberStatus ? T.green : T.textGhost;
+                  return (
+                    <div
+                      key={member.id}
+                      className="relative flex items-center gap-2 px-3 py-2 border-b"
+                      style={{ borderColor: T.border + "44" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = `${mc}08`; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                    >
+                      <div style={rowAccent(mc)} />
+                      <GlowDot color={mc} size={5} pulse={member.status === activeMemberStatus} />
+                      <span className="text-xs flex-1 truncate pl-1" style={{ color: T.text }}>
+                        {member.callsign}
+                      </span>
+                      <span className="text-xs" style={{ color: T.textDim, fontSize: "9px" }}>
+                        {member.role}
+                      </span>
+                    </div>
+                  );
+                })
               )}
             </div>
           </Panel>
@@ -280,11 +287,11 @@ export default function Dashboard() {
           <Panel title="MODULES">
             <div className="grid grid-cols-2 gap-px" style={{ background: T.border }}>
               {[
-                { label: "TACTICAL MAP", page: "TacticalMap", icon: Activity, color: ENTITY_COLORS.TacticalOverlay },
-                { label: "INVENTORY", page: "Inventory", icon: Package, color: ENTITY_COLORS.InventoryItem },
-                { label: "ENGINEERING", page: "EngineeringOps", icon: Wrench, color: PAGE.secondary },
-                { label: "SERVER", page: "ServerMonitor", icon: Zap, color: PAGE.primary },
-                { label: "AI AGENT", page: "AIAgent", icon: Skull, color: PAGE.accent },
+                { label: "TACTICAL MAP", page: "TacticalMap", icon: Activity, color: T.cyan },
+                { label: "INVENTORY", page: "Inventory", icon: Package, color: T.teal },
+                { label: "ENGINEERING", page: "EngineeringOps", icon: Wrench, color: T.green },
+                { label: "SERVER", page: "ServerMonitor", icon: Zap, color: T.amber },
+                { label: "AI AGENT", page: "AIAgent", icon: Skull, color: T.purple },
               ].map(({ label, page, icon: Icon, color }) => (
                 <Link
                   key={page}
@@ -303,7 +310,7 @@ export default function Dashboard() {
             </div>
           </Panel>
 
-          <Panel title="INVENTORY SNAPSHOT" titleColor={ENTITY_COLORS.InventoryItem}>
+          <Panel title="INVENTORY SNAPSHOT" titleColor={T.teal}>
             <div className="p-3 space-y-2">
               {trackedInventoryCategories.length === 0 ? (
                 <div className="text-xs text-center" style={{ color: T.textFaint }}>

@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Crosshair, Plus, Save, ChevronDown, ChevronUp } from "lucide-react";
-import { T, PageHeader, FormPanel, Field, ActionBtn, inputStyle, selectStyle, accentLine, GlowDot } from "@/components/ui/TerminalCard";
+import { T, PageHeader, FormPanel, Field, ActionBtn, FilterPill, inputStyle, selectStyle, accentLine, GlowDot } from "@/components/ui/TerminalCard";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
-import VoiceChannelPanel from "@/components/voice/VoiceChannelPanel";
 import { useVoiceSession } from "@/hooks/voice/useVoiceSession.jsx";
 
 const sanitizeRoomToken = (value, fallback = "channel") => {
@@ -112,17 +111,19 @@ export default function Missions() {
   return (
     <div className="p-4 space-y-4 max-w-5xl mx-auto" style={{ minHeight: "calc(100vh - 48px)" }}>
       <PageHeader icon={Crosshair} title="MISSION BOARD" color={T.red}>
-        <select className="text-xs px-2 py-1.5 border outline-none" style={{ ...selectStyle, minWidth: "110px" }}
-          value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-          <option value={STATUS_FILTER_ALL}>ALL STATUS</option>
-          {STATUSES.map(s => <option key={s}>{s}</option>)}
-        </select>
         {isAdmin && (
           <ActionBtn color={T.red} onClick={() => { setShowForm(!showForm); setEditing(null); setForm(buildEmpty(STATUSES, PRIORITIES)); }}>
             <Plus size={10} /> NEW MISSION
           </ActionBtn>
         )}
       </PageHeader>
+
+      <div className="flex flex-wrap gap-1">
+        <FilterPill label="ALL" active={filterStatus === STATUS_FILTER_ALL} onClick={() => setFilterStatus(STATUS_FILTER_ALL)} />
+        {STATUSES.map(s => (
+          <FilterPill key={s} label={s} color={STATUS_COLORS[s]} active={filterStatus === s} onClick={() => setFilterStatus(s)} />
+        ))}
+      </div>
 
       {runtimeConfig.error && (
         <div className="border px-3 py-2 text-xs" style={{ borderColor: T.red + "66", color: T.red }}>
@@ -246,13 +247,6 @@ export default function Missions() {
         }
       </div>
 
-      <VoiceChannelPanel
-        title="MISSION VOICE CHANNELS"
-        titleColor={T.cyan}
-        includeMissionRooms={true}
-        includeClanRoom={true}
-        includeOpsRoom={false}
-      />
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { Pin, Radio } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { EmptyState, Panel, StatGrid, StatusBadge, Chip, T, rowAccent } from "@/components/ui/TerminalCard";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
-import VoiceChannelPanel from "@/components/voice/VoiceChannelPanel";
 
 const TYPE_COLOR = {
   emergency:   T.red,
@@ -115,13 +114,6 @@ export default function CommunityHome() {
         )}
       </Panel>
 
-      <VoiceChannelPanel
-        title="COMMS VOICE DOCK"
-        titleColor={T.cyan}
-        includeMissionRooms={false}
-        includeClanRoom={true}
-        includeOpsRoom={true}
-      />
     </div>
   );
 }
