@@ -495,7 +495,14 @@ export default function Layout({ children, currentPageName }) {
           {children}
         </main>
       </div>
-      <CommsRail />
+      <footer className="ds-comms-footer" style={{ borderTop: "1px solid #3e2c18", position: "relative" }}>
+        {/* Top accent hairline */}
+        <div style={{ position:"absolute", top:0, left:0, right:0, height:"1px", background:"linear-gradient(90deg, transparent 0%, rgba(255,170,0,0.55) 28%, rgba(255,170,0,0.8) 50%, rgba(255,170,0,0.55) 72%, transparent 100%)", pointerEvents:"none", zIndex:1 }} />
+        {/* HUD corner brackets */}
+        <div style={{ position:"absolute", top:5, left:5, width:10, height:10, borderTop:"1px solid rgba(255,170,0,0.3)", borderLeft:"1px solid rgba(255,170,0,0.3)", pointerEvents:"none", zIndex:1 }} />
+        <div style={{ position:"absolute", bottom:5, right:5, width:10, height:10, borderBottom:"1px solid rgba(0,232,255,0.22)", borderRight:"1px solid rgba(0,232,255,0.22)", pointerEvents:"none", zIndex:1 }} />
+        <CommsRail />
+      </footer>
       {/* Ambient dot grid texture */}
       <div style={{ position: "fixed", inset: 0, zIndex: 9995, pointerEvents: "none", backgroundImage: "radial-gradient(circle, rgba(255, 170, 0, 0.038) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
       {/* CRT scanline overlay */}

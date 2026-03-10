@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Terminal, Package, Activity, Skull, Wrench, Zap } from "lucide-react";
-import { T, PageHeader, Panel, StatGrid, StatusBadge, GlowDot, Chip, rowAccent, accentLine } from "@/components/ui/TerminalCard";
+import { T, PageHeader, Panel, StatGrid, StatusBadge, GlowDot, Chip, rowAccent } from "@/components/ui/TerminalCard";
 import { RadioRack } from "@/components/voice/RadioRack";
 import { TrafficLogPanel } from "@/components/voice/TrafficLogPanel";
 import { createPageUrl } from "@/utils";
@@ -136,9 +136,8 @@ export default function Dashboard() {
           >
             <div>
               {highlightedMissions.length === 0 ? (
-                <div className="px-3 py-6 text-center relative overflow-hidden" style={{ color: T.textFaint, background: T.bg3 }}>
-                  <div style={accentLine(T.textFaint)} />
-                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ STANDBY — NO ACTIVE OPERATIONS</div>
+                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
+                  // NO ACTIVE MISSIONS
                 </div>
               ) : (
                 highlightedMissions.map((mission, index) => {
@@ -178,9 +177,8 @@ export default function Dashboard() {
           >
             <div>
               {events.length === 0 ? (
-                <div className="px-3 py-6 text-center relative overflow-hidden" style={{ color: T.textFaint, background: T.bg3 }}>
-                  <div style={accentLine(T.textFaint)} />
-                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ CLEAR — NO SERVER EVENTS LOGGED</div>
+                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
+                  // NO RECENT EVENTS
                 </div>
               ) : (
                 events.slice(0, 6).map((event) => (
@@ -213,9 +211,8 @@ export default function Dashboard() {
           >
             <div>
               {announcements.length === 0 ? (
-                <div className="px-3 py-6 text-center relative overflow-hidden" style={{ color: T.textFaint, background: T.bg3 }}>
-                  <div style={accentLine(T.textFaint)} />
-                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ COMM SILENCE</div>
+                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
+                  // NO TRANSMISSIONS
                 </div>
               ) : (
                 announcements.slice(0, 3).map((announcement) => {
@@ -258,9 +255,8 @@ export default function Dashboard() {
           >
             <div>
               {members.length === 0 ? (
-                <div className="px-3 py-6 text-center relative overflow-hidden" style={{ color: T.textFaint, background: T.bg3 }}>
-                  <div style={accentLine(T.textFaint)} />
-                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ ROSTER EMPTY</div>
+                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
+                  // NO OPERATORS
                 </div>
               ) : (
                 members.slice(0, 8).map((member) => {
@@ -300,28 +296,29 @@ export default function Dashboard() {
                 <Link
                   key={page}
                   to={createPageUrl(page)}
-                  className="flex flex-col items-center justify-center gap-2 py-5 relative overflow-hidden"
-                  style={{ background: T.bg1, textDecoration: "none", transition: "background 0.2s, box-shadow 0.2s" }}
+                  className="flex flex-col items-center justify-center gap-2 py-4 relative overflow-hidden"
+                  style={{ background: T.bg1, textDecoration: "none", transition: "background 0.18s" }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = `${color}12`;
-                    e.currentTarget.style.boxShadow = `inset 0 0 20px ${color}0a`;
+                    e.currentTarget.querySelector('.mod-tl').style.borderTopColor = `${color}66`;
+                    e.currentTarget.querySelector('.mod-tl').style.borderLeftColor = `${color}66`;
+                    e.currentTarget.querySelector('.mod-br').style.borderBottomColor = `${color}44`;
+                    e.currentTarget.querySelector('.mod-br').style.borderRightColor = `${color}44`;
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.background = T.bg1;
-                    e.currentTarget.style.boxShadow = "none";
+                    e.currentTarget.querySelector('.mod-tl').style.borderTopColor = 'transparent';
+                    e.currentTarget.querySelector('.mod-tl').style.borderLeftColor = 'transparent';
+                    e.currentTarget.querySelector('.mod-br').style.borderBottomColor = 'transparent';
+                    e.currentTarget.querySelector('.mod-br').style.borderRightColor = 'transparent';
                   }}
                 >
-                  <div style={accentLine(color)} />
-                  <div style={{
-                    width: 32, height: 32,
-                    border: `1px solid ${color}33`,
-                    background: `radial-gradient(circle, ${color}18 0%, transparent 70%)`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: `0 0 12px ${color}22`,
-                  }}>
-                    <Icon size={14} style={{ color, filter: `drop-shadow(0 0 5px ${color}88)` }} />
+                  <div className="mod-tl" style={{ position:"absolute", top:5, left:5, width:8, height:8, borderTop:"1px solid transparent", borderLeft:"1px solid transparent", transition:"border-color 0.15s", pointerEvents:"none" }} />
+                  <div className="mod-br" style={{ position:"absolute", bottom:5, right:5, width:8, height:8, borderBottom:"1px solid transparent", borderRight:"1px solid transparent", transition:"border-color 0.15s", pointerEvents:"none" }} />
+                  <div style={{ width:26, height:26, border:`1px solid ${color}33`, background:`${color}0d`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    <Icon size={13} style={{ color, filter: `drop-shadow(0 0 5px ${color}55)` }} />
                   </div>
-                  <span style={{ color: T.textDim, fontSize: "8.5px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.12em", textAlign: "center" }}>
+                  <span className="text-xs tracking-widest text-center" style={{ color: T.textFaint, fontSize: "8px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.15em" }}>
                     {label}
                   </span>
                 </Link>

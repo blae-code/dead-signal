@@ -6,10 +6,10 @@
 // ── Extended palette ──────────────────────────────────────────────────────────
 export const T = {
   // ── Backgrounds (strict dark zinc)
-  bg0:  "#353538",  // page background
-  bg1:  "#2a2a30",  // card/elevated surface
-  bg2:  "#2d2d34",  // secondary surface
-  bg3:  "#252528",  // deep background/input
+  bg0:  "#27272a",  // page background
+  bg1:  "#1c1c20",  // card/elevated surface
+  bg2:  "#1f1f23",  // secondary surface
+  bg3:  "#18181c",  // deep background/input
 
   // ── Borders
   border:   "#2a1e10",
@@ -152,6 +152,9 @@ export function Panel({ title, titleColor = T.amber, headerRight, accentBorder, 
       }}
     >
       <div style={accentLine(accent)} />
+      {/* Corner brackets */}
+      <div style={{ position:"absolute", top:4, left:4, width:7, height:7, borderTop:`1px solid ${accent}33`, borderLeft:`1px solid ${accent}33`, pointerEvents:"none", zIndex:2 }} />
+      <div style={{ position:"absolute", bottom:4, right:4, width:7, height:7, borderBottom:`1px solid ${accent}1e`, borderRight:`1px solid ${accent}1e`, pointerEvents:"none", zIndex:2 }} />
       {title && (
         <div
           className="flex items-center justify-between px-3 py-2 border-b"
