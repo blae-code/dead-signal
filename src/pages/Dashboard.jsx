@@ -136,8 +136,9 @@ export default function Dashboard() {
           >
             <div>
               {highlightedMissions.length === 0 ? (
-                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
-                  // NO ACTIVE MISSIONS
+                <div className="px-3 py-6 text-center relative overflow-hidden" style={{ color: T.textFaint, background: T.bg3 }}>
+                  <div style={accentLine(T.textFaint)} />
+                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ STANDBY — NO ACTIVE OPERATIONS</div>
                 </div>
               ) : (
                 highlightedMissions.map((mission, index) => {
@@ -177,8 +178,9 @@ export default function Dashboard() {
           >
             <div>
               {events.length === 0 ? (
-                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
-                  // NO RECENT EVENTS
+                <div className="px-3 py-6 text-center relative overflow-hidden" style={{ color: T.textFaint, background: T.bg3 }}>
+                  <div style={accentLine(T.textFaint)} />
+                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ CLEAR — NO SERVER EVENTS LOGGED</div>
                 </div>
               ) : (
                 events.slice(0, 6).map((event) => (
@@ -211,8 +213,9 @@ export default function Dashboard() {
           >
             <div>
               {announcements.length === 0 ? (
-                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
-                  // NO TRANSMISSIONS
+                <div className="px-3 py-6 text-center relative overflow-hidden" style={{ color: T.textFaint, background: T.bg3 }}>
+                  <div style={accentLine(T.textFaint)} />
+                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ COMM SILENCE</div>
                 </div>
               ) : (
                 announcements.slice(0, 3).map((announcement) => {
@@ -255,8 +258,9 @@ export default function Dashboard() {
           >
             <div>
               {members.length === 0 ? (
-                <div className="px-3 py-4 text-xs text-center" style={{ color: T.textFaint }}>
-                  // NO OPERATORS
+                <div className="px-3 py-6 text-center relative overflow-hidden" style={{ color: T.textFaint, background: T.bg3 }}>
+                  <div style={accentLine(T.textFaint)} />
+                  <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>▸ ROSTER EMPTY</div>
                 </div>
               ) : (
                 members.slice(0, 8).map((member) => {

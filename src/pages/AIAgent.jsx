@@ -173,13 +173,26 @@ export default function AIAgent() {
 
       <div className="flex flex-wrap gap-1.5 mb-3">
         {(Array.isArray(quickPrompts[mode]) ? quickPrompts[mode] : []).map((prompt) => (
-          <button key={prompt} onClick={() => handleSend(prompt)} className="text-xs px-2 py-1 border transition-opacity hover:opacity-80" style={{ borderColor: T.border, color: T.textDim, fontSize: "10px" }}>
-            {prompt}
+          <button key={prompt} onClick={() => handleSend(prompt)}
+            className="text-xs px-2.5 py-1 border transition-all hover:opacity-80"
+            style={{
+              borderColor: (currentMode?.color || T.cyan) + "44",
+              color: T.textDim,
+              fontSize: "10px",
+              background: (currentMode?.color || T.cyan) + "08",
+              fontFamily: "'Share Tech Mono', monospace",
+              letterSpacing: "0.05em",
+            }}>
+            ▸ {prompt}
           </button>
         ))}
       </div>
 
-      <div className="flex border" style={{ borderColor: (currentMode?.color || T.cyan) + "88" }}>
+      <div className="flex relative overflow-hidden" style={{
+        border: `1px solid ${(currentMode?.color || T.cyan)}66`,
+        background: T.bg3,
+        boxShadow: `0 0 20px ${(currentMode?.color || T.cyan)}11`,
+      }}>
         <span className="px-3 py-2 text-xs" style={{ color: currentMode?.color || T.cyan }}>›</span>
         <input
           className="flex-1 bg-transparent text-xs py-2 pr-2 outline-none border-0"
