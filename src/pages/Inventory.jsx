@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Package, Plus, Trash2, Save } from "lucide-react";
-import { T, PageHeader, Panel, FormPanel, Field, FilterPill, ActionBtn, TableHeader, TableRow, EmptyState, StatGrid, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
+import { T, PageHeader, Panel, FormPanel, Field, FilterPill, ActionBtn, TableHeader, TableRow, EmptyState, inputStyle, selectStyle, StatGrid } from "@/components/ui/TerminalCard";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -95,12 +95,20 @@ export default function Inventory() {
         </div>
       )}
 
-      <StatGrid stats={[
-        { label: "TOTAL ITEMS",   value: totalItems,                                           color: T.green },
-        { label: "TOTAL WEIGHT",  value: `${totalWeight.toFixed(1)}kg`,                       color: T.amber },
-        { label: "CATEGORIES",    value: Object.values(byCategory).filter(v => v > 0).length, color: T.cyan },
-        { label: "LOCATION",      value: filterLoc === ALL_FILTER ? "ALL" : filterLoc.toUpperCase(), color: T.textDim },
-      ]} />
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {[
+          { label: "TOTAL ITEMS",   value: totalItems,                                      color: T.green },
+          { label: "TOTAL WEIGHT",  value: `${totalWeight.toFixed(1)}kg`,                  color: T.amber },
+          { label: "CATEGORIES",    value: Object.values(byCategory).filter(v => v > 0).length, color: T.cyan },
+          { label: "LOCATION",      value: filterLoc === ALL_FILTER ? "ALL" : filterLoc.toUpperCase(), color: T.textDim },
+        ].map(({ label, value, color }) => (
+          <div key={label} className="border p-2.5" style={{ borderColor: T.border, background: T.bg1 }}>
+            <div className="text-xs tracking-widest" style={{ color: T.textFaint, fontSize: "9px" }}>{label}</div>
+            <div className="text-sm font-bold mt-1" style={{ color }}>{value}</div>
+          </div>
+        ))}
+      </div>
 
       {/* Category filter pills */}
       <div className="flex flex-wrap gap-1.5">
@@ -170,7 +178,7 @@ export default function Inventory() {
         {filtered.length === 0
           ? <EmptyState message="INVENTORY EMPTY" />
           : filtered.map(item => (
-            <TableRow key={item.id} style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr 56px" }} accentColor={CAT_COLORS[item.category]}>
+            <TableRow key={item.id} style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr 56px" }}>
               <span className="text-xs font-bold truncate" style={{ color: T.text }}>{item.item_name}</span>
               <span className="text-xs" style={{ color: CAT_COLORS[item.category] || T.textDim }}>{item.category}</span>
               <span className="text-xs" style={{ color: T.text }}>×{item.quantity}</span>

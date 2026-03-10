@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Users, Plus, Edit2, Trash2, Save, Shield, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { T, PageHeader, StatGrid, Panel, FormPanel, Field, ActionBtn, TableHeader, TableRow, EmptyState, inputStyle, selectStyle } from "@/components/ui/TerminalCard";
+import { T, PageHeader, StatGrid, Panel, FormPanel, Field, ActionBtn, TableHeader, TableRow, EmptyState, inputStyle, selectStyle, accentLine } from "@/components/ui/TerminalCard";
 import VoiceChannelPanel from "@/components/voice/VoiceChannelPanel";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useRealtimeEntityList } from "@/hooks/use-realtime-entity-list";
@@ -178,8 +178,7 @@ export default function ClanRoster() {
           ? <EmptyState message="NO OPERATORS ENLISTED" />
           : members.map(m => (
             <TableRow key={m.id} style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 80px" }}
-              onClick={() => setSelected(selected?.id === m.id ? null : m)}
-              accentColor={STATUS_COLORS[m.status]}>
+              onClick={() => setSelected(selected?.id === m.id ? null : m)}>
               <span className="text-xs font-bold" style={{ color: T.text }}>{m.callsign}</span>
               <span className="text-xs" style={{ color: ROLE_COLORS[m.role] || T.textDim }}>{m.role}</span>
               <span className="text-xs flex items-center gap-1" style={{ color: STATUS_COLORS[m.status] }}>

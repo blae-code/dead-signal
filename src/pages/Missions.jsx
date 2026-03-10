@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Crosshair, Plus, Save, ChevronDown, ChevronUp } from "lucide-react";
-import { T, PageHeader, FormPanel, Field, ActionBtn, FilterPill, inputStyle, selectStyle, accentLine, GlowDot } from "@/components/ui/TerminalCard";
+import { T, PageHeader, FormPanel, Field, ActionBtn, FilterPill, inputStyle, selectStyle, accentLine, GlowDot, StatGrid } from "@/components/ui/TerminalCard";
 import { useRuntimeConfig } from "@/hooks/use-runtime-config";
 import { useVoiceSession } from "@/hooks/voice/useVoiceSession.jsx";
 
@@ -132,29 +132,15 @@ export default function Missions() {
       )}
 
       <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
-        {STATUSES.map(s => {
-          const sc = STATUS_COLORS[s] || T.textFaint;
-          const count = missions.filter(m => m.status === s).length;
-          return (
-            <div key={s} className="relative text-center overflow-hidden"
-              style={{
-                border: `1px solid ${count > 0 ? sc + "55" : T.borderHi}`,
-                background: `linear-gradient(160deg, ${T.bg2} 0%, ${T.bg3} 100%)`,
-                padding: "14px 8px 12px",
-                boxShadow: count > 0
-                  ? `inset 0 1px 0 rgba(78,58,34,0.2), 0 4px 16px rgba(0,0,0,0.8), inset 0 0 24px rgba(0,0,0,0.3)`
-                  : "inset 0 1px 0 rgba(78,58,34,0.1), 0 2px 8px rgba(0,0,0,0.5)",
-              }}>
-              <div style={accentLine(sc)} />
-              <div style={{ position: "absolute", top: 4, left: 4, width: 6, height: 6, borderTop: `1px solid ${sc}44`, borderLeft: `1px solid ${sc}44` }} />
-              <div style={{ position: "absolute", bottom: 4, right: 4, width: 6, height: 6, borderBottom: `1px solid ${sc}22`, borderRight: `1px solid ${sc}22` }} />
-              <div style={{ color: sc, fontFamily: "'Orbitron', monospace", fontSize: "28px", fontWeight: "bold", lineHeight: 1, textShadow: count > 0 ? `0 0 20px ${sc}99` : "none" }}>
-                {count}
-              </div>
-              <div style={{ color: T.textFaint, fontSize: "7.5px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.18em", marginTop: "5px" }}>{s.toUpperCase()}</div>
+        {STATUSES.map(s => (
+          <div key={s} className="relative border p-2.5 text-center overflow-hidden" style={{ borderColor: T.border, background: T.bg1 }}>
+            <div style={accentLine(STATUS_COLORS[s] || T.textFaint)} />
+            <div className="text-base font-bold" style={{ color: STATUS_COLORS[s], fontFamily: "'Orbitron', monospace", textShadow: `0 0 12px ${STATUS_COLORS[s]}88` }}>
+              {missions.filter(m => m.status === s).length}
             </div>
-          );
-        })}
+            <div className="text-xs tracking-widest mt-0.5" style={{ color: T.textFaint, fontSize: "9px" }}>{s.toUpperCase()}</div>
+          </div>
+        ))}
       </div>
 
       {showForm && isAdmin && (
@@ -204,19 +190,9 @@ export default function Missions() {
 
       <div className="space-y-2">
         {filtered.length === 0
-          ? <div className="border px-3 py-8 text-center relative overflow-hidden" style={{ borderColor: T.border, background: T.bg1 }}>
-              <div style={accentLine(T.textFaint)} />
-              <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em", color: T.textFaint }}>▸ BLACKOUT — NO MISSION SIGNALS DETECTED</div>
-            </div>
+          ? <div className="border px-3 py-6 text-xs text-center" style={{ borderColor: T.border, color: T.textFaint }}>// NO MISSIONS ON RECORD</div>
           : filtered.map(m => (
-            <div key={m.id} className="relative overflow-hidden" style={{
-              border: `1px solid ${expanded === m.id ? (STATUS_COLORS[m.status] + "77") : T.borderHi}`,
-              background: T.bg1,
-              boxShadow: expanded === m.id
-                ? `inset 0 0 30px ${STATUS_COLORS[m.status] || T.amber}08, 0 4px 16px rgba(0,0,0,0.7)`
-                : "inset 0 0 20px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.5)",
-              transition: "border-color 0.2s, box-shadow 0.2s",
-            }}>
+            <div key={m.id} className="relative border overflow-hidden" style={{ borderColor: expanded === m.id ? (STATUS_COLORS[m.status] + "88") : T.border, background: T.bg1 }}>
               {expanded === m.id && <div style={accentLine(STATUS_COLORS[m.status] || T.amber)} />}
               <div className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none" onClick={() => setExpanded(expanded === m.id ? null : m.id)}>
                 <div style={{ position: "absolute", left: 0, top: "15%", bottom: "15%", width: "2px", background: PRIORITY_COLORS[m.priority] || T.textDim, boxShadow: `0 0 4px ${PRIORITY_COLORS[m.priority] || T.textDim}` }} />

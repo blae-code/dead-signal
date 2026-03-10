@@ -6,10 +6,10 @@
 // ── Extended palette ──────────────────────────────────────────────────────────
 export const T = {
   // ── Backgrounds (strict dark zinc)
-  bg0:  "#27272a",  // page background
-  bg1:  "#1c1c20",  // card/elevated surface
-  bg2:  "#1f1f23",  // secondary surface
-  bg3:  "#18181c",  // deep background/input
+  bg0:  "#2d2d32",  // page background
+  bg1:  "#252529",  // card/elevated surface
+  bg2:  "#2a2a2e",  // secondary surface
+  bg3:  "#1f1f23",  // deep background/input
 
   // ── Borders
   border:   "#2a1e10",
@@ -47,16 +47,6 @@ export const T = {
   shadow1: "0 4px 12px rgba(0,0,0,0.5)",
   shadow2: "0 8px 24px rgba(0,0,0,0.7)",
   shadow3: "0 16px 40px rgba(0,0,0,0.9)",
-};
-
-// ── Type scale ───────────────────────────────────────────────────────────────
-export const TYPE_SCALE = {
-  micro:    "8px",
-  label:    "10px",
-  body:     "12px",
-  title:    "11px",
-  subtitle: "9.5px",
-  stat:     "38px",
 };
 
 // ── Panel top-hairline gradient ───────────────────────────────────────────────
@@ -117,7 +107,7 @@ export function PageHeader({ icon: Icon, title, color = T.amber, children }) {
 // ── Stat card grid ────────────────────────────────────────────────────────────
 export function StatGrid({ stats }) {
   return (
-    <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))" }}>
+    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}>
       {stats.map(({ label, value, color = T.amber, sub }) => (
         <div
           key={label}
@@ -125,7 +115,7 @@ export function StatGrid({ stats }) {
           style={{
             border: `1px solid ${color}33`,
             background: `linear-gradient(160deg, ${T.bg2} 0%, ${T.bg3} 100%)`,
-            padding: "16px 8px 14px",
+            padding: "12px 8px 10px",
             boxShadow: `inset 0 1px 0 rgba(78, 58, 34, 0.2), 0 4px 16px rgba(0, 0, 0, 0.8), inset 0 0 24px rgba(0,0,0,0.3)`,
             borderRadius: 0,
           }}
@@ -138,7 +128,7 @@ export function StatGrid({ stats }) {
           {/* Corner glow */}
           <div style={{ position: "absolute", top: 0, left: 0, width: 32, height: 32, background: `radial-gradient(circle at 0 0, ${color}14, transparent 70%)` }} />
           <div style={{ color: T.textFaint, fontSize: "7.5px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em", marginBottom: "6px" }}>{label}</div>
-          <div style={{ color, fontFamily: "'Orbitron', monospace", fontSize: "38px", fontWeight: "bold", lineHeight: 1, textShadow: `0 0 28px ${color}bb` }}>
+          <div style={{ color, fontFamily: "'Orbitron', monospace", fontSize: "22px", fontWeight: "bold", lineHeight: 1, textShadow: `0 0 20px ${color}99` }}>
             {value}
           </div>
           {sub && <div style={{ color: color + "88", fontSize: "7px", marginTop: "4px", letterSpacing: "0.1em" }}>{sub}</div>}
@@ -155,9 +145,9 @@ export function Panel({ title, titleColor = T.amber, headerRight, accentBorder, 
     <div
       className="relative overflow-hidden"
       style={{
-        border: `1px solid ${T.borderHi}`,
+        border: `1px solid ${T.border}`,
         background: T.bg1,
-        boxShadow: "inset 0 1px 0 rgba(78, 58, 34, 0.2), 0 4px 12px rgba(0, 0, 0, 0.7), inset 0 0 40px rgba(0,0,0,0.4)",
+        boxShadow: "inset 0 1px 0 rgba(78, 58, 34, 0.2), 0 4px 12px rgba(0, 0, 0, 0.7)",
         borderRadius: 0,
       }}
     >
@@ -165,10 +155,10 @@ export function Panel({ title, titleColor = T.amber, headerRight, accentBorder, 
       {title && (
         <div
           className="flex items-center justify-between px-3 py-2 border-b"
-          style={{ borderColor: T.border, background: `linear-gradient(90deg, ${T.bg3} 0%, ${T.bg2} 100%)` }}
+          style={{ borderColor: T.border, background: T.bg2 }}
         >
           <div className="flex items-center gap-2">
-            <div style={{ width: "3px", height: "12px", background: accent, boxShadow: `0 0 8px ${accent}, 0 0 16px ${accent}44` }} />
+            <div style={{ width: "3px", height: "12px", background: accent, boxShadow: `0 0 5px ${accent}` }} />
             <span style={{ color: accent, fontFamily: "'Orbitron', monospace", fontSize: "9.5px", letterSpacing: "0.2em", textShadow: `0 0 8px ${accent}55` }}>
               {title}
             </span>
@@ -272,7 +262,7 @@ export function ActionBtn({ color = T.green, onClick, disabled, children, small 
     <button
       onClick={onClick}
       disabled={disabled}
-      className="ds-action-btn relative border flex items-center gap-1.5 overflow-hidden transition-opacity"
+      className="relative border flex items-center gap-1.5 overflow-hidden transition-opacity"
       style={{
         borderColor: disabled ? T.border : color + "77",
         color: disabled ? T.textFaint : color,
@@ -338,7 +328,7 @@ export function EmptyState({ message, icon: Icon, sub }) {
         </div>
       )}
       <div style={{ fontSize: "9px", fontFamily: "'Orbitron', monospace", letterSpacing: "0.2em" }}>
-        ▸ {message}
+        // {message}
       </div>
       {sub && (
         <div style={{ fontSize: "8px", color: T.textGhost, opacity: 0.6, marginTop: "5px", letterSpacing: "0.12em" }}>

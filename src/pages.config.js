@@ -47,21 +47,21 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AIAgent from './pages/AIAgent';
+import ClanBoard from './pages/ClanBoard';
 import ClanRoster from './pages/ClanRoster';
 import Dashboard from './pages/Dashboard';
+import DeathMap from './pages/DeathMap';
 import Intel from './pages/Intel';
 import Inventory from './pages/Inventory';
 import Missions from './pages/Missions';
 import ServerMonitor from './pages/ServerMonitor';
-import AIAgent from './pages/AIAgent';
 import Challenges from './pages/Challenges';
-import ClanBoard from './pages/ClanBoard';
 import ClanCalendar from './pages/ClanCalendar';
 import ClanMap from './pages/ClanMap';
 import ClanTreasury from './pages/ClanTreasury';
 import ClanVoting from './pages/ClanVoting';
 import ClanWiki from './pages/ClanWiki';
-import DeathMap from './pages/DeathMap';
 import EngineeringOps from './pages/EngineeringOps';
 import LoadoutPlanner from './pages/LoadoutPlanner';
 import LootSharing from './pages/LootSharing';
@@ -94,21 +94,21 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AIAgent": AIAgent,
+    "ClanBoard": ClanBoard,
     "ClanRoster": ClanRoster,
     "Dashboard": Dashboard,
+    "DeathMap": DeathMap,
     "Intel": Intel,
     "Inventory": Inventory,
     "Missions": Missions,
     "ServerMonitor": ServerMonitor,
-    "AIAgent": AIAgent,
     "Challenges": Challenges,
-    "ClanBoard": ClanBoard,
     "ClanCalendar": ClanCalendar,
     "ClanMap": ClanMap,
     "ClanTreasury": ClanTreasury,
     "ClanVoting": ClanVoting,
     "ClanWiki": ClanWiki,
-    "DeathMap": DeathMap,
     "EngineeringOps": EngineeringOps,
     "LoadoutPlanner": LoadoutPlanner,
     "LootSharing": LootSharing,
