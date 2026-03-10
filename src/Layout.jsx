@@ -243,58 +243,90 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#3c3c42", fontFamily: "'Share Tech Mono', monospace" }}>
-      <header className="ds-header-shell border-b flex items-center justify-between px-4 py-2 z-50 relative overflow-hidden" style={{ borderColor: C.border }}>
-        <div className={animationEnabled ? "layout-header-scan" : undefined} style={{ position: "absolute", inset: 0, pointerEvents: "none", background: `linear-gradient(90deg, transparent 0%, ${C.scan} 50%, transparent 100%)`, backgroundSize: "200% 100%" }} />
+      <header
+        className="border-b z-50 relative overflow-hidden flex items-stretch"
+        style={{
+          borderColor: C.border,
+          background: "linear-gradient(180deg, #2e2e36 0%, #292930 100%)",
+          boxShadow: "0 1px 0 #2a1e10, 0 2px 20px rgba(0,0,0,0.7)",
+          minHeight: "42px",
+        }}
+      >
+        {/* Top accent hairline — matches nav panel */}
+        <div style={{ position:"absolute", top:0, left:0, right:0, height:"1px", background:"linear-gradient(90deg, transparent 0%, rgba(255,170,0,0.5) 20%, rgba(255,170,0,0.7) 50%, rgba(255,170,0,0.5) 80%, transparent 100%)", pointerEvents:"none", zIndex:2 }} />
+        {/* Scan sweep */}
+        <div className={animationEnabled ? "layout-header-scan" : undefined} style={{ position:"absolute", inset:0, pointerEvents:"none", background:`linear-gradient(90deg, transparent 0%, ${C.scan} 50%, transparent 100%)`, backgroundSize:"200% 100%", zIndex:1 }} />
 
-        <div className="ds-header-segment flex items-center gap-3 relative px-2 py-1">
-          <button className="md:hidden" style={{ color: C.text }} onClick={() => setMobileOpen((value) => !value)}>
-            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+        {/* ── LEFT: Identity segment ── */}
+        <div className="flex items-center gap-3 px-3 relative flex-shrink-0" style={{ borderRight:`1px solid ${C.border}` }}>
+          {/* Corner bracket TL */}
+          <div style={{ position:"absolute", top:4, left:4, width:8, height:8, borderTop:`1px solid ${C.accent}55`, borderLeft:`1px solid ${C.accent}55` }} />
+          <button className="md:hidden" style={{ color: C.text }} onClick={() => setMobileOpen((v) => !v)}>
+            {mobileOpen ? <X size={16} /> : <Menu size={16} />}
           </button>
-          <div className="flex items-center gap-3">
-            <Skull size={14} style={{ color: C.accent }} />
-            <span className="font-bold tracking-widest" style={{ color: C.accent, fontFamily: "'Orbitron', monospace", fontSize: "11px" }}>
+          <div style={{ width:22, height:22, border:`1px solid ${C.accent}44`, background:`${C.accent}0f`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+            <Skull size={11} style={{ color: C.accent }} />
+          </div>
+          <div className="flex flex-col justify-center">
+            <span style={{ color: C.accent, fontFamily:"'Orbitron', monospace", fontSize:"10px", fontWeight:700, letterSpacing:"0.22em", lineHeight:1, textShadow:`0 0 12px ${C.accent}66` }}>
               {typeof appConfig.title === "string" ? appConfig.title : "DEAD SIGNAL"}
             </span>
-            <span style={{ color: C.border }}>|</span>
-            <span className="hidden sm:block text-xs" style={{ color: C.textDim, letterSpacing: "0.15em" }}>HUMANITZ OPS CENTER</span>
+            <span className="hidden sm:block" style={{ color: C.textFaint, fontSize:"7px", letterSpacing:"0.18em", marginTop:"2px" }}>HUMANITZ OPS CENTER</span>
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
+        {/* ── CENTER: Command prompt ── */}
+        <div className="hidden md:flex flex-1 items-center justify-center px-3 min-w-0" style={{ borderRight:`1px solid ${C.border}` }}>
           <HeaderCommandPrompt currentPageName={currentPageName} />
         </div>
 
-        <div className="ml-auto flex items-center mr-2 ds-header-segment p-1 gap-2">
+        {/* ── RIGHT: Launch + Chronometer ── */}
+        <div className="flex items-center gap-2 px-3 flex-shrink-0 relative" style={{ background:"rgba(0,0,0,0.15)" }}>
+          {/* Corner bracket TR */}
+          <div style={{ position:"absolute", top:4, right:4, width:8, height:8, borderTop:`1px solid ${C.cyan}44`, borderRight:`1px solid ${C.cyan}44` }} />
+
+          {/* Launch button */}
           <button
             type="button"
             onClick={handleLaunch}
             disabled={!launchEnabled || launching}
             title={launchTooltip}
-            className="flex items-center gap-1.5 border px-2 py-1 transition-opacity"
+            className="flex items-center gap-1.5 border px-2 py-1 transition-opacity flex-shrink-0"
             style={{
-              borderColor: launchEnabled ? (launchWarning ? `${C.red}88` : `${C.cyan}88`) : C.border,
-              background: launchEnabled ? (launchWarning ? "rgba(255, 32, 32, 0.14)" : "rgba(0, 232, 255, 0.14)") : "rgba(24, 24, 28, 0.8)",
+              borderColor: launchEnabled ? (launchWarning ? `${C.red}77` : `${C.cyan}66`) : C.border,
+              background: launchEnabled ? (launchWarning ? `${C.red}14` : `${C.cyan}10`) : "rgba(0,0,0,0.3)",
               color: launchEnabled ? (launchWarning ? C.red : C.cyan) : C.textFaint,
-              opacity: launchEnabled ? 1 : 0.65,
-              fontSize: "9px",
+              opacity: launchEnabled ? 1 : 0.55,
+              fontSize: "8px",
               letterSpacing: "0.14em",
               fontFamily: "'Orbitron', monospace",
-              boxShadow: launchEnabled
-                ? (launchWarning ? "0 0 10px rgba(255, 32, 32, 0.22)" : "0 0 10px rgba(0, 232, 255, 0.22)")
-                : "none",
+              boxShadow: launchEnabled ? (launchWarning ? `0 0 8px ${C.red}22` : `0 0 8px ${C.cyan}22`) : "none",
             }}
           >
-            <Rocket size={11} />
+            <Rocket size={10} />
             <span>{launching ? "DEPLOYING..." : launchLabel}</span>
           </button>
-          {launchWarning && (
-            <span style={{ color: C.red, fontSize: "8px", letterSpacing: "0.08em", maxWidth: "170px", lineHeight: 1.2 }}>
-              {launchWarning}
-            </span>
-          )}
+
+          {/* Segment divider */}
+          <div style={{ width:1, height:20, background:C.border, flexShrink:0 }} />
+
+          {/* Notifications */}
+          <div className="flex-shrink-0">
+            <InAppNotifications />
+          </div>
+
+          {/* Segment divider */}
+          <div style={{ width:1, height:20, background:C.border, flexShrink:0 }} />
+
+          {/* Chronometer */}
+          <HeaderChronometer animationEnabled={animationEnabled} runtimeConfig={runtimeConfig} appTimezone={timezone} />
         </div>
 
-        <HeaderChronometer animationEnabled={animationEnabled} runtimeConfig={runtimeConfig} appTimezone={timezone} />
+        {launchWarning && (
+          <div style={{ position:"absolute", bottom:"-22px", right:"12px", color:C.red, fontSize:"8px", letterSpacing:"0.08em", background:"rgba(0,0,0,0.85)", border:`1px solid ${C.red}44`, padding:"2px 8px", zIndex:10 }}>
+            {launchWarning}
+          </div>
+        )}
       </header>
 
       <div className="flex flex-1 overflow-hidden">

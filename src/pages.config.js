@@ -56,6 +56,7 @@ import Intel from './pages/Intel';
 import Inventory from './pages/Inventory';
 import Missions from './pages/Missions';
 import ServerMonitor from './pages/ServerMonitor';
+import TacticalMap from './pages/TacticalMap';
 import Challenges from './pages/Challenges';
 import ClanCalendar from './pages/ClanCalendar';
 import ClanMap from './pages/ClanMap';
@@ -73,7 +74,6 @@ import ResourceTradingHub from './pages/ResourceTradingHub';
 import SquadVitalsMonitor from './pages/SquadVitalsMonitor';
 import SupplyChainManager from './pages/SupplyChainManager';
 import SurvivalPlanner from './pages/SurvivalPlanner';
-import TacticalMap from './pages/TacticalMap';
 import AnnouncementsPanel from './pages/AnnouncementsPanel';
 import CommunityHome from './pages/CommunityHome';
 import IntelPanel from './pages/IntelPanel';
@@ -103,6 +103,7 @@ export const PAGES = {
     "Inventory": Inventory,
     "Missions": Missions,
     "ServerMonitor": ServerMonitor,
+    "TacticalMap": TacticalMap,
     "Challenges": Challenges,
     "ClanCalendar": ClanCalendar,
     "ClanMap": ClanMap,
@@ -120,7 +121,6 @@ export const PAGES = {
     "SquadVitalsMonitor": SquadVitalsMonitor,
     "SupplyChainManager": SupplyChainManager,
     "SurvivalPlanner": SurvivalPlanner,
-    "TacticalMap": TacticalMap,
     "AnnouncementsPanel": AnnouncementsPanel,
     "CommunityHome": CommunityHome,
     "IntelPanel": IntelPanel,
